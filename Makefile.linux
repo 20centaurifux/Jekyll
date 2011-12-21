@@ -1,0 +1,31 @@
+# compiler options:
+CC=gcc
+CFLAGS=-std=c99 -Wall -O2 -DGTK_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DPANGO_DISABLE_DEPRECATED
+CFLAGS_SQLITE3=-O0 -DTHREADSAFE=1 -D_REENTRANT
+
+# directories:
+PREFIX=/usr/local
+DATAROOTDIR=$(PREFIX)/share
+LOCALEDIR=$(DATAROOTDIR)/locale
+
+# utilities:
+RM=rm -fr
+FIND=find
+MAKEDEPEND=gccmakedep
+MSGFMT=msgfmt
+DOXYGEN=doxygen
+
+# include files & libraries:
+GLIB_INC=$(shell pkg-config --cflags glib-2.0)
+GLIB_LIB=$(shell pkg-config --libs glib-2.0)
+GOBJECT_LIB=$(shell pkg-config --libs gobject-2.0)
+GIO_LIB=$(shell pkg-config --libs gio-2.0)
+GTHREAD_LIB=$(shell pkg-config --libs gthread-2.0)
+GTK_INC=$(shell pkg-config --cflags gtk+-2.0)
+GTK_LIB=$(shell pkg-config --libs gtk+-2.0)
+OPENSSL_LIB=-lssl
+
+LIBS=$(GLIB_LIB) $(GOBJECT_LIB) $(GIO_LIB) $(GTHREAD_LIB) $(GTK_LIB) $(OPENSSL_LIB) -ldl -lcrypto -lm
+
+# build file:
+include Makefile.build

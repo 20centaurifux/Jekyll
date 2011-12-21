@@ -1,0 +1,69 @@
+======================================================
+Release Notes for Jekyll 0.1.0
+======================================================
+
+Preamble
+--------
+
+Jekyll is a GTK+ based multi-platform Twitter client. Jekyll has been
+developed and tested on the following platforms:
+
+* GNU/Linux
+* Microsoft Windows
+
+Jekyll is free software. Permission is granted to copy, modify and
+redistribute it under the provisions of the GNU General Public License
+Version 2, as published by the Free Software Foundation; see the file
+COPYING for licensing details.
+
+Note, in particular, that Jekyll is provided "as is", in the hope
+that it may prove useful, but WITHOUT WARRANTY OF ANY KIND; not even an
+implied WARRANTY OF MERCHANTABILITY, nor of FITNESS FOR ANY PARTICULAR
+PURPOSE. Under no circumstances will the authors accept liability for
+any damages, however caused, arising from the use of this software.
+
+
+Building
+--------
+
+Jekyll uses GNU Make for building. It has a separate Makefile for the
+Microsoft Windows platform and for GNU/Linux. The following components
+are required to build/compile Jekyll:
+
+* GNU Make
+* gcc or MinGW (on Microsoft Windows)
+* gccmakedep
+* GLib/GTK+ 2 development files and shared libraries (including all
+  dependencies like GObject, Pango, GDK, ...)
+* OpenSSL development files and shared libraries
+
+If all required components are installed properly on your machine you
+can build Jekyll using the GNU Make utility:
+
+# make -f Makefile.{platform} depend
+# make -f Makefile.{platform}
+
+To build Jekyll on Microsoft Windows please ensure that all
+directories in the related Makefile are correct.
+
+By default Jekyll will be installed in /usr/local. To change the
+location you can set the PREFIX variable:
+
+# make -f Makefile.linux PREFIX=/foo/bar
+
+
+Installation
+------------
+
+If Jekyll has been build successfully you can install it by typing in:
+
+# make -f Makefile.linux install PREFIX=/foo/bar
+
+
+Code documentation
+------------------
+
+To create the code documentation please ensure that doxygen is 
+installed on your system and type in:
+
+# make -f Makefile.{platform} documentation
