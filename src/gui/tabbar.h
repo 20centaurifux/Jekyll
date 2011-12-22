@@ -19,7 +19,7 @@
  * \brief Tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. September 2011
+ * \date 22. December 2011
  */
 
 #ifndef __TABS_H__
@@ -39,7 +39,8 @@ typedef enum
 	TAB_TYPE_ID_DIRECT_MESSAGES,
 	TAB_TYPE_ID_REPLIES,
 	TAB_TYPE_ID_USER_TIMELINE,
-	TAB_TYPE_ID_LIST
+	TAB_TYPE_ID_LIST,
+	TAB_TYPE_ID_SEARCH
 } TabTypeId;
 
 /*! Typedef macro for _Tab structure. */
@@ -205,6 +206,15 @@ void tabbar_open_list(GtkWidget *widget, const gchar *user, const gchar *list);
  * Updates an open list.
  */
 void tabbar_update_list(GtkWidget *widget, const gchar *user, const gchar *old_listname, const gchar *new_listname);
+
+/**
+ * \param widget the tabbar widget
+ * \param user name of an user
+ * \param query the search query
+ *
+ * Opens a search query.
+ */
+void tabbar_open_search_query(GtkWidget *widget, const gchar *user, const gchar *query);
 
 /**
  * \param widget the tabbar widget

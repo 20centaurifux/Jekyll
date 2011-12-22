@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. December 2011
+ * \date 22. December 2011
  */
 
 #include <gio/gio.h>
@@ -228,6 +228,7 @@ _status_tab_url_activated(GtkTwitterStatus *status, const gchar *url, _StatusTab
 {
 	gchar *lower = NULL;
 	const gchar *part = NULL;
+	gchar *query = NULL;
 	gboolean open_browser = TRUE;
 
 	g_debug("Handling url: \"%s\"", url);
@@ -246,27 +247,35 @@ _status_tab_url_activated(GtkTwitterStatus *status, const gchar *url, _StatusTab
 		if(g_str_has_prefix(part, "twitter.com/"))
 		{
 			part += 12;
+		}
 
-			if(g_str_has_prefix(part, "#!/") && !g_str_has_prefix(part + 3, "search?q="))
+		if(g_str_has_prefix(part, "#!/"))
+		{
+			part += 3;
+		}
+
+		if(g_str_has_prefix(part, "search?q=%23"))
+		{
+			/* open search tab */
+			query = g_strdup_printf("#%s", part + 12);
+			g_debug("Found search query url: \"%s\"", query);
+			tabbar_open_search_query(tab->tabbar, tab->owner, query);
+			open_browser = FALSE;
+		}
+		else
+		{
+			if(_status_tab_url_check_username(part))
 			{
-				/* check if we've found an username */
-				part += 3;
-
-				if(_status_tab_url_check_username(part))
-				{
-					/* open user timline */
-					g_debug("Found usertimeline url: \"%s\"", part);
-					tabbar_open_user_timeline(tab->tabbar, part);
-					open_browser = FALSE;
-				}
+				/* open user timline */
+				g_debug("Found usertimeline url: \"%s\"", part);
+				tabbar_open_user_timeline(tab->tabbar, part);
+				open_browser = FALSE;
 			}
 		}
 
 		/* cleanup */
-		if(lower)
-		{
-			g_free(lower);
-		}
+		g_free(query);
+		g_free(lower);
 	}
 
 	/* open url in browser */

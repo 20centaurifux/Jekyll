@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. September 2011
+ * \date 22. December 2011
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -660,6 +660,16 @@ tabbar_update_list(GtkWidget *widget, const gchar *user, const gchar *old_listna
 		/* cleanup */
 		g_list_free(children);
 	}
+}
+
+void
+tabbar_open_search_query(GtkWidget *widget, const gchar *user, const gchar *query)
+{
+	gchar *id;
+
+	id = g_strdup_printf("%s: %s", user, query);
+	_tabbar_open_status_page(GTK_NOTEBOOK(widget), TAB_TYPE_ID_SEARCH, id);
+	g_free(id);
 }
 
 void
