@@ -1460,6 +1460,23 @@ _status_tab_populate_list(TwitterClient *client, _StatusTab *tab, GError **err)
 }
 
 static void
+_status_tab_populate_search_query(TwitterClient *client, _StatusTab *tab, GError **err)
+{
+	gchar *tab_id;
+	gchar **pieces;
+
+	tab_id = tab_get_id((Tab *)tab);
+
+	if((pieces = g_strsplit(tab_id, ":", 2)))
+	{
+		twitter_client_search(client, pieces[0], pieces[1] + 1, (TwitterProcessStatusFunc)_status_tab_add_tweet, tab, tab->cancellable, err);
+		g_strfreev(pieces);
+	}
+
+	g_free(tab_id);
+}
+
+static void
 _status_tab_populate(_StatusTab *tab)
 {
 	gchar *tab_id;
@@ -1491,6 +1508,10 @@ _status_tab_populate(_StatusTab *tab)
 
 		case TAB_TYPE_ID_LIST:
 			_status_tab_populate_list(client, tab, &err);
+			break;
+
+		case TAB_TYPE_ID_SEARCH:
+			_status_tab_populate_search_query(client, tab, &err);
 			break;
 
 		default:
@@ -1912,6 +1933,14 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	if(type_id == TAB_TYPE_ID_LIST)
 	{
 		if((pieces = g_strsplit(id, "@", 2)))
+		{
+			g_strlcpy(meta->owner, pieces[0], 64);
+			g_strfreev(pieces);
+		}
+	}
+	else if(type_id == TAB_TYPE_ID_SEARCH)
+	{
+		if((pieces = g_strsplit(id, ":", 2)))
 		{
 			g_strlcpy(meta->owner, pieces[0], 64);
 			g_strfreev(pieces);

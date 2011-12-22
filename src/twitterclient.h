@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. September 2011
+ * \date 22. December 2011
  */
 
 #ifndef __TWITTER_CLIENT_H__
@@ -150,8 +150,24 @@ struct _TwitterClientClass
 	 
 	 * Gets tweets from a list.
 	 */
-	gboolean (* process_list)(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict list, TwitterProcessStatusFunc func,
-	                          gpointer user_data, GCancellable *cancellable, GError **err);
+	gboolean (* process_list)(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict list,
+	                          TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
+
+	/**
+	 * \param twitterclient TwitterClient instance
+	 * \param username an username
+	 * \param query search query
+	 * \param func callback function
+	 * \param user_data  user data
+	 * \param cancellable a GCancellable to abort the operation
+	 * \param err structure to store failure messages
+	 * \return TRUE on success
+	 
+	 * Gets tweets from a search query.
+	 */
+	gboolean (* search)(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict query,
+	                    TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
+
 	/**
 	 * \param twitterclient TwitterClient instance
 	 * \param owner list owner
@@ -298,8 +314,10 @@ gboolean twitter_client_process_replies(TwitterClient *twitter_client, const gch
 gboolean twitter_client_process_usertimeline(TwitterClient *twitter_client, const gchar *username, TwitterProcessStatusFunc func,
                                              gpointer user_data, GCancellable *cancellable, GError **err);
 /*! See _TwitterClientClass::process_list for further information. */
-gboolean twitter_client_process_list(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict list, TwitterProcessStatusFunc func,
-                                     gpointer user_data, GCancellable *cancellable, GError **err);
+gboolean twitter_client_process_list(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict list,
+                                     TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
+/*! See _TwitterClientClass::search for further information. */
+gboolean twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query, TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
 /*! See _TwitterClientClass::add_user_to_list for further information. */
 gboolean twitter_client_add_user_to_list(TwitterClient *twitter_client, const gchar * restrict owner, const gchar * restrict listname, const gchar * restrict username, GError **err);
 /*! See _TwitterClientClass::remove_user_from_list for further information. */
