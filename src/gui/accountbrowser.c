@@ -19,7 +19,7 @@
  * \brief A tree containing accounts.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. September 2011
+ * \date 22. December 2011
  */
 
 #include <gdk/gdk.h>
@@ -411,6 +411,7 @@ accountbrowser_create(GtkWidget *parent)
 	pathbuilder_save_path("icon_followers_16", pathbuilder_build_icon_path("16x16", "followers.png"));
 	pathbuilder_save_path("icon_list_16", pathbuilder_build_icon_path("16x16", "list.png"));
 	pathbuilder_save_path("icon_list_protected_16", pathbuilder_build_icon_path("16x16", "list_protected.png"));
+	pathbuilder_save_path("icon_search_16", pathbuilder_build_icon_path("16x16", "search.png"));
 
 	/* signals */
 	g_signal_connect(G_OBJECT(tree), "row-activated", G_CALLBACK(_accountbrowser_treeview_node_activated), (gpointer)parent);

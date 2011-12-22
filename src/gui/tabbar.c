@@ -381,6 +381,10 @@ _tabbar_open_status_page(GtkNotebook *notebook, TabTypeId type_id, const gchar *
 				image = gtk_image_new_from_file(pathbuilder_load_path("icon_lists_16"));
 				break;
 
+			case TAB_TYPE_ID_SEARCH:
+				image = gtk_image_new_from_file(pathbuilder_load_path("icon_search_16"));
+				break;
+
 			default:
 				g_warning("%s: unexpected type_id(%d)", __func__, type_id);
 				return;
