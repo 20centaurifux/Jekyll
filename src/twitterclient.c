@@ -862,7 +862,7 @@ _twitter_client_search(TwitterClient *twitter_client, const gchar * restrict use
 
 		if((client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err)))
 		{
-			g_object_set(G_OBJECT(client), "format", "json", NULL);
+			g_object_set(G_OBJECT(client), "format", "json", "status-count", TWITTER_CLIENT_SEARCH_STATUS_COUNT, NULL);
 
 			if(twitter_web_client_search(client, query, &buffer, &length))
 			{

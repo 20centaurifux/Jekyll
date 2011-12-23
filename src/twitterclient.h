@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 23. December 2011
  */
 
 #ifndef __TWITTER_CLIENT_H__
@@ -55,6 +55,8 @@
 
 /*! Default cache lifetime. */
 #define TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME 60
+/*! Status count for search results. */
+#define TWITTER_CLIENT_SEARCH_STATUS_COUNT    100
 
 /*!A type definition for _TwitterClientPrivate. */
 typedef struct _TwitterClientPrivate TwitterClientPrivate;
