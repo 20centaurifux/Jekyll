@@ -26,6 +26,7 @@
 #include "twitter.h"
 #include "twitterdb.h"
 #include "twitterxmlparser.h"
+#include "twitterjsonparser.h"
 #include "application.h"
 #include "net/httpclient.h"
 #include "net/twitterwebclient.h"
@@ -844,19 +845,42 @@ static gboolean
 _twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query,
                        TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err)
 {
+	gchar *key;
 	TwitterWebClient *client = NULL;
 	gchar *buffer = NULL;
 	gint length;
 	gboolean result = FALSE;
 
+	/* try to get data from cache */
+	key = g_strdup_printf("search.%s.%s", username, query);
+	g_debug("Searching for \"%s\" in cache", key);
 
-	if((client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err)))
+	if((length = cache_load(twitter_client->priv->cache, key, &buffer)) == -1)
 	{
-		g_object_set(G_OBJECT(client), "format", "json", NULL);
-		twitter_web_client_search(client, query, &buffer, &length);
-		g_object_unref(client);
+		/* get search result from Twitter */
+		g_debug("Trying to get search result from Twitter");
+
+		if((client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err)))
+		{
+			g_object_set(G_OBJECT(client), "format", "json", NULL);
+
+			if(twitter_web_client_search(client, query, &buffer, &length))
+			{
+				twitter_json_parse_search_result(buffer, length, func, user_data, cancellable);
+
+				/* save search result in cache */
+				cache_save(twitter_client->priv->cache, key, buffer, length, twitter_client->priv->lifetime);
+			}
+
+			g_object_unref(client);
+		}
+	}
+	else
+	{
+		twitter_json_parse_search_result(buffer, length, func, user_data, cancellable);
 	}
 
+	g_free(key);
 	g_free(buffer);
 
 	return result;
