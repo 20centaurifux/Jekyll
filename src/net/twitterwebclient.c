@@ -483,12 +483,12 @@ _twitter_web_client_remove_user_from_list(TwitterWebClient *twitterwebclient, co
 static gboolean
 _twitter_web_client_search(TwitterWebClient *twitterwebclient, const gchar *word, gchar **buffer, gint *length)
 {
-	GString *path;
+	GString *path = g_string_sized_new(48);
 	HttpClient *client;
 	gint status;
 	gboolean result = FALSE;
 
-	path = g_string_new("/search.rss?rpp=40&amp;include_entities=true&amp;result_type=mixed&q=");
+	g_string_printf(path, "/search.%s?rpp=%d&amp;include_entities=true&amp;result_type=mixed&q=", twitterwebclient->priv->format, twitterwebclient->priv->status_count);
 	path = g_string_append_uri_escaped(path, word, NULL, TRUE);
 
 	client = http_client_new("hostname", TWITTER_SEARCH_API_HOSTNAME, "port", HTTP_DEFAULT_PORT, NULL);
