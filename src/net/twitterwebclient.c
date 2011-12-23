@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 5. December 2011
+ * \date 23. December 2011
  */
 
 #include <string.h>
@@ -483,9 +483,28 @@ _twitter_web_client_remove_user_from_list(TwitterWebClient *twitterwebclient, co
 static gboolean
 _twitter_web_client_search(TwitterWebClient *twitterwebclient, const gchar *word, gchar **buffer, gint *length)
 {
-	g_warning("%s not implemented yet", __func__);
+	GString *path;
+	HttpClient *client;
+	gint status;
+	gboolean result = FALSE;
 
-	return FALSE;
+	path = g_string_new("/search.rss?rpp=40&amp;include_entities=true&amp;result_type=mixed&q=");
+	path = g_string_append_uri_escaped(path, word, NULL, TRUE);
+
+	client = http_client_new("hostname", TWITTER_SEARCH_API_HOSTNAME, "port", HTTP_DEFAULT_PORT, NULL);
+	status = http_client_get(client, path->str, &twitterwebclient->priv->err);
+
+	if(status == HTTP_OK)
+	{
+		/* read response */
+		http_client_read_content(client, buffer, length);
+		result = TRUE;
+	}
+
+	g_string_free(path, TRUE);
+	g_object_unref(client);
+
+	return result;
 }
 
 static gboolean

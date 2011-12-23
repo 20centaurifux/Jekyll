@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 23. December 2011
  */
 
 #include "twitterclient.h"
@@ -844,7 +844,21 @@ static gboolean
 _twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query,
                        TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err)
 {
-	return FALSE;
+	TwitterWebClient *client = NULL;
+	gchar *buffer = NULL;
+	gint length;
+	gboolean result = FALSE;
+
+
+	if((client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err)))
+	{
+		twitter_web_client_search(client, query, &buffer, &length);
+		g_object_unref(client);
+	}
+
+	g_free(buffer);
+
+	return result;
 }
 
 

@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 3. June 2011
+ * \date 23. December 2011
  */
 
 #ifndef __TWITTER_WEB_CLIENT_H__
@@ -49,6 +49,8 @@
 
 /*! Hostname of the Twitter web API server. */
 #define TWITTER_API_HOSTNAME               "api.twitter.com"
+/*! Hostname of the Twitter search server. */
+#define TWITTER_SEARCH_API_HOSTNAME        "search.twitter.com"
 
 /*!A type definition for _TwitterWebClientPrivate. */
 typedef struct _TwitterWebClientPrivate TwitterWebClientPrivate;
