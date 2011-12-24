@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 30. September 2011
+ * \date 24. December 2011
  */
 
 #include <gtk/gtk.h>
@@ -69,6 +69,8 @@ typedef enum
 	MAINMENU_ACTION_QUIT,
 	/*! Write new tweet. */
 	MAINMENU_ACTION_COMPOSE_TWEET,
+	/*! Search. */
+	MAINMENU_ACTION_SEARCH,
 	/*! Open "preferences" dialog. */
 	MAINMENU_ACTION_PREFERENCES,
 	/*! Open the "accounts" dialog. */
@@ -1729,6 +1731,14 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 }
 
 /*
+ *	search:
+ */
+static void
+_mainwindow_search(GtkWidget *mainwindow)
+{
+}
+
+/*
  *	mainmenu:
  */
 static void
@@ -1757,6 +1767,10 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 
 		case MAINMENU_ACTION_COMPOSE_TWEET:
 			_mainwindow_compose_tweet(menu->window);
+			break;
+
+		case MAINMENU_ACTION_SEARCH:
+			_mainwindow_search(menu->window);
 			break;
 
 		case MAINMENU_ACTION_PREFERENCES:
@@ -1806,13 +1820,13 @@ _mainwindow_create_menu(GtkWidget *widget)
 	GtkWidget *menu;
 	GtkWidget *submenu;
 	GtkWidget *item;
-	static _MainWindowMenuData menu_data[5];
+	static _MainWindowMenuData menu_data[6];
 
 	g_debug("Creating mainmenu");
 
 	menu = gtk_menu_bar_new();
 
-	for(gint i = 0; i <= 5; ++i)
+	for(gint i = 0; i <= 6; ++i)
 	{
 		menu_data[i] = _mainwindow_create_menu_data(widget, i);
 	}
@@ -1847,6 +1861,10 @@ _mainwindow_create_menu(GtkWidget *widget)
 
 	item = gtk_image_menu_item_new_with_mnemonic(_("_Compose tweet"));
 	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(_mainwindow_menu_item_activated), (gpointer)&(menu_data[MAINMENU_ACTION_COMPOSE_TWEET]));
+	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), item);
+
+	item = gtk_image_menu_item_new_with_mnemonic(_("_Search"));
+	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(_mainwindow_menu_item_activated), (gpointer)&(menu_data[MAINMENU_ACTION_SEARCH]));
 	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), item);
 
 	/*
