@@ -1612,6 +1612,81 @@ _mainwindow_apply_preferences(GtkWidget *widget, gboolean save_preferences)
 }
 
 /*
+ *	get selected account:
+ */
+static gchar *
+_mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
+{
+	_MainWindowPrivate *private;
+	gint count;
+	gchar **usernames = NULL;
+	gchar *id;
+	gchar *username = NULL;
+	gchar **pieces = NULL;
+	gint i;
+	gchar *result = NULL;
+
+	/* get user accounts */
+	if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)))
+	{
+		/* get username from current tab id */
+		private = MAINWINDOW_GET_DATA(widget);
+
+		if((id = tabbar_get_current_id(private->tabbar)))
+		{
+			if(g_strstr_len(id, -1, "@"))
+			{
+				pieces = g_strsplit(id, "@", 2);
+			}
+			else if(g_strstr_len(id, -1, ":"))
+			{
+				pieces = g_strsplit(id, ":", 2);
+			}
+
+			if(pieces)
+			{
+				username = g_strdup(pieces[0]);
+				g_strfreev(pieces);
+				g_free(id);
+			}
+			else
+			{
+				username = id;
+			}
+
+			/* check if found username is an account */
+			for(i = 0; i < count; ++i)
+			{
+				if(!g_strcmp0(username, usernames[i]))
+				{
+					result = g_strdup(username);
+					break;
+				}
+			}
+		}
+
+		if(set_default && !result)
+		{
+			/* copy first found username if username is empty */
+			result = g_strdup(usernames[0]);
+		}
+
+
+		/* cleanup */
+		for(i = 0; i < count; ++i)
+		{
+			g_free(usernames[i]);
+		}
+
+		g_free(usernames);
+		g_free(username);
+	}
+
+	return result;
+}
+
+
+/*
  *	compose tweets:
  */
 static gboolean
@@ -1655,54 +1730,28 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, Gtk
 static void
 _mainwindow_compose_tweet(GtkWidget *widget)
 {
-	_MainWindowPrivate *private;
 	GtkWidget *dialog;
-	gint count;
-	gchar **usernames = NULL;
 	static gchar selected_user[64] = { 0 };
-	gchar *id;
-	gchar *username = NULL;
-	gchar **pieces;
-	gint i;
-
-	/* get user accounts */
+	gchar *account = NULL;
+	gchar **usernames = NULL;
+	gint count;
+	
 	if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)))
 	{
-		/* try to get username from current tab id */
-		private = MAINWINDOW_GET_DATA(widget);
-
-		if((id = tabbar_get_current_id(private->tabbar)))
+		if(selected_user[0])
 		{
-			if(g_strstr_len(id, -1, "@"))
+			if((account = _mainwindow_get_selected_account(widget, FALSE)))
 			{
-				pieces = g_strsplit(id, "@", 2);
-				username = g_strdup(pieces[0]);
-				g_strfreev(pieces);
-				g_free(id);
+				g_strlcpy(selected_user, account, 64);
 			}
-			else
-			{
-				username = id;
-			}
-
-			/* check if found username is an account */
-			for(i = 0; i < count; ++i)
-			{
-				if(!g_strcmp0(username, usernames[i]))
-				{
-					g_strlcpy(selected_user, username, 64);
-					break;
-				}
-			}
-
-			g_free(username);
+		}
+		else
+		{
+			account = _mainwindow_get_selected_account(widget, TRUE);
+			g_strlcpy(selected_user, account, 64);
 		}
 
-		/* copy first found username if username is empty */
-		if(!selected_user[0])
-		{
-			g_strlcpy(selected_user, usernames[0], 64);
-		}
+		g_free(account);
 
 		/* create & run composer dialog */
 		dialog = composer_dialog_create(widget, usernames, count, selected_user, _("Compose new tweet"));
@@ -1713,21 +1762,23 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 		if(GTK_IS_WIDGET(dialog))
 		{
 			/* try to copy selected username */
-			if((username = composer_dialog_get_user(dialog)))
+			if((account = composer_dialog_get_user(dialog)))
 			{
-				g_strlcpy(selected_user, username, 64);
-				g_free(username);
+				g_strlcpy(selected_user, account, 64);
+				g_free(account);
 			}
 
 			gtk_widget_destroy(dialog);
 		}
-
-		/* cleanup */
-		for(gint i = 0; i < count; ++i)
-		{
-			g_free(usernames[i]);
-		}
 	}
+
+	/* cleanup */
+	for(gint i = 0; i < count; ++i)
+	{
+		g_free(usernames[i]);
+	}
+
+	g_free(usernames);
 }
 
 /*
