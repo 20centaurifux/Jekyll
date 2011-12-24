@@ -19,7 +19,7 @@
  * \brief Application information.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 04. July 2011
+ * \date 23. December 2011
  */
 
 #ifndef __APPLICATION_H__
@@ -44,7 +44,7 @@
 /*! Major release number.*/
 #define VERSION_MAJOR             0
 /*! Minor release number. */
-#define VERSION_MINOR             1
+#define VERSION_MINOR             2
 /*! Patch level of the release. */
 #define VERSION_PATCH_LEVEL       0
 

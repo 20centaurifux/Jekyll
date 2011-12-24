@@ -56,7 +56,7 @@
 /*! Default cache lifetime. */
 #define TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME 60
 /*! Status count for search results. */
-#define TWITTER_CLIENT_SEARCH_STATUS_COUNT    100
+#define TWITTER_CLIENT_SEARCH_STATUS_COUNT    50
 
 /*!A type definition for _TwitterClientPrivate. */
 typedef struct _TwitterClientPrivate TwitterClientPrivate;
