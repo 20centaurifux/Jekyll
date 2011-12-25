@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 24. December 2011
+ * \date 25. December 2011
  */
 
 #include <gtk/gtk.h>
@@ -310,6 +310,12 @@ typedef struct
 		GtkWidget *menu_list[2];
 	} accountbrowser_menues;
 } _MainWindowPrivate;
+
+
+/*
+ *	forward declarations:
+ */
+static void _mainwindow_search(GtkWidget *mainwindow);
 
 /*
  *	log handler:
@@ -1251,6 +1257,13 @@ _mainwindow_close_tab_closure(GtkWidget *widget)
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
 	tabbar_close_current_tab(private->tabbar);
+}
+
+static void
+_mainwindow_search_closure(GtkWidget *widget)
+{
+
+	_mainwindow_search(widget);
 }
 
 /*
@@ -2635,6 +2648,10 @@ _mainwindow_create(Config *config, Cache *cache)
 
 	closure = g_cclosure_new_swap(G_CALLBACK(_mainwindow_close_tab_closure), (gpointer)window, NULL);
 	gtk_accelerator_parse("<Control>w", &key, &mods);
+	gtk_accel_group_connect(accelgroup, key, mods, 0, closure);
+
+	closure = g_cclosure_new_swap(G_CALLBACK(_mainwindow_search_closure), (gpointer)window, NULL);
+	gtk_accelerator_parse("<Control>f", &key, &mods);
 	gtk_accel_group_connect(accelgroup, key, mods, 0, closure);
 
 	gtk_window_add_accel_group(GTK_WINDOW(window), accelgroup);
