@@ -23,6 +23,7 @@
  */
 
 #include <glib/gi18n.h>
+#include <gdk/gdkkeysyms.h> 
 
 #include "search_dialog.h"
 
@@ -61,6 +62,17 @@ _search_dialog_destroy(GtkWidget *dialog, gpointer user_data)
 	g_assert(GTK_IS_DIALOG(dialog));
 
 	g_free(g_object_get_data(G_OBJECT(dialog), "private"));
+}
+
+static gboolean
+_search_dialog_key_press(GtkWidget *dialog, GdkEventKey *event, gpointer user_data)
+{
+	if(event->keyval == GDK_Return)
+	{
+		gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+	}
+
+	return FALSE;
 }
 
 /*
@@ -134,6 +146,7 @@ search_dialog_create(GtkWidget *parent)
 
 	/* connect signals */
 	g_signal_connect(dialog, "destroy", G_CALLBACK(_search_dialog_destroy), NULL);
+	g_signal_connect(dialog, "key-press-event", G_CALLBACK(_search_dialog_key_press), NULL);
 
 	/* show widgets */
 	gtk_widget_show_all(dialog);
