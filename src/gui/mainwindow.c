@@ -39,6 +39,7 @@
 #include "add_list_dialog.h"
 #include "edit_members_dialog.h"
 #include "composer_dialog.h"
+#include "search_dialog.h"
 #include "gtk_helpers.h"
 #include "../listener.h"
 #include "../application.h"
@@ -1738,6 +1739,7 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 	
 	if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)))
 	{
+		/* get selected account */
 		if(selected_user[0])
 		{
 			if((account = _mainwindow_get_selected_account(widget, FALSE)))
@@ -1787,6 +1789,29 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 static void
 _mainwindow_search(GtkWidget *mainwindow)
 {
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(mainwindow);
+	GtkWidget *dialog;
+	gchar *account = NULL;
+	gchar *query = NULL;
+
+	dialog = search_dialog_create(mainwindow);
+
+	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK)
+	{
+		if((query = search_dialog_get_query(dialog)))
+		{
+			account = _mainwindow_get_selected_account(mainwindow, TRUE);
+			tabbar_open_search_query(private->tabbar, account, query);
+		}
+	}
+
+	if(GTK_IS_DIALOG(dialog))
+	{
+		gtk_widget_destroy(dialog);
+	}
+
+	g_free(query);
+	g_free(account);
 }
 
 /*
