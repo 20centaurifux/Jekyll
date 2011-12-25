@@ -28,16 +28,19 @@
 #include "yail/yajl_parse.h"
 #include "yail/yajl_gen.h"
 
-#define ERROR_BUFFER_SIZE 1024
-
 /*
  *	parse search results:
  */
 
+/*! Clear current key name. */
 #define _twitter_json_search_result_clear_key(ctx) ((_twitter_json_search_result_data *)ctx)->key[0] = '\0'
+/*! Test if cancellable has been cancelled and return from function if this is the case. */
 #define _twitter_json_search_result_test_cancel(ctx) if(((_twitter_json_search_result_data *)ctx)->cancellable && g_cancellable_is_cancelled(((_twitter_json_search_result_data *)ctx)->cancellable)) return 0;
 
-
+/**
+ * \struct _twitter_json_search_result_data
+ * \brief This structure holds data passed to the JSON parser functions.
+ */
 typedef struct
 {
 	/*! Current depth in the tree. */
