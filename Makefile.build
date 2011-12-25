@@ -36,7 +36,7 @@ install:
 	echo "cp -r ./share/"$$directory" "$(DATAROOTDIR)"/jekyll"; \
 	cp -r ./share/$$directory $(DATAROOTDIR)/jekyll; \
 	done
-	cp -r ./share/locale $(LOCALEDIR)
+	cp -r ./share/locale/* $(LOCALEDIR)
 	mkdir -p $(PREFIX)/bin
 	cp jekyll $(PREFIX)/bin/jekyll
 
