@@ -1262,7 +1262,6 @@ _mainwindow_close_tab_closure(GtkWidget *widget)
 static void
 _mainwindow_search_closure(GtkWidget *widget)
 {
-
 	_mainwindow_search(widget);
 }
 

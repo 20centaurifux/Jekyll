@@ -19,7 +19,7 @@
  * \brief Parsing JSON data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 24. December 2011
+ * \date 25. December 2011
  */
 #include <string.h>
 #include <glib/gprintf.h>
@@ -144,7 +144,7 @@ _twitter_json_search_result_handle_string(void *ctx, const unsigned char *value,
 			if((parts = g_strsplit(text, " ", 6)))
 			{
 				parts[0][strlen(parts[0]) - 1] = '\0';
-				g_sprintf(data->status.created_at, "%s %s %s %s %s %s", parts[0], parts[2], parts[1], parts[4], parts[5], parts[3]);		
+				g_snprintf(data->status.created_at, 24, "%s %s %s %s %s %s", parts[0], parts[2], parts[1], parts[4], parts[5], parts[3]);		
 				g_strfreev(parts);
 			}
 		}
