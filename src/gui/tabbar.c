@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 25. December 2011
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -407,6 +407,25 @@ _tabbar_open_status_page(GtkNotebook *notebook, TabTypeId type_id, const gchar *
 	}
 }
 
+static Tab *
+_tabbar_get_current_tab(GtkWidget *widget)
+{
+	GtkWidget *page;
+	gint index;
+
+	g_assert(GTK_IS_NOTEBOOK(widget));
+
+	if((index = gtk_notebook_get_current_page(GTK_NOTEBOOK(widget))) != -1)
+	{
+		if((page = gtk_notebook_get_nth_page(GTK_NOTEBOOK(widget), index)))
+		{
+			return g_object_get_data(G_OBJECT(page), "meta");
+		}
+	}
+
+	return NULL;
+}
+
 /*
  *	public:
  */
@@ -529,24 +548,31 @@ tabbar_refresh(GtkWidget *widget)
 gchar *
 tabbar_get_current_id(GtkWidget *widget)
 {
-	GtkWidget *page;
-	gint index;
 	Tab *tab;
 
 	g_assert(GTK_IS_NOTEBOOK(widget));
 
-	if((index = gtk_notebook_get_current_page(GTK_NOTEBOOK(widget))) != -1)
+	if((tab = _tabbar_get_current_tab(widget)))
 	{
-		if((page = gtk_notebook_get_nth_page(GTK_NOTEBOOK(widget), index)))
-		{
-			if((tab = g_object_get_data(G_OBJECT(page), "meta")))
-			{
-				return g_strdup(tab_get_id(tab));
-			}
-		}
+		return g_strdup(tab_get_id(tab));
 	}
 
 	return NULL;
+}
+
+gint
+tabbar_get_current_type(GtkWidget *widget)
+{
+	Tab *tab;
+
+	g_assert(GTK_IS_NOTEBOOK(widget));
+
+	if((tab = _tabbar_get_current_tab(widget)))
+	{
+		return tab->type_id;
+	}
+
+	return -1;
 }
 
 void

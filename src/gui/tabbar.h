@@ -19,7 +19,7 @@
  * \brief Tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 25. December 2011
  */
 
 #ifndef __TABS_H__
@@ -139,6 +139,13 @@ void tabbar_refresh(GtkWidget *widget);
  * Returns the current tab id or NULL.
  */
 gchar *tabbar_get_current_id(GtkWidget *widget);
+
+/**
+ * \param widget the tabbar widget
+ *
+ * Returns the current tab id or -1.
+ */
+gint tabbar_get_current_type(GtkWidget *widget);
 
 /**
  * \param widget the tabbar widget
