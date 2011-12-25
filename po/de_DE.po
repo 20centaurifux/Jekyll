@@ -1,450 +1,107 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Jekyll v0.1.0\n"
+"Project-Id-Version: Jekyll v0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-30 19:18+0100\n"
-"PO-Revision-Date: 2011-09-30 19:20+0100\n"
+"POT-Creation-Date: 2011-12-25 12:25+0100\n"
+"PO-Revision-Date: 2011-12-25 12:26+0100\n"
 "Last-Translator: Sebastian Fedrau <lord-kefir@arcor.de>\n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-SearchPath-0: D:\\git\\jekyll\\src\n"
+"X-Poedit-SearchPath-0: /home/lordkefir/git/Jekyll/src\n"
 
-#: D:\git\jekyll\src/twitter.c:74
-#: D:\git\jekyll\src/twitter.c:99
+#: /home/lordkefir/git/Jekyll/src/twitter.c:74
+#: /home/lordkefir/git/Jekyll/src/twitter.c:99
 msgid "Couldn't launch browser, please check your preferences."
 msgstr "Der Browser konnte nicht gestartet werden, bitte prüfen Sie Ihre Einstellungen."
 
-#: D:\git\jekyll\src/twitter.c:81
+#: /home/lordkefir/git/Jekyll/src/twitter.c:81
 msgid "Couldn't connect to Twitter service. Please try again later."
 msgstr "Der Twitter Service konnte nicht erreicht werden. Bitte versuchen Sie es später erneut."
 
-#: D:\git\jekyll\src/gui/accountbrowser.c:364
-#: D:\git\jekyll\src/gui/accounts_dialog.c:788
-msgid "Accounts"
-msgstr "Konten"
+#: /home/lordkefir/git/Jekyll/src/libsexy/sexy-url-label.c:200
+msgid "_Open Link"
+msgstr "_Link öffnen"
 
-#: D:\git\jekyll\src/gui/accountbrowser.c:482
-msgid "Messages"
-msgstr "Nachrichten"
+#: /home/lordkefir/git/Jekyll/src/libsexy/sexy-url-label.c:212
+msgid "Copy _Link Address"
+msgstr "Link _Adresse kopieren"
 
-#: D:\git\jekyll\src/gui/accountbrowser.c:495
-msgid "Replies"
-msgstr "Erwähnungen"
-
-#: D:\git\jekyll\src/gui/accountbrowser.c:508
-msgid "Direct Messages"
-msgstr "Direktnachrichten"
-
-#: D:\git\jekyll\src/gui/accountbrowser.c:521
-msgid "Updates"
-msgstr "Aktualisierungen"
-
-#: D:\git\jekyll\src/gui/accountbrowser.c:534
-msgid "Lists"
-msgstr "Listen"
-
-#: D:\git\jekyll\src/gui/accountbrowser.c:547
-msgid "Friends"
-msgstr "Freunde"
-
-#: D:\git\jekyll\src/gui/accountbrowser.c:560
-msgid "Followers"
-msgstr "Folger"
-
-#: D:\git\jekyll\src/gui/accounts_dialog.c:388
-msgid "Account"
-msgstr "Konto"
-
-#: D:\git\jekyll\src/gui/accounts_dialog.c:402
-msgid "Authorized"
-msgstr "Authorisiert"
-
-#: D:\git\jekyll\src/gui/accounts_dialog.c:604
-msgid "Couldn't create dialog. Please check your configuration file."
-msgstr "Die Dialog konnte nicht erstellt werden, bitte überprüfen Sie Ihre Konfiguration."
-
-#: D:\git\jekyll\src/gui/accounts_dialog.c:686
-#, c-format
-msgid "Do you really want to delete the selected account (<b>%s</b>)?"
-msgstr "Möchten Sie wirklich das Konto <b>%s</b> entfernen?"
-
-#: D:\git\jekyll\src/gui/accounts_dialog.c:798
-msgid "Twitter accounts"
-msgstr "Twitterkonten"
-
-#: D:\git\jekyll\src/gui/accounts_dialog.c:813
-msgid "Authorize"
-msgstr "Authorisieren"
-
-#: D:\git\jekyll\src/gui/add_account_dialog.c:100
-msgid "Please enter an username."
-msgstr "Bitte geben Sie einen Benuternamen ein."
-
-#: D:\git\jekyll\src/gui/add_account_dialog.c:107
-msgid "The specified account does already exist. Please enter a different username."
-msgstr "Ein Benutzerkonto mit diesem Namen exisitiert bereits. Bitte geben Sie einen anderen Namen ein."
-
-#: D:\git\jekyll\src/gui/add_account_dialog.c:148
-msgid "Add Account"
-msgstr "Konto hinzufügen"
-
-#: D:\git\jekyll\src/gui/add_account_dialog.c:177
-msgid "Please enter the name of the Twitter account you want to add."
-msgstr "Bitte geben Sie den Namen für das Konto ein, welches Sie hinzufügen möchten."
-
-#: D:\git\jekyll\src/gui/add_list_dialog.c:119
-msgid "Couldn't create list, please try again later."
-msgstr "Die Liste konnte nicht erstellt werden, bitte versuchen Sie es später erneut."
-
-#: D:\git\jekyll\src/gui/add_list_dialog.c:202
-msgid "Create new list"
-msgstr "Neue Liste erstellen"
-
-#: D:\git\jekyll\src/gui/add_list_dialog.c:223
-msgid "List details"
-msgstr "Listendetails"
-
-#: D:\git\jekyll\src/gui/add_list_dialog.c:239
-msgid "Name"
-msgstr "Name"
-
-#: D:\git\jekyll\src/gui/add_list_dialog.c:250
-msgid "Private"
-msgstr "Privat"
-
-#: D:\git\jekyll\src/gui/authorize_account_dialog.c:359
-msgid "Authorize request"
-msgstr "Authorisierungsanfrage"
-
-#: D:\git\jekyll\src/gui/authorize_account_dialog.c:387
-#, c-format
-msgid "Please enter the PIN provided by Twitter to authorize %s for <b>%s</b>."
-msgstr "Bitte geben Sie die PIN ein, um %s für das Konto <b>%s</b> zu authorisieren."
-
-#: D:\git\jekyll\src/gui/authorize_account_dialog.c:407
-msgid "Get PIN"
-msgstr "PIN anfordern"
-
-#: D:\git\jekyll\src/gui/edit_list_membership_dialog.c:208
-msgid "Couldn't update list membership, please try again later."
-msgstr "Die Listenzugehörigkeit konnte nicht aktualisiert werden, bitte versuchen Sie es später erneut."
-
-#: D:\git\jekyll\src/gui/edit_list_membership_dialog.c:321
-msgid "Member"
-msgstr "Mitglied"
-
-#: D:\git\jekyll\src/gui/edit_list_membership_dialog.c:333
-msgid "List owner"
-msgstr "Listeneigentümer"
-
-#: D:\git\jekyll\src/gui/edit_list_membership_dialog.c:347
-msgid "List"
-msgstr "Liste"
-
-#: D:\git\jekyll\src/gui/edit_list_membership_dialog.c:494
-msgid "List membership"
-msgstr "Listenmitgliedschaft"
-
-#: D:\git\jekyll\src/gui/first_sync_dialog.c:123
-msgid "Fetching user details..."
-msgstr "Hole Benutzerdetails..."
-
-#: D:\git\jekyll\src/gui/first_sync_dialog.c:152
-msgid "Synchronizing timelines..."
-msgstr "Synchronisiere Zeitlinien..."
-
-#: D:\git\jekyll\src/gui/first_sync_dialog.c:164
-msgid "Synchronizing lists..."
-msgstr "Synchronisiere Listen..."
-
-#: D:\git\jekyll\src/gui/first_sync_dialog.c:188
-msgid "Synchronizing followers..."
-msgstr "Synchronisiere Folger..."
-
-#: D:\git\jekyll\src/gui/first_sync_dialog.c:265
-msgid "First synchronization"
-msgstr "Erste Synchronisation"
-
-#: D:\git\jekyll\src/gui/first_sync_dialog.c:300
-#, c-format
-msgid "Please stay patient, while <b>%s</b> synchronizes your account for the very first time."
-msgstr "Bitte haben Sie Geduld, während <b>%s</b> zum ersten Mal Ihr Benutzerkonto aktualisiert."
-
-#: D:\git\jekyll\src/gui/gtktwitterstatus.c:887
-msgid "Friendship"
-msgstr "Freundschaft"
-
-#: D:\git\jekyll\src/gui/gtktwitterstatus.c:899
-#: D:\git\jekyll\src/gui/statustab.c:421
-msgid "Reply"
-msgstr "Antwort"
-
-#: D:\git\jekyll\src/gui/gtktwitterstatus.c:911
-msgid "Retweet"
-msgstr "Retweet"
-
-#: D:\git\jekyll\src/gui/gtktwitterstatus.c:935
-msgid "Delete"
-msgstr "Löschen"
-
-#: D:\git\jekyll\src/gui/gtkuserlistdialog.c:223
-#, c-format
-msgid "<b>Users:</b> %d"
-msgstr "<b>Benutzer:</b> %d"
-
-#: D:\git\jekyll\src/gui/gtkuserlistdialog.c:410
-msgid "Users"
-msgstr "Benutzer"
-
-#: D:\git\jekyll\src/gui/gui.c:266
+#: /home/lordkefir/git/Jekyll/src/gui/gui.c:266
 #, c-format
 msgid "Couldn't initialize %s, database seems to be damaged."
 msgstr "%s konnte nicht aktualisiert werden, die Datenbank scheint beschädigt zu sein."
 
-#: D:\git\jekyll\src/gui/gui.c:274
+#: /home/lordkefir/git/Jekyll/src/gui/gui.c:274
 #, c-format
 msgid "Couldn't initialize database, please upgrade %s."
 msgstr "%s konnte nicht initialisiert werden, bitte aktualisieren Sie die installierte Version."
 
-#: D:\git\jekyll\src/gui/gui.c:315
+#: /home/lordkefir/git/Jekyll/src/gui/gui.c:315
 msgid "Account initialization failed, please try again later."
 msgstr "Das Benutzerkonto konnte nicht initialisiert werden, bitte versuchen Sie es noch einmal."
 
-#: D:\git\jekyll\src/gui/list_preferences_dialog.c:119
-msgid "A list with the given name does already exist."
-msgstr "Eine Liste mit dem angegebenen Namen existiert bereits."
-
-#: D:\git\jekyll\src/gui/list_preferences_dialog.c:142
-msgid "Couldn't update list, an internal failure occured."
-msgstr "Die Liste konnte nicht aktualisiert werden, ein interner Fehler ist aufgetreten."
-
-#: D:\git\jekyll\src/gui/list_preferences_dialog.c:148
-msgid "Please enter a name for the list."
-msgstr "Bitte geben Sie einen Namen für die Liste ein."
-
-#: D:\git\jekyll\src/gui/list_preferences_dialog.c:298
-msgid "Couldn't update list, please try again later."
-msgstr "Die Liste konnte nicht aktualisiert werden, bitte versuchen Sie es später erneut."
-
-#: D:\git\jekyll\src/gui/list_preferences_dialog.c:394
-#: D:\git\jekyll\src/gui/mainwindow.c:2125
-#: D:\git\jekyll\src/gui/statustab.c:1197
-#: D:\git\jekyll\src/gui/statustab.c:1686
-msgid "List preferences"
-msgstr "Listeigenschaften"
-
-#: D:\git\jekyll\src/gui/list_preferences_dialog.c:422
-msgid "Description"
-msgstr "Beschreibung"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1046
-msgid "Updating messages..."
-msgstr "Nachrichten werden aktualisiert..."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1057
-msgid "Updating lists..."
-msgstr "Listen werden aktualisiert..."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1067
-msgid "Updating direct messages..."
-msgstr "Direktnachrichten werden aktualisiert..."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1082
-msgid "Updating followers..."
-msgstr "Folger werden aktualisiert..."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1643
-#: D:\git\jekyll\src/gui/statustab.c:402
-msgid "Couldn't publish your tweet, please try again later."
-msgstr "Der Tweet konnte nicht erstellt werden, bitte versuchen Sie es später erneut."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1706
-msgid "Compose new tweet"
-msgstr "Neuen Tweet erstellen"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1848
-msgid "_Compose tweet"
-msgstr "_Tweet erstellen"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1855
-msgid "_Preferences"
-msgstr "_Eigenschaften"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1865
-msgid "_Twitter Accounts"
-msgstr "Twitter_konten"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1960
-msgid "Couldn't update friends, please try again later."
-msgstr "Freunde konnten nicht aktualisiert werden, bitte versuchen Sie es später erneut."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:1961
-msgid "Couldn't update followers, please try again later."
-msgstr "Folger konnten nicht aktualisiert werden, bitte versuchen Sie es später erneut."
-
-#: D:\git\jekyll\src/gui/mainwindow.c:2012
-msgid "Editing friends"
-msgstr "Freunde bearbeiten"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:2012
-msgid "Editing followers"
-msgstr "Folger bearbeiten"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:2019
-msgid "Follow user"
-msgstr "Benutzer folgen"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:2019
-msgid "Block user"
-msgstr "Benutzer blocken"
-
-#: D:\git\jekyll\src/gui/mainwindow.c:2021
-#: D:\git\jekyll\src/gui/statustab.c:649
-#: D:\git\jekyll\src/gui/statustab.c:1108
-#: D:\git\jekyll\src/gui/wizard.c:630
-msgid "Username"
-msgstr "Benutzername"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:356
-#: D:\git\jekyll\src/gui/preferences_dialog.c:653
-msgid "General"
-msgstr "Allgemein"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:374
-msgid "show program in systray"
-msgstr "Programm im Benachrichtungsfeld anzeigen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:377
-msgid "open window minimized/hidden"
-msgstr "Fenster minimiert/versteckt öffnen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:380
-msgid "restore window size and position"
-msgstr "Fenstergröße und Position wiederherstellen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:420
-#: D:\git\jekyll\src/gui/wizard.c:258
-msgid "Open File"
-msgstr "Datei öffnen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:430
-#: D:\git\jekyll\src/gui/wizard.c:268
-msgid "Executable file"
-msgstr "Ausführbare Datei"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:459
-msgid "Browser preferences"
-msgstr "Browsereigenschaften"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:480
-#: D:\git\jekyll\src/gui/wizard.c:311
-msgid "Please specifiy your favorite internet browser."
-msgstr "Bitte geben Sie Ihren favorisierten Browser an."
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:486
-#: D:\git\jekyll\src/gui/wizard.c:318
-msgid "use default browser"
-msgstr "Standardbrowser benutzen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:489
-#: D:\git\jekyll\src/gui/wizard.c:321
-msgid "use custom browser"
-msgstr "benutzerdefinierten Browser nutzen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:560
-#: D:\git\jekyll\src/gui/preferences_dialog.c:659
-msgid "View"
-msgstr "Ansicht"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:578
-msgid "display notification area"
-msgstr "Benachrichtigungsfeld anzeigen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:581
-msgid "show all messages"
-msgstr "alle Nachrichten anzeigen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:585
-msgid "show notifications and warnings"
-msgstr "Informationen und Warnungen anzeigen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:589
-msgid "show only warnings"
-msgstr "nur Warnungen anzeigen"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:656
-msgid "Browser"
-msgstr "Browser"
-
-#: D:\git\jekyll\src/gui/preferences_dialog.c:678
-msgid "Preferences"
-msgstr "Eigenschaften"
-
-#: D:\git\jekyll\src/gui/remove_list_dialog.c:112
-msgid "Couldn't remove list, please try again later."
-msgstr "Die Liste konnte nicht entfernt werden, bitte versuchen Sie es später noch einmal."
-
-#: D:\git\jekyll\src/gui/remove_list_dialog.c:195
-#: D:\git\jekyll\src/gui/statustab.c:1690
-msgid "Remove list"
-msgstr "Liste entfernen"
-
-#: D:\git\jekyll\src/gui/remove_list_dialog.c:220
-#, c-format
-msgid "Do you really want to remove the list (<b>%s</b>)?"
-msgstr "Möchten Sie wirklich die Liste <b>%s</b> entfernen?"
-
-#: D:\git\jekyll\src/gui/retweet_dialog.c:185
-msgid "Do you really want to retweet the status to all of your followers?"
-msgstr "Möchten Sie den Status wirklich an alle Ihre Folger tweeten?"
-
-#: D:\git\jekyll\src/gui/statustab.c:462
-msgid "Couldn't retweet status, please try again later."
-msgstr "Status konnte nicht retweetet werden, bitte versuchen Sie es später noch einmal."
-
-#: D:\git\jekyll\src/gui/statustab.c:582
-msgid "Couldn't update friendship information, please try again later."
-msgstr "Die Freundschaftsdaten konnten nicht aktualisiert werden, bitte versuchen Sie es später noch einmal."
-
-#: D:\git\jekyll\src/gui/statustab.c:640
-msgid "Edit friendship"
-msgstr "Freundschaft bearbeiten"
-
-#: D:\git\jekyll\src/gui/statustab.c:647
-msgid "Followed by"
-msgstr "Verfolgt von"
-
-#: D:\git\jekyll\src/gui/statustab.c:1057
-msgid "Couldn't update list members, please try again later."
-msgstr "Die Listenzugehörigkeit konnte nicht aktualisiert werden, bitte versuchen Sie es später noch einmal."
-
-#: D:\git\jekyll\src/gui/statustab.c:1099
-#: D:\git\jekyll\src/gui/statustab.c:1682
-msgid "List members"
-msgstr "Benutzer der Liste"
-
-#: D:\git\jekyll\src/gui/systray.c:141
+#: /home/lordkefir/git/Jekyll/src/gui/systray.c:141
 msgid "Hide window"
 msgstr "Fenster verstecken"
 
-#: D:\git\jekyll\src/gui/systray.c:147
+#: /home/lordkefir/git/Jekyll/src/gui/systray.c:147
 msgid "Show window"
 msgstr "Fenster anzeigen"
 
-#: D:\git\jekyll\src/gui/systray.c:152
+#: /home/lordkefir/git/Jekyll/src/gui/systray.c:152
 msgid "About"
 msgstr "Über"
 
-#: D:\git\jekyll\src/gui/systray.c:156
+#: /home/lordkefir/git/Jekyll/src/gui/systray.c:156
 msgid "Quit program"
 msgstr "Programm beenden"
 
-#: D:\git\jekyll\src/gui/wizard.c:171
+#: /home/lordkefir/git/Jekyll/src/gui/gtkuserlistdialog.c:224
+#, c-format
+msgid "<b>Users:</b> %d"
+msgstr "<b>Benutzer:</b> %d"
+
+#: /home/lordkefir/git/Jekyll/src/gui/gtkuserlistdialog.c:411
+msgid "Users"
+msgstr "Benutzer"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:388
+msgid "Account"
+msgstr "Konto"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:402
+msgid "Authorized"
+msgstr "Authorisiert"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:604
+msgid "Couldn't create dialog. Please check your configuration file."
+msgstr "Die Dialog konnte nicht erstellt werden, bitte überprüfen Sie Ihre Konfiguration."
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:686
+#, c-format
+msgid "Do you really want to delete the selected account (<b>%s</b>)?"
+msgstr "Möchten Sie wirklich das Konto <b>%s</b> entfernen?"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:788
+msgid "Accounts"
+msgstr "Konten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:798
+msgid "Twitter accounts"
+msgstr "Twitterkonten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accounts_dialog.c:813
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:653
+msgid "Authorize"
+msgstr "Authorisieren"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:171
 #, c-format
 msgid ""
 "<b>Welcome to %s!</b>\n"
@@ -455,49 +112,404 @@ msgstr ""
 "\n"
 "Sie haben bisher noch kein Twitterkonto konfiguriert. Dieser Assistent wird Sie durch alle notwendigen Schritte begleiten. Bitte klicken Sie auf <b>Vor</b>, um Ihr erstes Konto anzulegen."
 
-#: D:\git\jekyll\src/gui/wizard.c:532
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:258
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:420
+msgid "Open File"
+msgstr "Datei öffnen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:268
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:430
+msgid "Executable file"
+msgstr "Ausführbare Datei"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:311
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:480
+msgid "Please specifiy your favorite internet browser."
+msgstr "Bitte geben Sie Ihren favorisierten Browser an."
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:318
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:486
+msgid "use default browser"
+msgstr "Standardbrowser benutzen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:321
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:489
+msgid "use custom browser"
+msgstr "benutzerdefinierten Browser nutzen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:532
 #, c-format
 msgid "<b>%s</b> has been authorized successfully."
 msgstr "Das Konto <b>%s</b> wurde erfolgreich authorisiert."
 
-#: D:\git\jekyll\src/gui/wizard.c:543
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:543
 #, c-format
 msgid "Couldn't authorize <b>%s</b>, please try again later."
 msgstr "Das Konto <b>%s</b> konnte nicht authorisiert werden, bitte versuchen Sie es später erneut."
 
-#: D:\git\jekyll\src/gui/wizard.c:617
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:617
 #, c-format
 msgid "Please enter your username. Like any other Twitter application <b>%s</b> has to be authorized. Please enter the PIN you were provided and click <b>Authorize</b>."
 msgstr "Bitte geben Sie Ihren Twitter-Benutzernamen ein. Wie jede andere Twitter-Anwendung, muss <b>%s</b> authorisiert werden. Bitte geben Sie anschließend die PIN ein und klicken Sie <b>Authorisieren</b>."
 
-#: D:\git\jekyll\src/gui/wizard.c:683
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:630
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:658
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1117
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2115
+msgid "Username"
+msgstr "Benutzername"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:650
+msgid "Get PIN"
+msgstr "PIN anfordern"
+
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:683
 #, c-format
 msgid "Please click on <b>Apply</b> to save all settings and start <b>%s</b>."
 msgstr "Bitte klicken Sie auf <b>Übernehmen</b>, um alle Einstellugen zu speichern und <b>%s</b> zu starten."
 
-#: D:\git\jekyll\src/gui/wizard.c:744
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:744
 msgid "Welcome"
 msgstr "Willkommen"
 
-#: D:\git\jekyll\src/gui/wizard.c:750
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:750
 msgid "Internet Browser"
 msgstr "Internetbrowser"
 
-#: D:\git\jekyll\src/gui/wizard.c:756
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:756
 msgid "Account settings"
 msgstr "Kontoeinstellungen"
 
-#: D:\git\jekyll\src/gui/wizard.c:762
+#: /home/lordkefir/git/Jekyll/src/gui/wizard.c:762
 msgid "Finish configuration"
 msgstr "Konfiguration abschließen"
 
-#: D:\git\jekyll\src/libsexy/sexy-url-label.c:200
-msgid "_Open Link"
-msgstr "_Link öffnen"
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:957
+msgid "Friendship"
+msgstr "Freundschaft"
 
-#: D:\git\jekyll\src/libsexy/sexy-url-label.c:212
-msgid "Copy _Link Address"
-msgstr "Link _Adresse kopieren"
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:969
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:430
+msgid "Reply"
+msgstr "Antwort"
+
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:981
+msgid "Retweet"
+msgstr "Retweet"
+
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:993
+msgid "Lists"
+msgstr "Listen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1005
+msgid "Delete"
+msgstr "Löschen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/remove_list_dialog.c:112
+msgid "Couldn't remove list, please try again later."
+msgstr "Die Liste konnte nicht entfernt werden, bitte versuchen Sie es später noch einmal."
+
+#: /home/lordkefir/git/Jekyll/src/gui/remove_list_dialog.c:195
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1720
+msgid "Remove list"
+msgstr "Liste entfernen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/remove_list_dialog.c:220
+#, c-format
+msgid "Do you really want to remove the list (<b>%s</b>)?"
+msgstr "Möchten Sie wirklich die Liste <b>%s</b> entfernen?"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:356
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:653
+msgid "General"
+msgstr "Allgemein"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:374
+msgid "show program in systray"
+msgstr "Programm im Benachrichtungsfeld anzeigen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:377
+msgid "open window minimized/hidden"
+msgstr "Fenster minimiert/versteckt öffnen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:380
+msgid "restore window size and position"
+msgstr "Fenstergröße und Position wiederherstellen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:459
+msgid "Browser preferences"
+msgstr "Browsereigenschaften"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:560
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:659
+msgid "View"
+msgstr "Ansicht"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:578
+msgid "display notification area"
+msgstr "Benachrichtigungsfeld anzeigen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:581
+msgid "show all messages"
+msgstr "alle Nachrichten anzeigen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:585
+msgid "show notifications and warnings"
+msgstr "Informationen und Warnungen anzeigen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:589
+msgid "show only warnings"
+msgstr "nur Warnungen anzeigen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:656
+msgid "Browser"
+msgstr "Browser"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:678
+msgid "Preferences"
+msgstr "Eigenschaften"
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:411
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1721
+msgid "Couldn't publish your tweet, please try again later."
+msgstr "Der Tweet konnte nicht erstellt werden, bitte versuchen Sie es später erneut."
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:471
+msgid "Couldn't retweet status, please try again later."
+msgstr "Status konnte nicht retweetet werden, bitte versuchen Sie es später noch einmal."
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:591
+msgid "Couldn't update friendship information, please try again later."
+msgstr "Die Freundschaftsdaten konnten nicht aktualisiert werden, bitte versuchen Sie es später noch einmal."
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:649
+msgid "Edit friendship"
+msgstr "Freundschaft bearbeiten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:656
+msgid "Followed by"
+msgstr "Verfolgt von"
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1066
+msgid "Couldn't update list members, please try again later."
+msgstr "Die Listenzugehörigkeit konnte nicht aktualisiert werden, bitte versuchen Sie es später noch einmal."
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1108
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1712
+msgid "List members"
+msgstr "Benutzer der Liste"
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1115
+msgid "Member"
+msgstr "Mitglied"
+
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1206
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1716
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2219
+msgid "List preferences"
+msgstr "Listeigenschaften"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1049
+msgid "Updating messages..."
+msgstr "Nachrichten werden aktualisiert..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1060
+msgid "Updating lists..."
+msgstr "Listen werden aktualisiert..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1070
+msgid "Updating direct messages..."
+msgstr "Direktnachrichten werden aktualisiert..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1085
+msgid "Updating followers..."
+msgstr "Folger werden aktualisiert..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1759
+msgid "Compose new tweet"
+msgstr "Neuen Tweet erstellen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1938
+msgid "_Compose tweet"
+msgstr "_Tweet erstellen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1942
+msgid "_Search"
+msgstr "_Suche"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1949
+msgid "_Preferences"
+msgstr "_Eigenschaften"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1959
+msgid "_Twitter Accounts"
+msgstr "Twitter_konten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2054
+msgid "Couldn't update friends, please try again later."
+msgstr "Freunde konnten nicht aktualisiert werden, bitte versuchen Sie es später erneut."
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2055
+msgid "Couldn't update followers, please try again later."
+msgstr "Folger konnten nicht aktualisiert werden, bitte versuchen Sie es später erneut."
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2106
+msgid "Editing friends"
+msgstr "Freunde bearbeiten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2106
+msgid "Editing followers"
+msgstr "Folger bearbeiten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2113
+msgid "Follow user"
+msgstr "Benutzer folgen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2113
+msgid "Block user"
+msgstr "Benutzer blocken"
+
+#: /home/lordkefir/git/Jekyll/src/gui/retweet_dialog.c:185
+msgid "Do you really want to retweet the status to all of your followers?"
+msgstr "Möchten Sie den Status wirklich an alle Ihre Folger tweeten?"
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:119
+msgid "A list with the given name does already exist."
+msgstr "Eine Liste mit dem angegebenen Namen existiert bereits."
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:142
+msgid "Couldn't update list, an internal failure occured."
+msgstr "Die Liste konnte nicht aktualisiert werden, ein interner Fehler ist aufgetreten."
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:148
+msgid "Please enter a name for the list."
+msgstr "Bitte geben Sie einen Namen für die Liste ein."
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:298
+msgid "Couldn't update list, please try again later."
+msgstr "Die Liste konnte nicht aktualisiert werden, bitte versuchen Sie es später erneut."
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:410
+msgid "Name"
+msgstr "Name"
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:422
+msgid "Description"
+msgstr "Beschreibung"
+
+#: /home/lordkefir/git/Jekyll/src/gui/list_preferences_dialog.c:433
+msgid "Private"
+msgstr "Privat"
+
+#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:88
+#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:106
+msgid "Search"
+msgstr "Suche"
+
+#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:122
+msgid "Please enter your search query:"
+msgstr "Bitte geben Sie Ihren Suchbegriff ein:"
+
+#: /home/lordkefir/git/Jekyll/src/gui/edit_list_membership_dialog.c:208
+msgid "Couldn't update list membership, please try again later."
+msgstr "Die Listenzugehörigkeit konnte nicht aktualisiert werden, bitte versuchen Sie es später erneut."
+
+#: /home/lordkefir/git/Jekyll/src/gui/edit_list_membership_dialog.c:333
+msgid "List owner"
+msgstr "Listeneigentümer"
+
+#: /home/lordkefir/git/Jekyll/src/gui/edit_list_membership_dialog.c:347
+msgid "List"
+msgstr "Liste"
+
+#: /home/lordkefir/git/Jekyll/src/gui/edit_list_membership_dialog.c:494
+msgid "List membership"
+msgstr "Listenmitgliedschaft"
+
+#: /home/lordkefir/git/Jekyll/src/gui/authorize_account_dialog.c:359
+msgid "Authorize request"
+msgstr "Authorisierungsanfrage"
+
+#: /home/lordkefir/git/Jekyll/src/gui/authorize_account_dialog.c:387
+#, c-format
+msgid "Please enter the PIN provided by Twitter to authorize %s for <b>%s</b>."
+msgstr "Bitte geben Sie die PIN ein, um %s für das Konto <b>%s</b> zu authorisieren."
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_account_dialog.c:100
+msgid "Please enter an username."
+msgstr "Bitte geben Sie einen Benuternamen ein."
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_account_dialog.c:107
+msgid "The specified account does already exist. Please enter a different username."
+msgstr "Ein Benutzerkonto mit diesem Namen exisitiert bereits. Bitte geben Sie einen anderen Namen ein."
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_account_dialog.c:148
+msgid "Add Account"
+msgstr "Konto hinzufügen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_account_dialog.c:177
+msgid "Please enter the name of the Twitter account you want to add."
+msgstr "Bitte geben Sie den Namen für das Konto ein, welches Sie hinzufügen möchten."
+
+#: /home/lordkefir/git/Jekyll/src/gui/first_sync_dialog.c:123
+msgid "Fetching user details..."
+msgstr "Hole Benutzerdetails..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/first_sync_dialog.c:152
+msgid "Synchronizing timelines..."
+msgstr "Synchronisiere Zeitlinien..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/first_sync_dialog.c:164
+msgid "Synchronizing lists..."
+msgstr "Synchronisiere Listen..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/first_sync_dialog.c:188
+msgid "Synchronizing followers..."
+msgstr "Synchronisiere Folger..."
+
+#: /home/lordkefir/git/Jekyll/src/gui/first_sync_dialog.c:265
+msgid "First synchronization"
+msgstr "Erste Synchronisation"
+
+#: /home/lordkefir/git/Jekyll/src/gui/first_sync_dialog.c:300
+#, c-format
+msgid "Please stay patient, while <b>%s</b> synchronizes your account for the very first time."
+msgstr "Bitte haben Sie Geduld, während <b>%s</b> zum ersten Mal Ihr Benutzerkonto aktualisiert."
+
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:483
+msgid "Messages"
+msgstr "Nachrichten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:496
+msgid "Replies"
+msgstr "Erwähnungen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:524
+msgid "Updates"
+msgstr "Aktualisierungen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:550
+msgid "Friends"
+msgstr "Freunde"
+
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:563
+msgid "Followers"
+msgstr "Folger"
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_list_dialog.c:119
+msgid "Couldn't create list, please try again later."
+msgstr "Die Liste konnte nicht erstellt werden, bitte versuchen Sie es später erneut."
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_list_dialog.c:202
+msgid "Create new list"
+msgstr "Neue Liste erstellen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/add_list_dialog.c:223
+msgid "List details"
+msgstr "Listendetails"
+
+#~ msgid "Direct Messages"
+#~ msgstr "Direktnachrichten"
 
 #~ msgid "Please enter the PIN you were provided and click <b>Authorize</b>."
 #~ msgstr ""
