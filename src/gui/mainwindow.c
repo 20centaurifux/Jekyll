@@ -1648,27 +1648,38 @@ _mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
 
 		if((id = tabbar_get_current_id(private->tabbar)))
 		{
-			if(g_strstr_len(id, -1, "@"))
+			switch(tabbar_get_current_type(private->tabbar))
 			{
-				pieces = g_strsplit(id, "@", 2);
-			}
-			else if(g_strstr_len(id, -1, ":"))
-			{
-				pieces = g_strsplit(id, ":", 2);
-			}
+				case TAB_TYPE_ID_PUBLIC_TIMELINE:
+				case TAB_TYPE_ID_REPLIES:
+				case TAB_TYPE_ID_DIRECT_MESSAGES:
+				case TAB_TYPE_ID_USER_TIMELINE:
+					username = id;
+					break;
 
-			if(pieces)
-			{
-				username = g_strdup(pieces[0]);
-				g_strfreev(pieces);
-				g_free(id);
-			}
-			else
-			{
-				username = id;
-			}
+				case TAB_TYPE_ID_LIST:
+					pieces = g_strsplit(id, "@", 2);
+					break;
 
-			/* check if found username is an account */
+				case TAB_TYPE_ID_SEARCH:
+					pieces = g_strsplit(id, ":", 2);
+					break;
+
+				default:
+					g_warning("Invalid tab type");
+			}
+		}
+
+		if(pieces)
+		{
+			username = g_strdup(pieces[0]);
+			g_strfreev(pieces);
+			g_free(id);
+		}
+
+		/* check if found username is an account */
+		if(username)
+		{
 			for(i = 0; i < count; ++i)
 			{
 				if(!g_strcmp0(username, usernames[i]))
@@ -1684,7 +1695,6 @@ _mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
 			/* copy first found username if username is empty */
 			result = g_strdup(usernames[0]);
 		}
-
 
 		/* cleanup */
 		for(i = 0; i < count; ++i)
