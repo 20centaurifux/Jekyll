@@ -144,7 +144,8 @@ _twitter_json_search_result_handle_string(void *ctx, const unsigned char *value,
 			if((parts = g_strsplit(text, " ", 6)))
 			{
 				parts[0][strlen(parts[0]) - 1] = '\0';
-				g_snprintf(data->status.created_at, 24, "%s %s %s %s %s %s", parts[0], parts[2], parts[1], parts[4], parts[5], parts[3]);		
+				g_snprintf(data->status.created_at, 24, "%s %s %s %s %s %s",
+				           parts[0], parts[2], parts[1], parts[4], parts[5], parts[3]);		
 				g_strfreev(parts);
 			}
 		}
@@ -152,7 +153,7 @@ _twitter_json_search_result_handle_string(void *ctx, const unsigned char *value,
 		{
 			g_strlcpy(data->status.text, text, 280);
 		}
-		else if(!g_ascii_strcasecmp("from_user", data->key))
+		else if(!g_ascii_strcasecmp("from_user_name", data->key))
 		{
 			g_strlcpy(data->user.name, text, 64);
 		}
@@ -160,7 +161,7 @@ _twitter_json_search_result_handle_string(void *ctx, const unsigned char *value,
 		{
 			g_strlcpy(data->user.id, text, 32);
 		}
-		else if(!g_ascii_strcasecmp("from_user_name", data->key))
+		else if(!g_ascii_strcasecmp("from_user", data->key))
 		{
 			g_strlcpy(data->user.screen_name, text, 64);
 		}
