@@ -2595,7 +2595,6 @@ _mainwindow_create(Config *config, Cache *cache)
 
 	/* create window */
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window), APPLICATION_NAME);
 	gtk_widget_set_size_request(window, MAINWINDOW_MINIMUM_WIDTH, MAINWINDOW_MINIMUM_HEIGHT);
 
 	/* window data  */
@@ -2725,6 +2724,9 @@ _mainwindow_create(Config *config, Cache *cache)
 	/* start pixmap loader */
 	g_debug("Starting pixbuf loader");
 	pixbuf_loader_start(private->pixbuf_loader);
+
+	/* set default title */
+	mainwindow_set_title(window, NULL);
 
 	/* signals */
 	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(_mainwindow_destroy), NULL);
@@ -3071,6 +3073,24 @@ mainwindow_notify(GtkWidget *widget, NotificationLevel level, const gchar *messa
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
 	notification_area_notify(private->notification_area, level, message);
+}
+
+void
+mainwindow_set_title(GtkWidget *widget, const gchar *title)
+{
+	gchar *text;
+
+	if(title)
+	{
+		text = g_strdup_printf("%s - %s", APPLICATION_NAME, title);
+	}
+	else
+	{
+		text = g_strdup_printf("%s %d.%d.%d", APPLICATION_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH_LEVEL);
+	}
+
+	gtk_window_set_title(GTK_WINDOW(widget), text);
+	g_free(text);
 }
 
 /**

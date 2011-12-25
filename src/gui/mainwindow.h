@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. June 2011
+ * \date 25. December 2011
  */
 
 #ifndef __MAINWINDOW_H__
@@ -227,6 +227,14 @@ void mainwindow_remove_list(GtkWidget *widget, const gchar *owner, const gchar *
  * Shows a notification.
  */
 void mainwindow_notify(GtkWidget *widget, NotificationLevel level, const gchar *message);
+
+/**
+ * \param widget the mainwindow widget
+ * \param title window title
+ *
+ * Sets the window title.
+ */
+void mainwindow_set_title(GtkWidget *widget, const gchar *title);
 
 /**
  * @}
