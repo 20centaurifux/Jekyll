@@ -19,13 +19,15 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 25. December 2011
+ * \date 26. December 2011
  */
 
 #include <gdk/gdkkeysyms.h>
+#include <glib/gi18n.h>
 
 #include "tabbar.h"
 #include "statustab.h"
+#include "mainwindow.h"
 #include "../pathbuilder.h"
 
 /**
@@ -75,6 +77,10 @@ typedef struct
 		GMutex *mutex;
 	} sync;
 } _Tabbar;
+
+/*
+ *	close tabs:
+ */
 
 /*
  * This background worker receives notebook pages through an asynchronous message
@@ -153,8 +159,19 @@ _tabbar_destroy_page_widget_worker(_Tabbar *tabbar)
 }
 
 /*
- *	close tabs:
+ * This close handler is connected to the "click" event of the close button in the
+ * label of the notebook page.
  */
+static void
+_tabbar_close_button_clicked(GtkWidget *button, GtkWidget *page)
+{
+	GtkWidget *notebook;
+
+	notebook = gtk_widget_get_parent(page);
+	g_assert(GTK_IS_NOTEBOOK(notebook));
+
+	_tabbar_destroy_page(GTK_NOTEBOOK(notebook), gtk_notebook_page_num(GTK_NOTEBOOK(notebook), page));
+}
 
 /*
  *	scrolling:
@@ -188,25 +205,90 @@ _tabbar_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 	return result;
 }
 
-
-/*
- * This close handler is connected to the "click" event of the close button in the
- * label of the notebook page.
- */
-static void
-_tabbar_close_button_clicked(GtkWidget *button, GtkWidget *page)
-{
-	GtkWidget *notebook;
-
-	notebook = gtk_widget_get_parent(page);
-	g_assert(GTK_IS_NOTEBOOK(notebook));
-
-	_tabbar_destroy_page(GTK_NOTEBOOK(notebook), gtk_notebook_page_num(GTK_NOTEBOOK(notebook), page));
-}
-
 /*
  *	helpers:
  */
+static Tab *
+_tabbar_get_current_tab(GtkWidget *widget)
+{
+	GtkWidget *page;
+	gint index;
+
+	g_assert(GTK_IS_NOTEBOOK(widget));
+
+	if((index = gtk_notebook_get_current_page(GTK_NOTEBOOK(widget))) != -1)
+	{
+		if((page = gtk_notebook_get_nth_page(GTK_NOTEBOOK(widget), index)))
+		{
+			return g_object_get_data(G_OBJECT(page), "meta");
+		}
+	}
+
+	return NULL;
+}
+
+static void
+_tabbar_page_changed(GtkNotebook *notebook, gint index)
+{
+	Tab *tab = NULL;
+	GtkWidget *page;
+	gchar *id;
+	gchar *title = NULL;
+	gchar **pieces;
+
+	g_assert(GTK_IS_NOTEBOOK(notebook));
+
+	if(index == -1)
+	{
+		tab = _tabbar_get_current_tab(GTK_WIDGET(notebook));
+	}
+	else if((page = gtk_notebook_get_nth_page(notebook, index)))
+	{
+		tab = g_object_get_data(G_OBJECT(page), "meta");
+	}
+
+	if(tab)
+	{
+		id = tab_get_id(tab);
+
+		switch(tab->type_id)
+		{
+			case TAB_TYPE_ID_PUBLIC_TIMELINE:
+				title = g_strdup_printf("%s (%s)", _("Messages"), id);
+				break;
+
+			case TAB_TYPE_ID_REPLIES:
+				title = g_strdup_printf("%s (%s)", _("Replies"), id);
+				break;
+
+			case TAB_TYPE_ID_DIRECT_MESSAGES:
+				title = g_strdup_printf("%s (%s)", _("Direct Messages"), id);
+				break;
+
+			case TAB_TYPE_ID_SEARCH:
+				if((pieces = g_strsplit(id, ":", 2)))
+				{
+					title = g_strdup_printf("%s: %s", _("Search"), pieces[1] + 1);
+					g_strfreev(pieces);
+				}
+				break;
+
+			case TAB_TYPE_ID_USER_TIMELINE:
+			case TAB_TYPE_ID_LIST:
+				title = g_strdup(id);
+				break;
+
+			default:
+				g_warning("Invalid tab type.");
+		}
+
+		g_free(id);
+	}
+
+	mainwindow_set_title(tabbar_get_mainwindow(GTK_WIDGET(notebook)), title);
+	g_free(title);
+}
+
 static GtkWidget *
 _tabbar_create_tab_label(GtkImage *image, const gchar *title, GCallback button_clicked, gpointer user_data)
 {
@@ -271,7 +353,6 @@ _tabbar_destroy_page(GtkNotebook *notebook, gint index)
 
 	g_debug("Destroying tab(%d)", index);
 
-
 	/* create object reference & remove page from notebook */
 	child = g_object_ref(gtk_notebook_get_nth_page(notebook, index));
 	gtk_notebook_remove_page(notebook, index);
@@ -279,6 +360,9 @@ _tabbar_destroy_page(GtkNotebook *notebook, gint index)
 	/* push page object into remove queue */
 	meta = (_Tabbar *)g_object_get_data(G_OBJECT(notebook), "meta");
 	g_async_queue_push(meta->queue, child);
+
+	/* update window title */
+	_tabbar_page_changed(notebook, -1);
 }
 
 static gint
@@ -407,23 +491,13 @@ _tabbar_open_status_page(GtkNotebook *notebook, TabTypeId type_id, const gchar *
 	}
 }
 
-static Tab *
-_tabbar_get_current_tab(GtkWidget *widget)
+/*
+ *	handle page switches:
+ */
+static void
+_tabbar_switch_page(GtkNotebook *notebook, gpointer page, guint page_num, gpointer user_data)
 {
-	GtkWidget *page;
-	gint index;
-
-	g_assert(GTK_IS_NOTEBOOK(widget));
-
-	if((index = gtk_notebook_get_current_page(GTK_NOTEBOOK(widget))) != -1)
-	{
-		if((page = gtk_notebook_get_nth_page(GTK_NOTEBOOK(widget), index)))
-		{
-			return g_object_get_data(G_OBJECT(page), "meta");
-		}
-	}
-
-	return NULL;
+	_tabbar_page_changed(notebook, page_num);
 }
 
 /*
@@ -479,6 +553,7 @@ tabbar_create(GtkWidget *parent)
 	}
 
 	g_signal_connect(G_OBJECT(meta->notebook), "key-press-event", G_CALLBACK(_tabbar_key_press), NULL);
+	g_signal_connect(G_OBJECT(meta->notebook), "switch-page", G_CALLBACK(_tabbar_switch_page), NULL);
 
 	return widget;
 }
