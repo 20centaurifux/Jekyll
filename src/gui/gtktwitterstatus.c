@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. December 2011
+ * \date 26. December 2011
  */
 
 #include <string.h>
@@ -457,7 +457,7 @@ _gtk_twitter_status_set_status_text(GtkWidget *label, const gchar *text)
 	{
 		if(type == POS_TEXT)
 		{
-			if(offy == 0 || text[offy - 1] == ' ')
+			if(offy == 0 || g_ascii_isspace(text[offy - 1]))
 			{
 				/* check if the beginning of a link, hashtag or user can be found at the current position */
 				if((offy < length - 7) &&      /* http:// */
