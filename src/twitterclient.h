@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 28. December 2011
  */
 
 #ifndef __TWITTER_CLIENT_H__
@@ -54,7 +54,9 @@
 #define TWITTER_CLIENT_GET_CLASS(inst)   (G_TYPE_INSTANCE_GET_CLASS((inst), TWITTER_CLIENT_TYPE, TwitterClientClass))
 
 /*! Default cache lifetime. */
-#define TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME 60
+#define TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME 45
+/*! Default cache lifetime of search result. */
+#define TWITTER_CLIENT_SEARCH_CACHE_LIFETIME  30
 /*! Status count for search results. */
 #define TWITTER_CLIENT_SEARCH_STATUS_COUNT    50
 

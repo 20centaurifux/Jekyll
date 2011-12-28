@@ -19,7 +19,7 @@
  * \brief Threadsafe caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. April 2010
+ * \date 28. December 2010
  */
 
 #include <glib.h>
@@ -84,7 +84,7 @@ typedef struct
 	/*! The lifetime. */
 	gint lifetime;
 	/*! Timestamp of the last modification. */
-	gint mtime;
+	gint64 mtime;
 	/*! Amount of read accesses. */
 	guint read_count;
 } _CacheItem;
@@ -95,7 +95,9 @@ typedef struct
 static inline gboolean
 _cache_item_expired(_CacheItem *item)
 {
-	GTimeVal time;
+	gint64 usec;
+
+	g_debug("Checking item's lifetime: %d", item->lifetime);
 
 	if(item->lifetime == CACHE_INFINITE_LIFETIME)
 	{
@@ -103,10 +105,12 @@ _cache_item_expired(_CacheItem *item)
 	}
 
 	/* get current time */
-	g_get_current_time(&time);
+	usec = g_get_monotonic_time();
 
 	/* check if lifetime has been expired */
-	if(((time.tv_usec - item->mtime) / 1000) > item->lifetime)
+	g_debug("Testing: (usec[%ld] - item->mtime[%ld]) / 1000000 [%ld] > item->lifetime [%d]", usec, item->mtime, (usec - item->mtime) / 1000000, item->lifetime);
+
+	if((gint)((usec - item->mtime) / 1000000) > item->lifetime)
 	{
 		return TRUE;
 	}
@@ -527,7 +531,7 @@ _cache_save(Cache *cache, const gchar * restrict key, const gchar * restrict dat
 {
 	_CacheItem *item;
 	gchar *orig_key;
-	GTimeVal time;
+	gint64 usec;
 	gboolean ret = FALSE;
 
 	g_mutex_lock(cache->priv->mutex);
@@ -536,7 +540,7 @@ _cache_save(Cache *cache, const gchar * restrict key, const gchar * restrict dat
 	if(size <= cache->priv->cache_limit)
 	{
 		/* get timestamp */
-		g_get_current_time(&time);
+		usec = g_get_monotonic_time();
 
 		/* check if hashtable does already contain an item with the given key */
 		if(g_hash_table_lookup_extended(cache->priv->table, (gconstpointer)key, (gpointer)&orig_key, (gpointer)&item))
@@ -547,7 +551,7 @@ _cache_save(Cache *cache, const gchar * restrict key, const gchar * restrict dat
 			if(size <= item->size)
 			{
 				cache->priv->size -= item->size - size;
-				item->mtime = time.tv_usec;
+				item->mtime = usec;
 				item->size = size;
 				memcpy(item->data, data, size);
 			}
@@ -558,7 +562,7 @@ _cache_save(Cache *cache, const gchar * restrict key, const gchar * restrict dat
 				cache->priv->size -= item->size;
 
 				/* update data */
-				item->mtime = time.tv_usec;
+				item->mtime = usec;
 				item->size = size;
 				item->data = (gchar *)g_realloc(item->data, size);
 				memcpy(item->data, data, size);
@@ -588,7 +592,7 @@ _cache_save(Cache *cache, const gchar * restrict key, const gchar * restrict dat
 				{
 					item->size = size;
 					item->lifetime = lifetime;
-					item->mtime = time.tv_usec;
+					item->mtime = usec;
 				}
 			}
 			else
@@ -607,7 +611,7 @@ _cache_save(Cache *cache, const gchar * restrict key, const gchar * restrict dat
 				item->data = g_memdup(data, size);
 				item->size = size;
 				item->lifetime = lifetime;
-				item->mtime = time.tv_usec;
+				item->mtime = usec;
 
 				/* append element to cache */
 				g_hash_table_insert(cache->priv->table, (gpointer)g_strdup(key), (gpointer)item);
@@ -642,9 +646,13 @@ _cache_load(Cache *cache, const gchar * restrict key, gchar ** restrict data)
 
 	*data = NULL;
 
+	g_debug("Searching cache item \"%s\"", key);
+
 	/* try to load item from memory */
 	if(g_hash_table_lookup_extended(cache->priv->table, (gconstpointer)key, (gpointer)&orig_key, (gpointer)&item))
 	{
+		g_debug("Found cache item \"%s\" in memory", key);
+
 		/* check if item has been expired */
 		if(_cache_item_expired(item))
 		{

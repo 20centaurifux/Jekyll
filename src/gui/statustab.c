@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 28. December 2011
  */
 
 #include <gio/gio.h>
@@ -48,9 +48,6 @@
  * @addtogroup Gui
  * @{
  */
-
-/*! Lifetime of cached items. */
-#define STATUS_TAB_DEFAULT_CACHE_LIFETIME 60
 
 /**
  * \struct _StatusTab
@@ -1489,7 +1486,14 @@ _status_tab_populate(_StatusTab *tab)
 	type = ((Tab *)tab)->type_id;
 
 	/* create TwitterClient */
-	client = mainwindow_create_twittter_client(tabbar_get_mainwindow(tab->tabbar), STATUS_TAB_DEFAULT_CACHE_LIFETIME);
+	if(type == TAB_TYPE_ID_SEARCH)
+	{
+		client = mainwindow_create_twittter_client(tabbar_get_mainwindow(tab->tabbar), TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME);
+	}
+	else
+	{
+		client = mainwindow_create_twittter_client(tabbar_get_mainwindow(tab->tabbar), TWITTER_CLIENT_SEARCH_CACHE_LIFETIME);
+	}
 
 	/* insert tweets */
 	switch(type)

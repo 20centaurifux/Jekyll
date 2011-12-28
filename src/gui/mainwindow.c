@@ -119,15 +119,15 @@ typedef enum
 typedef enum
 {
 	/*! Displays an update notification. */
-	MAINWINDOW_SYNC_STEP_NOTICY_TIMELINES,
+	MAINWINDOW_SYNC_STEP_NOTIFY_TIMELINES,
 	/*! Updates the main timelines (home, replies, mentions). */
 	MAINWINDOW_SYNC_STEP_TIMELINES,
 	/*! Displays an update notification. */
-	MAINWINDOW_SYNC_STEP_NOTICY_LISTS,
+	MAINWINDOW_SYNC_STEP_NOTIFY_LISTS,
 	/*! Updates list members & list timelines. */
 	MAINWINDOW_SYNC_STEP_LISTS,
 	/*! Displays an update notification. */
-	MAINWINDOW_SYNC_STEP_NOTICY_DIRECT_MESSAGES,
+	MAINWINDOW_SYNC_STEP_NOTIFY_DIRECT_MESSAGES,
 	/*! Updates direct messages. */
 	MAINWINDOW_SYNC_STEP_DIRECT_MESSAGES,
 	/*! Refreshs the GUI. */
@@ -135,7 +135,7 @@ typedef enum
 	/*! Idle. */
 	MAINWINDOW_SYNC_STEP_GUI_IDLE,
 	/*! Displays an update notification. */
-	MAINWINDOW_SYNC_STEP_NOTICY_FOLLOWERS,
+	MAINWINDOW_SYNC_STEP_NOTIFY_FOLLOWERS,
 	/*! Updates followers. */
 	MAINWINDOW_SYNC_STEP_FOLLOWERS,
 	/*! Last synchronization id. */
@@ -1050,7 +1050,7 @@ _mainwindow_sync_coprocedure(GtkWidget *widget, gint step)
 
 	switch(state)
 	{
-		case MAINWINDOW_SYNC_STEP_NOTICY_TIMELINES:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_TIMELINES:
 			g_debug("Synchronizing timelines");
 			statusbar_set_text(private->statusbar, _("Updating messages..."));
 			tabbar_set_busy(private->tabbar, TRUE);
@@ -1060,7 +1060,7 @@ _mainwindow_sync_coprocedure(GtkWidget *widget, gint step)
 			_mainwindow_sync_foreach_account(widget, _mainwindow_sync_timelines);
 			break;
 
-		case MAINWINDOW_SYNC_STEP_NOTICY_LISTS:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_LISTS:
 			g_debug("Synchronizing lists");
 			tabbar_set_busy(private->tabbar, TRUE);
 			statusbar_set_text(private->statusbar, _("Updating lists..."));
@@ -1070,7 +1070,7 @@ _mainwindow_sync_coprocedure(GtkWidget *widget, gint step)
 			_mainwindow_sync_foreach_account(widget, _mainwindow_sync_lists);
 			break;
 
-		case MAINWINDOW_SYNC_STEP_NOTICY_DIRECT_MESSAGES:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_DIRECT_MESSAGES:
 			g_debug("Synchronizing direct messages");
 			tabbar_set_busy(private->tabbar, TRUE);
 			statusbar_set_text(private->statusbar, _("Updating direct messages..."));
@@ -1086,7 +1086,7 @@ _mainwindow_sync_coprocedure(GtkWidget *widget, gint step)
 			_mainwindow_sync_gui(widget);
 			break;
 
-		case MAINWINDOW_SYNC_STEP_NOTICY_FOLLOWERS:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_FOLLOWERS:
 			g_debug("Synchronizing friends");
 			statusbar_set_text(private->statusbar, _("Updating followers..."));
 			break;
@@ -1195,11 +1195,11 @@ _mainwindow_synchronization_thread(GtkWidget *widget)
 					break;
 
 				case MAINWINDOW_SYNC_EVENT_UPDATE_TIMELINES:
-					synchronizing = _mainwindow_synchronization_force_step(widget, MAINWINDOW_SYNC_STEP_NOTICY_TIMELINES, TWITTERDB_SYNC_SOURCE_TIMELINES);
+					synchronizing = _mainwindow_synchronization_force_step(widget, MAINWINDOW_SYNC_STEP_NOTIFY_TIMELINES, TWITTERDB_SYNC_SOURCE_TIMELINES);
 					break;
 
 				case MAINWINDOW_SYNC_EVENT_UPDATE_LISTS:
-					synchronizing = _mainwindow_synchronization_force_step(widget, MAINWINDOW_SYNC_STEP_NOTICY_LISTS, TWITTERDB_SYNC_SOURCE_LISTS);
+					synchronizing = _mainwindow_synchronization_force_step(widget, MAINWINDOW_SYNC_STEP_NOTIFY_LISTS, TWITTERDB_SYNC_SOURCE_LISTS);
 					break;
 
 				case MAINWINDOW_SYNC_EVENT_UPDATE_GUI:
@@ -2978,22 +2978,22 @@ mainwindow_get_current_sync_status(GtkWidget *widget)
 
 	switch(step)
 	{
-		case MAINWINDOW_SYNC_STEP_NOTICY_TIMELINES:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_TIMELINES:
 		case MAINWINDOW_SYNC_STEP_TIMELINES:
 			result = MAINWINDOW_SYNC_STATUS_SYNC_MESSAGES;
 			break;
 
-		case MAINWINDOW_SYNC_STEP_NOTICY_LISTS:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_LISTS:
 		case MAINWINDOW_SYNC_STEP_LISTS:
 			result = MAINWINDOW_SYNC_STATUS_SYNC_LISTS;
 			break;
 
-		case MAINWINDOW_SYNC_STEP_NOTICY_DIRECT_MESSAGES:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_DIRECT_MESSAGES:
 		case MAINWINDOW_SYNC_STEP_DIRECT_MESSAGES:
 			result = MAINWINDOW_SYNC_STATUS_SYNC_DIRECT_MESSAGES;
 			break;
 
-		case MAINWINDOW_SYNC_STEP_NOTICY_FOLLOWERS:
+		case MAINWINDOW_SYNC_STEP_NOTIFY_FOLLOWERS:
 		case MAINWINDOW_SYNC_STEP_FOLLOWERS:
 			result = MAINWINDOW_SYNC_STATUS_SYNC_FOLLOWERS;
 			break;
