@@ -50,7 +50,9 @@
  */
 
 /*! Lifetime of cached items. */
-#define STATUS_TAB_DEFAULT_CACHE_LIFETIME 60
+#define STATUS_TAB_DEFAULT_CACHE_LIFETIME   60
+/*! Default tweet background color. */
+#define STATUS_TAB_DEFAULT_BACKGROUND_COLOR "e6eaf3"
 
 /**
  * \struct _StatusTab
@@ -1404,6 +1406,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 				     "show-retweet_button", owner ? FALSE : TRUE,
 				     "show-delete-button", FALSE,
 				     "selectable", TRUE,
+				     "background-color", STATUS_TAB_DEFAULT_BACKGROUND_COLOR,
 				     NULL);
 
 			/* insert status */
