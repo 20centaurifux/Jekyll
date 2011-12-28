@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author sebastian fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. September 2011
+ * \date 28. December 2011
  */
 
 #ifndef __GTK_TWITTER_STATUS_H__
@@ -45,7 +45,7 @@
 /*! Get GtkTwitterStatusClass from GtkTwitterStatus. */
 #define GTK_TWITTER_STATUS_GET_CLASS(inst) (G_TYPE_INSTANCE_GET_CLASS((inst), GTK_TWITTER_STATUS_0CLASS, GtkTwitterStatusClass))
 
-/*! A type definition for _.GtkTwitterStatusPrivate*/
+/*! A type definition for _GtkTwitterStatusPrivate*/
 typedef struct _GtkTwitterStatusPrivate GtkTwitterStatusPrivate;
 
 /*! A type definition for _GtkTwitterStatus*/
@@ -84,6 +84,7 @@ struct _GtkTwitterStatus
  * - \b edit-friendship-button-has-tooltip: activate friendship button tooltip (boolean, rw)\n
  * - \b show-delete-button: show delete button (boolean, rw)\n
  * - \b selectable: enable text selection (boolean, rw)\n
+ * - \b background-color: the background-color (string, rw)\n
  *
  * The class has the following signals:
  * - \b reply-button-clicked: void user_function(GtkTwitterStatus *status, gchar *status_guid, gpointer user_data)

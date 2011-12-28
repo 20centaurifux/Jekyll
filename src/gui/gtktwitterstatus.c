@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 26. December 2011
+ * \date 28. December 2011
  */
 
 #include <string.h>
@@ -56,6 +56,7 @@ enum
 	PROP_REALNAME,
 	PROP_STATUS,
 	PROP_TIMESTAMP,
+	PROP_BACKGROUND_COLOR,
 	PROP_SHOW_REPLY_BUTTON,
 	PROP_SHOW_LISTS_BUTTON,
 	PROP_SHOW_FRIENDSHIP_BUTTON,
@@ -173,6 +174,20 @@ struct _GtkTwitterStatusPrivate
 		/*! Displays the timestamp. */
 		GtkWidget *widget;
 	} timestamp;
+	/**
+	 * \struct _background
+	 * \brief Holds background color.
+	 *
+	 * \var background
+	 * \brief Holds background color.
+	 */
+	struct _background
+	{
+		/*! The string specifying the color. */
+		gchar *spec;
+		/*! GdkColor. */
+		GdkColor color;
+	} background;
 	/**
 	 * \struct _reply_button
 	 * \brief Holds reply button visibility and widget.
@@ -741,6 +756,37 @@ _gtk_twitter_status_status_label_grab_focus(GtkWidget *widget, GtkTwitterStatus 
 }
 
 /*
+ *	color:
+ */
+static void
+_gtk_twitter_status_set_background(GtkTwitterStatus *twitter_status, gchar *spec)
+{
+	GdkColor color;
+	GtkTwitterStatusPrivate *priv = GTK_TWITTER_STATUS(twitter_status)->priv;
+	GtkWidget *w = priv->ebox;
+	gint states[] = { GTK_STATE_NORMAL, GTK_STATE_ACTIVE, GTK_STATE_PRELIGHT, GTK_STATE_SELECTED, GTK_STATE_INSENSITIVE };
+	gint i = 0;
+
+	if(gdk_color_parse(spec, &color))
+	{
+		for(i = 0; i < 5; ++i)
+		{
+			gtk_widget_modify_bg(GTK_WIDGET(w), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->username.widget), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->edit_friendship_button.widget), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->reply_button.widget), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->retweet_button.widget), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->edit_lists_button.widget), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->delete_button.widget), states[i], &color);
+		}
+	}
+	else
+	{
+		g_warning("%s: couldn't parse color \"%s\"", __func__, spec);
+	}
+}
+
+/*
  *	implementation:
  */
 static const gchar *
@@ -800,6 +846,10 @@ gtk_twitter_status_class_init(GtkTwitterStatusClass *klass)
 	g_object_class_install_property(object_class,
 	                                PROP_TIMESTAMP,
 	                                g_param_spec_int("timestamp", NULL, NULL, 0, G_MAXINT, 0, G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
+	                                PROP_BACKGROUND_COLOR,
+	                                g_param_spec_string("background-color", NULL, NULL, NULL, G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 	                                PROP_SHOW_REPLY_BUTTON,
@@ -1038,23 +1088,6 @@ gtk_twitter_status_constructor(GType type, guint n_construct_properties, GObject
 	g_signal_connect(priv->username.widget, "clicked", (GCallback)_gtk_twitter_status_link_label_clicked, &priv->args[GTK_TWITTER_STATUS_ACTION_SHOW_USER]);
 	g_signal_connect(priv->status.widget, "url_activated", (GCallback)_gtk_twitter_status_url_activated, object);
 
-	/*
-	GdkColor color = { 0xFFFF, 0xFFFF, 0xFFFF, 0xDDDD };
-	GtkWidget *w = priv->ebox;
-	gtk_widget_modify_bg(GTK_WIDGET(w), GTK_STATE_NORMAL, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(w), GTK_STATE_ACTIVE, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(w), GTK_STATE_PRELIGHT, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(w), GTK_STATE_SELECTED, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(w), GTK_STATE_INSENSITIVE, &color);
-
-	gtk_widget_modify_bg(GTK_WIDGET(priv->username.widget), GTK_STATE_NORMAL, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(priv->reply_button.widget), GTK_STATE_NORMAL, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(priv->edit_lists_button.widget), GTK_STATE_NORMAL, &color);
-	gtk_widget_modify_bg(GTK_WIDGET(priv->delete_button.widget), GTK_STATE_NORMAL, &color);
-
-	gtk_widget_queue_resize(priv->status.widget);
-	*/
-
 	gtk_widget_push_composite_child();
 
 	return object;
@@ -1068,6 +1101,7 @@ gtk_twitter_status_finalize(GObject *object)
 	priv = GTK_TWITTER_STATUS(object)->priv;
 
 	g_free(priv->guid);
+	g_free(priv->background.spec);
 	g_free(priv->username.value);
 	g_free(priv->realname.value);
 	g_free(priv->status.value);
@@ -1087,40 +1121,34 @@ gtk_twitter_status_set_property(GObject *object, guint property_id, const GValue
 			break;
 
 		case PROP_GUID:
-			if(self->priv->guid)
-			{
-				g_free(self->priv->guid);
-			}
+			g_free(self->priv->guid);
 			self->priv->guid = g_value_dup_string(value);
 			break;
 
 		case PROP_USERNAME:
-			if(self->priv->username.value)
-			{
-				g_free(self->priv->username.value);
-			}
+			g_free(self->priv->username.value);
 			self->priv->username.value = g_value_dup_string(value);
 			_gtk_twitter_status_set_label_text(self->priv->username.widget, self->priv->username.value);
 			break;
 
 		case PROP_REALNAME:
-			if(self->priv->realname.value)
-			{
-				g_free(self->priv->realname.value);
-			}
+			g_free(self->priv->realname.value);
 			self->priv->realname.value = g_value_dup_string(value);
 			_gtk_twitter_status_set_label_text(self->priv->realname.widget, self->priv->realname.value);
 			break;
 
 		case PROP_STATUS:
-			if(self->priv->status.value)
-			{
-				g_free(self->priv->status.value);
-			}
+			g_free(self->priv->status.value);
 			self->priv->status.value = g_value_dup_string(value);
 			_gtk_twitter_status_set_status_text(self->priv->status.widget, self->priv->status.value);
 			break;
-	
+
+		case PROP_BACKGROUND_COLOR:
+			g_free(self->priv->background.spec);
+			self->priv->background.spec = g_value_dup_string(value);
+			_gtk_twitter_status_set_background(self, self->priv->background.spec);
+			break;
+
 		case PROP_TIMESTAMP:
 			self->priv->timestamp.value = g_value_get_int(value);
 			_gtk_twitter_status_set_timestamp(self->priv->timestamp.widget, self->priv->timestamp.value);
@@ -1202,6 +1230,10 @@ gtk_twitter_status_get_property(GObject *object, guint property_id, GValue *valu
 			g_value_set_int(value, self->priv->timestamp.value);
 			break;
 
+		case PROP_BACKGROUND_COLOR:
+			g_value_set_string(value, self->priv->background.spec);
+			break;
+	
 		case PROP_SHOW_REPLY_BUTTON:
 			g_value_set_boolean(value, self->priv->reply_button.visible);
 			break;
