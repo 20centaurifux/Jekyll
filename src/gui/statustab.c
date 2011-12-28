@@ -52,7 +52,7 @@
 /*! Lifetime of cached items. */
 #define STATUS_TAB_DEFAULT_CACHE_LIFETIME   60
 /*! Default tweet background color. */
-#define STATUS_TAB_DEFAULT_BACKGROUND_COLOR "e6eaf3"
+#define STATUS_TAB_DEFAULT_BACKGROUND_COLOR "#e6eaf3"
 
 /**
  * \struct _StatusTab
