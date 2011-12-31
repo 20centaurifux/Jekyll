@@ -104,6 +104,8 @@ _preferences_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_
 	Section *section;
 	Value *value;
 	const gchar *text;
+	GdkColor color;
+	gchar *spec;
 
 	if(response_id == GTK_RESPONSE_APPLY)
 	{
@@ -194,6 +196,16 @@ _preferences_dialog_response(GtkDialog *dialog, gint response_id, gpointer user_
 		{
 			value_set_int32(value, 2);
 		}
+
+		if(!(value = section_find_first_value(section, "tweet-background-color")))
+		{
+			value = section_append_value(section, "tweet-background-color", VALUE_DATATYPE_STRING);
+		}
+
+		gtk_color_button_get_color(GTK_COLOR_BUTTON(private->button_color), &color);
+		spec = gdk_color_to_string(&color);
+		value_set_string(value, spec);
+		g_free(spec);
 
 		/* unlock configuration */
 		mainwindow_unlock_config((GtkWidget *)user_data);
