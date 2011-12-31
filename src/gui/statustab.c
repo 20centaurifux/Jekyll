@@ -126,6 +126,8 @@ typedef struct
 	} accountlist;
 	/*! The background color. */
 	gchar *background_color;
+	/*! Indicates if background color has been changed. */
+	gboolean background_changed;
 } _StatusTab;
 
 enum
@@ -1705,10 +1707,6 @@ _status_tab_init(GtkWidget *widget)
 	TabTypeId type;
 	gboolean visible = TRUE;
 	GtkWidget *button;
-	GtkWidget *window;
-	Config *config;
-	Section *section;
-	Value *value;
 
 	type = ((Tab *)tab)->type_id;
 
@@ -1734,22 +1732,6 @@ _status_tab_init(GtkWidget *widget)
 	}
 
 	_status_tab_show_action_area(widget, visible);
-
-	/* getting background color */
-	window = tabbar_get_mainwindow(tab->tabbar);
-	config = mainwindow_lock_config(window);
-
-	section = config_get_root(config);
-
-	if((section = section_find_first_child(section, "View")))
-	{
-		if((value = section_find_first_value(section, "tweet-background-color")) && VALUE_IS_STRING(value))
-		{
-			tab->background_color = g_strdup(value_get_string(value));
-		}
-	}
-
-	mainwindow_unlock_config(window);
 }
 
 /*
@@ -1808,6 +1790,10 @@ _status_tab_refresh(GtkWidget *widget)
 	gchar *tab_id;
 	_StatusTab *meta = g_object_get_data(G_OBJECT(widget), "meta");
 	GtkWidget *window;
+	Config *config;
+	Section *section;
+	Value *value;
+	const gchar *spec;
 
 	if(!meta->initialized)
 	{
@@ -1816,10 +1802,32 @@ _status_tab_refresh(GtkWidget *widget)
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
+	window = tabbar_get_mainwindow(meta->tabbar);
 
+	/* get background color */
+	config = mainwindow_lock_config(window);
+	section = config_get_root(config);
+
+	if((section = section_find_first_child(section, "View")))
+	{
+		if((value = section_find_first_value(section, "tweet-background-color")) && VALUE_IS_STRING(value))
+		{
+			spec = value_get_string(value);
+
+			if(!meta->background_color || g_strcmp0(meta->background_color, spec))
+			{
+				g_free(meta->background_color);
+				meta->background_color = g_strdup(value_get_string(value));
+				meta->background_changed = TRUE;
+			}
+		}
+	}
+
+	mainwindow_unlock_config(window);
+
+	/* get account list */
 	g_mutex_lock(meta->accountlist.mutex);
 	g_strfreev(meta->accountlist.accounts);
-	window = tabbar_get_mainwindow(meta->tabbar);
 	meta->accountlist.accounts = _status_tab_get_accounts(mainwindow_lock_config(window));
 	mainwindow_unlock_config(window);
 	g_mutex_unlock(meta->accountlist.mutex);
