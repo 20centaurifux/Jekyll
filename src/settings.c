@@ -19,7 +19,7 @@
  * \brief Loading and saving configuration settings.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 14. October 2011
+ * \date 31. December 2011
  */
 
 #include "settings.h"
@@ -29,6 +29,9 @@
  * @addtogroup Core
  * @{
  */
+
+/*! Default tweet background color. */
+#define SETTINGS_DEFAULT_TWEET_BACKGROUND_COLOR "#e6eaf3"
 
 /*
  *	helpers:
@@ -57,6 +60,10 @@ _settings_set_default_value(Section *section, const gchar *name, gpointer value,
 				value_set_int32(val, GPOINTER_TO_INT(value));
 				break;
 
+			case VALUE_DATATYPE_STRING:
+				value_set_string(val, (gchar *)value);
+				break;
+
 			default:
 				g_warning("%s: invalid value type", __func__);
 		}
@@ -73,6 +80,12 @@ static void
 _settings_set_default_int32(Section *section, const gchar *name, gint32 value, gboolean overwrite)
 {
 	_settings_set_default_value(section, name, GINT_TO_POINTER(value), VALUE_DATATYPE_INT32, overwrite);
+}
+
+static void
+_settings_set_default_string(Section *section, const gchar *name, const gchar *value, gboolean overwrite)
+{
+	_settings_set_default_value(section, name, (gpointer)value, VALUE_DATATYPE_STRING, overwrite);
 }
 
 /*
@@ -206,6 +219,7 @@ settings_set_default_settings(Config *config, gboolean overwrite)
 
 	_settings_set_default_bool(section, "show-notification-area", TRUE, overwrite);
 	_settings_set_default_int32(section, "notification-area-level", 1, overwrite);
+	_settings_set_default_string(section, "tweet-background-color", SETTINGS_DEFAULT_TWEET_BACKGROUND_COLOR, overwrite);
 }
 
 /**
