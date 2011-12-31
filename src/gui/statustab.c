@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 31. December 2011
  */
 
 #include <gio/gio.h>
@@ -51,8 +51,6 @@
 
 /*! Lifetime of cached items. */
 #define STATUS_TAB_DEFAULT_CACHE_LIFETIME   60
-/*! Default tweet background color. */
-#define STATUS_TAB_DEFAULT_BACKGROUND_COLOR "#e6eaf3"
 
 /**
  * \struct _StatusTab
@@ -126,6 +124,8 @@ typedef struct
 		/*! Mutex protecting the list. */
 		GMutex *mutex;
 	} accountlist;
+	/*! The background color. */
+	gchar *background_color;
 } _StatusTab;
 
 enum
@@ -1406,7 +1406,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 				     "show-retweet_button", owner ? FALSE : TRUE,
 				     "show-delete-button", FALSE,
 				     "selectable", TRUE,
-				     "background-color", STATUS_TAB_DEFAULT_BACKGROUND_COLOR,
+				     "background-color", tab->background_color,
 				     NULL);
 
 			/* insert status */
@@ -1705,6 +1705,10 @@ _status_tab_init(GtkWidget *widget)
 	TabTypeId type;
 	gboolean visible = TRUE;
 	GtkWidget *button;
+	GtkWidget *window;
+	Config *config;
+	Section *section;
+	Value *value;
 
 	type = ((Tab *)tab)->type_id;
 
@@ -1730,6 +1734,22 @@ _status_tab_init(GtkWidget *widget)
 	}
 
 	_status_tab_show_action_area(widget, visible);
+
+	/* getting background color */
+	window = tabbar_get_mainwindow(tab->tabbar);
+	config = mainwindow_lock_config(window);
+
+	section = config_get_root(config);
+
+	if((section = section_find_first_child(section, "View")))
+	{
+		if((value = section_find_first_value(section, "tweet-background-color")) && VALUE_IS_STRING(value))
+		{
+			tab->background_color = g_strdup(value_get_string(value));
+		}
+	}
+
+	mainwindow_unlock_config(window);
 }
 
 /*
