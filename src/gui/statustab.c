@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. December 2011
+ * \date 31. December 2011
  */
 
 #include <gio/gio.h>
@@ -121,6 +121,10 @@ typedef struct
 		/*! Mutex protecting the list. */
 		GMutex *mutex;
 	} accountlist;
+	/*! The background color. */
+	gchar *background_color;
+	/*! Indicates if background color has been changed. */
+	gboolean background_changed;
 } _StatusTab;
 
 enum
@@ -1401,6 +1405,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 				     "show-retweet_button", owner ? FALSE : TRUE,
 				     "show-delete-button", FALSE,
 				     "selectable", TRUE,
+				     "background-color", tab->background_color,
 				     NULL);
 
 			/* insert status */
@@ -1474,6 +1479,34 @@ _status_tab_populate_search_query(TwitterClient *client, _StatusTab *tab, GError
 }
 
 static void
+_status_tab_update_color(_StatusTab *tab)
+{
+	GList *iter;
+	GList *children;
+	GtkWidget *widget;
+
+	if((iter = children = gtk_container_get_children(GTK_CONTAINER(tab->vbox))))
+	{
+		while(iter)
+		{
+			widget = GTK_WIDGET(iter->data);
+
+			gdk_threads_enter();
+			g_object_set(G_OBJECT(widget), "background-color", tab->background_color, NULL);
+			gdk_threads_leave();
+
+			g_usleep(75000);
+			iter = iter->next;
+		}
+	}
+
+	if(children)
+	{
+		g_list_free(children);
+	}
+}
+
+static void
 _status_tab_populate(_StatusTab *tab)
 {
 	gchar *tab_id;
@@ -1520,6 +1553,13 @@ _status_tab_populate(_StatusTab *tab)
 
 		default:
 			g_warning("Unknown tab id: %d", type);
+	}
+
+	/* change background color of old tweets if necessary*/
+	if(tab->background_changed)
+	{
+		tab->background_changed = FALSE;
+		_status_tab_update_color(tab);
 	}
 
 	/* cleanup */
@@ -1789,6 +1829,10 @@ _status_tab_refresh(GtkWidget *widget)
 	gchar *tab_id;
 	_StatusTab *meta = g_object_get_data(G_OBJECT(widget), "meta");
 	GtkWidget *window;
+	Config *config;
+	Section *section;
+	Value *value;
+	const gchar *spec;
 
 	if(!meta->initialized)
 	{
@@ -1797,10 +1841,36 @@ _status_tab_refresh(GtkWidget *widget)
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
+	window = tabbar_get_mainwindow(meta->tabbar);
 
+	/* get background color */
+	config = mainwindow_lock_config(window);
+	section = config_get_root(config);
+
+	if((section = section_find_first_child(section, "View")))
+	{
+		if((value = section_find_first_value(section, "tweet-background-color")) && VALUE_IS_STRING(value))
+		{
+			spec = value_get_string(value);
+
+			if(!meta->background_color || g_strcmp0(meta->background_color, spec))
+			{
+				if(meta->background_color)
+				{
+					g_free(meta->background_color);
+					meta->background_changed = TRUE;
+				}
+
+				meta->background_color = g_strdup(value_get_string(value));
+			}
+		}
+	}
+
+	mainwindow_unlock_config(window);
+
+	/* get account list */
 	g_mutex_lock(meta->accountlist.mutex);
 	g_strfreev(meta->accountlist.accounts);
-	window = tabbar_get_mainwindow(meta->tabbar);
 	meta->accountlist.accounts = _status_tab_get_accounts(mainwindow_lock_config(window));
 	mainwindow_unlock_config(window);
 	g_mutex_unlock(meta->accountlist.mutex);
@@ -1931,6 +2001,8 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->status.waiting = FALSE;
 	meta->accountlist.accounts = NULL;
 	meta->accountlist.mutex = g_mutex_new();
+	meta->background_color = NULL;
+	meta->background_changed = FALSE;
 
 	memset(meta->owner, 0, 64);
 

@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 25. December 2011
+ * \date 31. December 2011
  */
 
 #include <gtk/gtk.h>
@@ -1622,6 +1622,9 @@ _mainwindow_apply_preferences(GtkWidget *widget, gboolean save_preferences)
 
 	/* unlock configuration */
 	mainwindow_unlock_config(widget);
+
+	/* refresh gui */
+	mainwindow_sync_gui(widget);
 }
 
 /*
