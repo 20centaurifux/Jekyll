@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Jekyll v0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-25 12:25+0100\n"
-"PO-Revision-Date: 2011-12-25 12:26+0100\n"
+"POT-Creation-Date: 2011-12-31 14:30+0100\n"
+"PO-Revision-Date: 2011-12-31 14:31+0100\n"
 "Last-Translator: Sebastian Fedrau <lord-kefir@arcor.de>\n"
 "Language-Team: \n"
 "Language: \n"
@@ -113,27 +113,27 @@ msgstr ""
 "Sie haben bisher noch kein Twitterkonto konfiguriert. Dieser Assistent wird Sie durch alle notwendigen Schritte begleiten. Bitte klicken Sie auf <b>Vor</b>, um Ihr erstes Konto anzulegen."
 
 #: /home/lordkefir/git/Jekyll/src/gui/wizard.c:258
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:420
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:447
 msgid "Open File"
 msgstr "Datei öffnen"
 
 #: /home/lordkefir/git/Jekyll/src/gui/wizard.c:268
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:430
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:457
 msgid "Executable file"
 msgstr "Ausführbare Datei"
 
 #: /home/lordkefir/git/Jekyll/src/gui/wizard.c:311
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:480
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:507
 msgid "Please specifiy your favorite internet browser."
 msgstr "Bitte geben Sie Ihren favorisierten Browser an."
 
 #: /home/lordkefir/git/Jekyll/src/gui/wizard.c:318
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:486
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:513
 msgid "use default browser"
 msgstr "Standardbrowser benutzen"
 
 #: /home/lordkefir/git/Jekyll/src/gui/wizard.c:321
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:489
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:516
 msgid "use custom browser"
 msgstr "benutzerdefinierten Browser nutzen"
 
@@ -153,9 +153,9 @@ msgid "Please enter your username. Like any other Twitter application <b>%s</b> 
 msgstr "Bitte geben Sie Ihren Twitter-Benutzernamen ein. Wie jede andere Twitter-Anwendung, muss <b>%s</b> authorisiert werden. Bitte geben Sie anschließend die PIN ein und klicken Sie <b>Authorisieren</b>."
 
 #: /home/lordkefir/git/Jekyll/src/gui/wizard.c:630
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:658
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1117
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2115
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:659
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1118
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2140
 msgid "Username"
 msgstr "Benutzername"
 
@@ -184,24 +184,24 @@ msgstr "Kontoeinstellungen"
 msgid "Finish configuration"
 msgstr "Konfiguration abschließen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:957
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1007
 msgid "Friendship"
 msgstr "Freundschaft"
 
-#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:969
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:430
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1019
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:431
 msgid "Reply"
 msgstr "Antwort"
 
-#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:981
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1031
 msgid "Retweet"
 msgstr "Retweet"
 
-#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:993
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1043
 msgid "Lists"
 msgstr "Listen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1005
+#: /home/lordkefir/git/Jekyll/src/gui/gtktwitterstatus.c:1055
 msgid "Delete"
 msgstr "Löschen"
 
@@ -210,7 +210,7 @@ msgid "Couldn't remove list, please try again later."
 msgstr "Die Liste konnte nicht entfernt werden, bitte versuchen Sie es später noch einmal."
 
 #: /home/lordkefir/git/Jekyll/src/gui/remove_list_dialog.c:195
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1720
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1764
 msgid "Remove list"
 msgstr "Liste entfernen"
 
@@ -219,153 +219,165 @@ msgstr "Liste entfernen"
 msgid "Do you really want to remove the list (<b>%s</b>)?"
 msgstr "Möchten Sie wirklich die Liste <b>%s</b> entfernen?"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:356
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:653
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:383
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:707
 msgid "General"
 msgstr "Allgemein"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:374
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:401
 msgid "show program in systray"
 msgstr "Programm im Benachrichtungsfeld anzeigen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:377
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:404
 msgid "open window minimized/hidden"
 msgstr "Fenster minimiert/versteckt öffnen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:380
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:407
 msgid "restore window size and position"
 msgstr "Fenstergröße und Position wiederherstellen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:459
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:486
 msgid "Browser preferences"
 msgstr "Browsereigenschaften"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:560
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:659
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:590
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:713
 msgid "View"
 msgstr "Ansicht"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:578
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:600
+msgid "Colors"
+msgstr "Farben"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:615
+msgid "Tweet background"
+msgstr "Tweet Hintergrund"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:623
+msgid "Notifications"
+msgstr "Benachrichtigungen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:632
 msgid "display notification area"
 msgstr "Benachrichtigungsfeld anzeigen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:581
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:635
 msgid "show all messages"
 msgstr "alle Nachrichten anzeigen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:585
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:639
 msgid "show notifications and warnings"
 msgstr "Informationen und Warnungen anzeigen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:589
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:643
 msgid "show only warnings"
 msgstr "nur Warnungen anzeigen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:656
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:710
 msgid "Browser"
 msgstr "Browser"
 
-#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:678
+#: /home/lordkefir/git/Jekyll/src/gui/preferences_dialog.c:732
 msgid "Preferences"
 msgstr "Eigenschaften"
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:411
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1721
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:412
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1746
 msgid "Couldn't publish your tweet, please try again later."
 msgstr "Der Tweet konnte nicht erstellt werden, bitte versuchen Sie es später erneut."
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:471
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:472
 msgid "Couldn't retweet status, please try again later."
 msgstr "Status konnte nicht retweetet werden, bitte versuchen Sie es später noch einmal."
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:591
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:592
 msgid "Couldn't update friendship information, please try again later."
 msgstr "Die Freundschaftsdaten konnten nicht aktualisiert werden, bitte versuchen Sie es später noch einmal."
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:649
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:650
 msgid "Edit friendship"
 msgstr "Freundschaft bearbeiten"
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:656
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:657
 msgid "Followed by"
 msgstr "Verfolgt von"
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1066
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1067
 msgid "Couldn't update list members, please try again later."
 msgstr "Die Listenzugehörigkeit konnte nicht aktualisiert werden, bitte versuchen Sie es später noch einmal."
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1108
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1712
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1109
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1756
 msgid "List members"
 msgstr "Benutzer der Liste"
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1115
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1116
 msgid "Member"
 msgstr "Mitglied"
 
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1206
-#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1716
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2219
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1207
+#: /home/lordkefir/git/Jekyll/src/gui/statustab.c:1760
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2244
 msgid "List preferences"
 msgstr "Listeigenschaften"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1049
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1055
 msgid "Updating messages..."
 msgstr "Nachrichten werden aktualisiert..."
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1060
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1066
 msgid "Updating lists..."
 msgstr "Listen werden aktualisiert..."
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1070
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1076
 msgid "Updating direct messages..."
 msgstr "Direktnachrichten werden aktualisiert..."
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1085
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1091
 msgid "Updating followers..."
 msgstr "Folger werden aktualisiert..."
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1759
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1784
 msgid "Compose new tweet"
 msgstr "Neuen Tweet erstellen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1938
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1963
 msgid "_Compose tweet"
 msgstr "_Tweet erstellen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1942
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1967
 msgid "_Search"
 msgstr "_Suche"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1949
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1974
 msgid "_Preferences"
 msgstr "_Eigenschaften"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1959
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:1984
 msgid "_Twitter Accounts"
 msgstr "Twitter_konten"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2054
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2079
 msgid "Couldn't update friends, please try again later."
 msgstr "Freunde konnten nicht aktualisiert werden, bitte versuchen Sie es später erneut."
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2055
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2080
 msgid "Couldn't update followers, please try again later."
 msgstr "Folger konnten nicht aktualisiert werden, bitte versuchen Sie es später erneut."
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2106
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2131
 msgid "Editing friends"
 msgstr "Freunde bearbeiten"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2106
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2131
 msgid "Editing followers"
 msgstr "Folger bearbeiten"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2113
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2138
 msgid "Follow user"
 msgstr "Benutzer folgen"
 
-#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2113
+#: /home/lordkefir/git/Jekyll/src/gui/mainwindow.c:2138
 msgid "Block user"
 msgstr "Benutzer blocken"
 
@@ -401,12 +413,13 @@ msgstr "Beschreibung"
 msgid "Private"
 msgstr "Privat"
 
-#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:88
-#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:106
+#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:100
+#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:118
+#: /home/lordkefir/git/Jekyll/src/gui/tabbar.c:271
 msgid "Search"
 msgstr "Suche"
 
-#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:122
+#: /home/lordkefir/git/Jekyll/src/gui/search_dialog.c:134
 msgid "Please enter your search query:"
 msgstr "Bitte geben Sie Ihren Suchbegriff ein:"
 
@@ -425,6 +438,20 @@ msgstr "Liste"
 #: /home/lordkefir/git/Jekyll/src/gui/edit_list_membership_dialog.c:494
 msgid "List membership"
 msgstr "Listenmitgliedschaft"
+
+#: /home/lordkefir/git/Jekyll/src/gui/tabbar.c:257
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:483
+msgid "Messages"
+msgstr "Nachrichten"
+
+#: /home/lordkefir/git/Jekyll/src/gui/tabbar.c:261
+#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:496
+msgid "Replies"
+msgstr "Erwähnungen"
+
+#: /home/lordkefir/git/Jekyll/src/gui/tabbar.c:265
+msgid "Direct Messages"
+msgstr "Direktnachrichten"
 
 #: /home/lordkefir/git/Jekyll/src/gui/authorize_account_dialog.c:359
 msgid "Authorize request"
@@ -476,14 +503,6 @@ msgstr "Erste Synchronisation"
 msgid "Please stay patient, while <b>%s</b> synchronizes your account for the very first time."
 msgstr "Bitte haben Sie Geduld, während <b>%s</b> zum ersten Mal Ihr Benutzerkonto aktualisiert."
 
-#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:483
-msgid "Messages"
-msgstr "Nachrichten"
-
-#: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:496
-msgid "Replies"
-msgstr "Erwähnungen"
-
 #: /home/lordkefir/git/Jekyll/src/gui/accountbrowser.c:524
 msgid "Updates"
 msgstr "Aktualisierungen"
@@ -507,9 +526,6 @@ msgstr "Neue Liste erstellen"
 #: /home/lordkefir/git/Jekyll/src/gui/add_list_dialog.c:223
 msgid "List details"
 msgstr "Listendetails"
-
-#~ msgid "Direct Messages"
-#~ msgstr "Direktnachrichten"
 
 #~ msgid "Please enter the PIN you were provided and click <b>Authorize</b>."
 #~ msgstr ""
