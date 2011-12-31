@@ -278,6 +278,7 @@ _preferences_dialog_populate_view_settings(_PreferenceWindowPrivate *private, Co
 	Section *section;
 	Value *value;
 	gint level;
+	GdkColor color;
 
 	g_debug("Populating browser preferences");
 
@@ -303,6 +304,18 @@ _preferences_dialog_populate_view_settings(_PreferenceWindowPrivate *private, Co
 			else
 			{
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(private->toggle_notification_level_info), TRUE);
+			}
+		}
+
+		if((value = section_find_first_value(section, "tweet-background-color")) && VALUE_IS_STRING(value))
+		{
+			if(gdk_color_parse(value_get_string(value), &color))
+			{
+				gtk_color_button_set_color(GTK_COLOR_BUTTON(private->button_color), &color);
+			}
+			else
+			{
+				g_warning("Couldn't parse tweet-background-color");
 			}
 		}
 	}
