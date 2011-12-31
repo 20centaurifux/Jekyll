@@ -19,7 +19,7 @@
  * \brief Preferences dialog.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 30. September 2011
+ * \date 31. December 2011
  */
 
 #include <string.h>
@@ -63,6 +63,8 @@ typedef struct
 	GtkWidget *button_open_browser;
 	/*! Textbox holding the filename of a selected executable. */
 	GtkWidget *entry_browser;
+	/*! Button showing status background color. */
+	GtkWidget *button_color;
 	/*! Checkbox to show the notification area. */
 	GtkWidget *checkbox_notification_area;
 	/*! Option to set "debug" notification level. */
@@ -554,6 +556,9 @@ _preferences_dialog_create_view_frame(GtkWidget *dialog)
 	GtkWidget *subframe;
 	GtkWidget *framehbox;
 	GtkWidget *framevbox;
+	GtkWidget *table;
+	GtkWidget *align;
+	GtkWidget *label;
 	GSList *group;
 
 	/* create frame */
@@ -566,8 +571,32 @@ _preferences_dialog_create_view_frame(GtkWidget *dialog)
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(hbox), vbox);
 
-	subframe = gtk_frame_new(NULL);
+	/* colors */
+	subframe = gtk_frame_new(_("Colors"));
 	gtk_box_pack_start(GTK_BOX(vbox), subframe, FALSE, FALSE, 0);
+
+	framehbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(subframe), framehbox);
+
+	framevbox = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(framehbox), framevbox, FALSE, FALSE, 5);
+
+	table = gtk_table_new(1, 2, FALSE);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 3);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
+	gtk_box_pack_start(GTK_BOX(framevbox), table, FALSE, TRUE, 2);
+
+	align = gtk_alignment_new(0, 0.5, 0, 0);
+	label = gtk_label_new(_("Tweet background"));
+	gtk_container_add(GTK_CONTAINER(align), label);
+	gtk_table_attach_defaults(GTK_TABLE(table), align, 0, 1, 0, 1);
+
+	private->button_color = gtk_color_button_new();
+	gtk_table_attach_defaults(GTK_TABLE(table), private->button_color, 1, 2, 0, 1);
+
+	/* notification area */
+	subframe = gtk_frame_new(_("Notifications"));
+	gtk_box_pack_start(GTK_BOX(vbox), subframe, FALSE, FALSE, 5);
 
 	framehbox = gtk_hbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(subframe), framehbox);
