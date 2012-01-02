@@ -159,6 +159,7 @@ about_dialog_create(GtkWidget *parent)
 	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), APPLICATION_WEBSITE);
 	gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dialog), APPLICATION_WEBSITE);
 	gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog), APPLICATION_DESCRIPTION);
+	gtk_about_dialog_set_url_hook(_about_dialog_activate_link, parent, NULL);
 
 	if(pixbuf)
 	{
@@ -170,18 +171,6 @@ about_dialog_create(GtkWidget *parent)
 	{
 		gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(dialog), license);
 		g_free(license);
-	}
-
-	/*
-	 *	url hook:
-	 */
-	if(GTK_CHECK_VERSION(2, 24, 0))
-	{
-		g_object_connect(G_OBJECT(dialog), "activate-link", _about_dialog_activate_link, parent);
-	}
-	else
-	{
-		gtk_about_dialog_set_url_hook(_about_dialog_activate_link, parent, NULL);
 	}
 
 	/*
