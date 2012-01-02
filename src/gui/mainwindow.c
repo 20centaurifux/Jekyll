@@ -1878,7 +1878,7 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 			{
 				/* apply preferences */
 				_mainwindow_apply_preferences(menu->window, TRUE);
-				mainwindow_sync_gui(widget);
+				mainwindow_sync_gui(menu->window);
 			}
 			break;
 
