@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. December 2011
+ * \date 2. January 2012
  */
 
 #include <string.h>
@@ -549,7 +549,9 @@ _gtk_twitter_status_set_status_text(GtkWidget *label, const gchar *text)
 		else
 		{
 			/* check if we've found the end of the link/hashtag at the current position */
-			if(type != POS_ANCHOR && (text[offy] == ' ' || (type == POS_USER && text[offy] == ':') || (type == POS_HASHTAG && (g_unichar_iscntrl(g_utf8_get_char_validated(text+ offy, 1)) || text[offy] == ':'))))
+			if(type != POS_ANCHOR && (text[offy] == ' ' ||
+			   (type == POS_USER && (text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.')) ||
+			   (type == POS_HASHTAG && (g_unichar_iscntrl(g_utf8_get_char_validated(text+ offy, 1)) || text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.'))))
 			{
 				/* append link/hashtag to buffer */
 				switch(type)

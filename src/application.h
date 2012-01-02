@@ -19,7 +19,7 @@
  * \brief Application information.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 2. January 2012
  */
 
 #ifndef __APPLICATION_H__
@@ -37,7 +37,7 @@
 /*! The author of the program. */
 #define APPLICATION_AUTHOR        "Sebastian Fedrau"
 /*! Copyright of the program. */
-#define APPLICATION_COPYRIGHT     "Copyright (C) 2010-2011, Sebastian Fedrau"
+#define APPLICATION_COPYRIGHT     "Copyright (C) 2010-2012, Sebastian Fedrau"
 /*! Project's website. */
 #define APPLICATION_WEBSITE       "https://github.com/20centaurifux/jekyll"
 

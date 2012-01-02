@@ -19,7 +19,7 @@
  * \brief An about dialog.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 3. December 2011
+ * \date 2. January 2012
  */
 
 #include <string.h>
@@ -173,9 +173,16 @@ about_dialog_create(GtkWidget *parent)
 	}
 
 	/*
-	 *	signals:
+	 *	url hook:
 	 */
-	g_object_connect(G_OBJECT(dialog), "activate-link", _about_dialog_activate_link, NULL);
+	if(GTK_CHECK_VERSION(2, 24, 0))
+	{
+		g_object_connect(G_OBJECT(dialog), "activate-link", _about_dialog_activate_link, parent);
+	}
+	else
+	{
+		gtk_about_dialog_set_url_hook(_about_dialog_activate_link, parent, NULL);
+	}
 
 	/*
 	 *	show dialog:
