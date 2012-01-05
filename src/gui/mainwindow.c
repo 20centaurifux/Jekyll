@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 2. January 2012
+ * \date 4. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -338,17 +338,28 @@ _mainwindow_log_handler(const gchar *domain, GLogLevelFlags level, const gchar *
 {
 	_MainWindowPrivate *private;
 	NotificationLevel notification_level = NOTIFICATION_LEVEL_INFO;
+	gboolean visible;
 	gint verbosity;
 	gboolean show_notification = TRUE;
 	_MainWindowNotification *notification;
 
 	private = MAINWINDOW_GET_DATA(mainwindow);
 
+	/* call default log handler */
 	if(level != G_LOG_LEVEL_DEBUG || private->enable_debug)
 	{
 		g_log_default_handler(domain, level, message, NULL);
 	}
 
+	/* test if notification area is visible */
+	g_object_get(G_OBJECT(private->notification_area), "visible", &visible, NULL);
+
+	if(!visible)
+	{
+		return;
+	}
+
+	/* get current notification area debug level */
 	g_mutex_lock(private->notification_level.mutex);
 	verbosity = private->notification_level.level;
 	g_mutex_unlock(private->notification_level.mutex);
@@ -370,6 +381,7 @@ _mainwindow_log_handler(const gchar *domain, GLogLevelFlags level, const gchar *
 		show_notification = FALSE;
 	}
 
+	/* append notification to notification area */
 	if(show_notification)
 	{
 		notification = (_MainWindowNotification *)g_slice_alloc(sizeof(_MainWindowNotification));
@@ -3070,9 +3082,16 @@ mainwindow_remove_list(GtkWidget *widget, const gchar *owner, const gchar *listn
 void
 mainwindow_notify(GtkWidget *widget, NotificationLevel level, const gchar *message)
 {
+	gboolean visible;
+
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
-	notification_area_notify(private->notification_area, level, message);
+	g_object_get(G_OBJECT(private->notification_area), "visible", &visible, NULL);
+
+	if(visible)
+	{
+		notification_area_notify(private->notification_area, level, message);
+	}
 }
 
 void
