@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 2. January 2012
+ * \date 6. January 2012
  */
 
 #include <string.h>
@@ -672,7 +672,6 @@ _gtk_twitter_status_create_link_label_attributes(void)
 	pango_attr_list_insert(attrs, attr);
 	attr = pango_attr_underline_new(PANGO_UNDERLINE_NONE);
 	pango_attr_list_insert(attrs, attr);
-	attr = pango_attr_style_new(PANGO_STYLE_NORMAL);
 
 	return attrs;
 }
