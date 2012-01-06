@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 31. December 2011
+ * \date 6. January 2012
  */
 
 #include <gio/gio.h>
@@ -1816,6 +1816,7 @@ _status_tab_destroyed(GtkWidget *widget)
 	g_debug("Freeing accountlist");
 	g_strfreev(meta->accountlist.accounts);
 	g_mutex_free(meta->accountlist.mutex);
+	g_free(meta->background_color);
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
