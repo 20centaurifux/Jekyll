@@ -6,7 +6,7 @@
 
 /***************************************************************************
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as post_tweeted by
+    it under the terms of the GNU General Public License as published by
     the Free Software Foundation.
 
     This program is distributed in the hope that it will be useful,
@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 11. January 2012
  */
 
 #ifndef __TWITTER_WEB_CLIENT_H__
@@ -351,13 +351,14 @@ struct _TwitterWebClientClass
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
 	 * \param text text of the status to post
+	 * \param prev_status the guid of an status that the update is in reply to
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
 	 * Publishes a tweet.
 	 */
-	gboolean (* post_tweet)(TwitterWebClient *twitterwebclient, const gchar *text, gchar **buffer, gint *length);
+	gboolean (* post_tweet)(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
@@ -448,7 +449,7 @@ gboolean twitter_web_client_get_user_details(TwitterWebClient *twitterwebclient,
 /*! See _TwitterWebClientClass::get_user_details_by_id for further information. */
 gboolean twitter_web_client_get_user_details_by_id(TwitterWebClient *twitterwebclient, const gchar *friend, gchar **buffer, gint *length);
 /*! See _TwitterWebClientClass::post_tweet for further information. */
-gboolean twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, gchar **buffer, gint *length);
+gboolean twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length);
 /*! See _TwitterWebClientClass::remove_tweet for further information. */
 gboolean twitter_web_client_remove_tweet(TwitterWebClient *twitterwebclient, const gchar *id, gchar **buffer, gint *length);
 /*! See _TwitterWebClientClass::retweet for further information. */

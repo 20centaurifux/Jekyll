@@ -248,7 +248,7 @@ const gchar *twitterdb_queries_replace_sync_seconds = "REPLACE INTO last_sync (s
 
 const gchar *twitterdb_queries_remove_sync_seconds = "DELETE FROM last_sync WHERE source=?";
 
-const gchar *twitterdb_queries_add_prev_status_column = "ALTER TABLE status DROP COLUMN prev_status VARCHAR(32)";
+const gchar *twitterdb_queries_add_prev_status_column = "ALTER TABLE status ADD COLUMN prev_status VARCHAR(32)";
 
 /**
  * @}

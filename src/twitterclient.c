@@ -669,7 +669,7 @@ _twitter_client_save_tweet(TwitterClient *twitter_client, TwitterDbHandle *handl
 }
 
 static gboolean
-_twitter_client_publish(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict arg, gboolean retweet, GError **err)
+_twitter_client_publish(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict arg1, const gchar * restrict arg2, gboolean retweet, GError **err)
 {
 	TwitterClientPrivate *priv = twitter_client->priv;
 	TwitterDbHandle *handle;
@@ -693,11 +693,11 @@ _twitter_client_publish(TwitterClient *twitter_client, const gchar * restrict ac
 			{
 				if(retweet)
 				{
-					result = twitter_web_client_retweet(client, arg, &buffer, &length);
+					result = twitter_web_client_retweet(client, arg1, &buffer, &length);
 				}
 				else
 				{
-					result = twitter_web_client_post_tweet(client, arg, &buffer, &length);
+					result = twitter_web_client_post_tweet(client, arg1, arg2, &buffer, &length);
 				}
 
 				if(result)
@@ -1195,15 +1195,15 @@ _twitter_client_add_friend(TwitterClient *twitter_client, const gchar * restrict
 }
 
 static gboolean
-_twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err)
+_twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err)
 {
-	return _twitter_client_publish(twitter_client, account, text, FALSE, err);
+	return _twitter_client_publish(twitter_client, account, text, prev_status, FALSE, err);
 }
 
 static gboolean
 _twitter_client_retweet(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err)
 {
-	return _twitter_client_publish(twitter_client, account, text, TRUE, err);
+	return _twitter_client_publish(twitter_client, account, text, NULL, TRUE, err);
 }
 
 /*
@@ -1305,9 +1305,9 @@ twitter_client_add_friend(TwitterClient *twitter_client, const gchar * restrict 
 }
 
 gboolean
-twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err)
+twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar *prev_status, GError **err)
 {
-	return TWITTER_CLIENT_GET_CLASS(twitter_client)->post(twitter_client, account, text, err);
+	return TWITTER_CLIENT_GET_CLASS(twitter_client)->post(twitter_client, account, text, prev_status, err);
 }
 
 gboolean

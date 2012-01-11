@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. December 2011
+ * \date 11. January 2012
  */
 
 #ifndef __TWITTER_CLIENT_H__
@@ -270,12 +270,13 @@ struct _TwitterClientClass
 	 * \param twitterclient TwitterClient instance
 	 * \param account name of the Twitter account
 	 * \param text text to post
+	 * \param prev_status guid of an status that the update is in reply to
 	 * \param err structure to store failure messages
 	 * \return TRUE on success
 	 *
 	 * Posts a tweet.
 	 */
-	gboolean (* post)(TwitterClient *client, const gchar * restrict account, const gchar * restrict text, GError **err);
+	gboolean (* post)(TwitterClient *client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err);
 
 	/**
 	 * \param twitterclient TwitterClient instance
@@ -339,7 +340,7 @@ gboolean twitter_client_add_friend(TwitterClient *twitter_client, const gchar * 
 /*! See _TwitterClientClass::remove_friend for further information. */
 gboolean twitter_client_remove_friend(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict friend, GError **err);
 /*! See _TwitterClientClass::post for further information. */
-gboolean twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err);
+gboolean twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err);
 /*! See _TwitterClientClass::retweet for further information. */
 gboolean twitter_client_retweet(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict guid, GError **err);
 

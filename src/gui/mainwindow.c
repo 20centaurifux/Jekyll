@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 4. January 2012
+ * \date 11. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -1736,7 +1736,7 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, Gtk
 
 	if((client = mainwindow_create_twittter_client(mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME)))
 	{
-		if((result = twitter_client_post(client, username, text, &err)))
+		if((result = twitter_client_post(client, username, text, NULL, &err)))
 		{
 			mainwindow_sync_gui(mainwindow);
 		}

@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 11. January 2012
  */
 
 #include <string.h>
@@ -626,7 +626,7 @@ _twitter_web_client_get_user_details_by_id(TwitterWebClient *twitterwebclient, c
 }
 
 static gboolean
-_twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, gchar **buffer, gint *length)
+_twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length)
 {
 	gchar *path;
 	gchar *keys[] = { "status" };
@@ -932,9 +932,9 @@ twitter_web_client_get_user_details_by_id(TwitterWebClient *twitterwebclient, co
 }
 
 gboolean
-twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, gchar **buffer, gint *length)
+twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length)
 {
-	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->post_tweet(twitterwebclient, text, buffer, length);
+	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->post_tweet(twitterwebclient, text, prev_status, buffer, length);
 }
 
 gboolean

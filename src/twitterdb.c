@@ -1881,7 +1881,6 @@ twitterdb_upgrade_0_1_to_0_2(TwitterDbHandle *handle, GError **err)
 			if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_DONE)
 			{
 				result = TRUE;
-				exit(0);
 			}
 
 			sqlite3_finalize(stmt);
