@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 26. September 2011
+ * \date 11. January 2012
  */
 
 #ifndef __TWITTERDB_H__
@@ -604,6 +604,15 @@ void twitterdb_set_last_sync(TwitterDbHandle *handle, TwitterDbSyncSource source
  * Removes all timestamps related to the given source.
  */
 gboolean twitterdb_remove_last_sync_source(TwitterDbHandle *handle, TwitterDbSyncSource source, GError **err);
+
+/**
+ * \param handle a database handle
+ * \param err structure for storing error messages
+ * \return TRUE on success
+ *
+ * Upgrades database format from version 0.1 to 0.2.
+ */
+gboolean twitterdb_upgrade_0_1_to_0_2(TwitterDbHandle *handle, GError **err);
 
 /**
  * @}

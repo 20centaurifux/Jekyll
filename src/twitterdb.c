@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. September 2011
+ * \date 11. January 2012
  */
 
 #include <string.h>
@@ -1858,6 +1858,34 @@ twitterdb_remove_last_sync_source(TwitterDbHandle *handle, TwitterDbSyncSource s
 	sqlite3_finalize(stmt);
 
 	g_static_mutex_unlock(&mutex_twitterdb);
+
+	return result;
+}
+
+gboolean
+twitterdb_upgrade_0_1_to_0_2(TwitterDbHandle *handle, GError **err)
+{
+	sqlite3_stmt *stmt;
+	gboolean result = FALSE;
+
+	g_debug("Altering status table: \"%s\"", twitterdb_queries_add_prev_status_column);
+	if(_twitterdb_execute_non_query(handle, twitterdb_queries_add_prev_status_column, err))
+	{
+		g_debug("Updating version to 0.2");
+		if(_twitterdb_prepare_statement(handle, twitterdb_queries_replace_version, &stmt, err))
+		{
+			sqlite3_bind_int(stmt, 1, 0);
+			sqlite3_bind_int(stmt, 2, 2);
+	
+			if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_DONE)
+			{
+				result = TRUE;
+				exit(0);
+			}
+
+			sqlite3_finalize(stmt);
+		}
+	}
 
 	return result;
 }

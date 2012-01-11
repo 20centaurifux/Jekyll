@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. June 2011
+ * \date 11. January 2012
  */
 
 #include "twitterdb_queries.h"
@@ -47,6 +47,7 @@ const gchar *twitterdb_queries_create_tables[] =
 
 	"CREATE TABLE IF NOT EXISTS status ("
 	"guid VARCHAR(32) NOT NULL, "
+	"prev_status VARCHAR(32), "
 	"text VARCHAR(140) NOT NULL, "
 	"user_guid VARCHAR(32) NOT NULL REFERENCES user(guid) ON DELETE CASCADE, "
 	"timestamp INTEGER NOT NULL, "
@@ -246,6 +247,8 @@ const gchar *twitterdb_queries_get_sync_seconds = "SELECT seconds FROM last_sync
 const gchar *twitterdb_queries_replace_sync_seconds = "REPLACE INTO last_sync (source, user_guid, seconds) VALUES (?, ?, ?)";
 
 const gchar *twitterdb_queries_remove_sync_seconds = "DELETE FROM last_sync WHERE source=?";
+
+const gchar *twitterdb_queries_add_prev_status_column = "ALTER TABLE status DROP COLUMN prev_status VARCHAR(32)";
 
 /**
  * @}
