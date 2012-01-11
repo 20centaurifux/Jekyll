@@ -3,7 +3,7 @@
  *  @file oauth.h
  *  @author Robin Gareus <robin@gareus.org>
  *
- * Copyright 2007-2010 Robin Gareus <robin@gareus.org>
+ * Copyright 2007-2011 Robin Gareus <robin@gareus.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,15 +29,15 @@
 
 #ifndef DOXYGEN_IGNORE
 // liboauth version
-#define LIBOAUTH_VERSION "0.9.4"
+#define LIBOAUTH_VERSION "0.9.5"
 #define LIBOAUTH_VERSION_MAJOR  0
 #define LIBOAUTH_VERSION_MINOR  9
-#define LIBOAUTH_VERSION_MICRO  4
+#define LIBOAUTH_VERSION_MICRO  5
 
 //interface revision number
 //http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
 #define LIBOAUTH_CUR  8
-#define LIBOAUTH_REV  1
+#define LIBOAUTH_REV  2
 #define LIBOAUTH_AGE  8
 #endif
 
@@ -53,6 +53,10 @@
 #else
 #    define attribute_deprecated
 #endif
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /** \enum OAuthMethod
@@ -751,6 +755,10 @@ char *oauth_send_data_with_callback      (const char *u,
                                           void (*callback)(void*,int,size_t,size_t),
                                           void *callback_data,
                                           const char *httpMethod);
+
+#ifdef __cplusplus
+}       /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif
 /* vi:set ts=8 sts=2 sw=2: */
