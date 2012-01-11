@@ -820,7 +820,7 @@ twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, GError **
 }
 
 gboolean
-twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict user_guid, const gchar * restrict text, gint64 timestamp, gint *count, GError **err)
+twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict prev_status, const gchar * restrict user_guid, const gchar * restrict text, gint64 timestamp, gint *count, GError **err)
 {
 	sqlite3_stmt *stmt;
 	gboolean exists = FALSE;
@@ -858,9 +858,10 @@ twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, cons
 		if(_twitterdb_prepare_statement(handle, twitterdb_queries_insert_status, &stmt, err))
 		{
 			sqlite3_bind_text(stmt, 1, guid, -1, NULL);
-			sqlite3_bind_text(stmt, 2, text, -1, NULL);
-			sqlite3_bind_text(stmt, 3, user_guid, -1, NULL);
-			sqlite3_bind_int(stmt, 4, (sqlite3_int64)timestamp);
+			sqlite3_bind_text(stmt, 2, prev_status, -1, NULL);
+			sqlite3_bind_text(stmt, 3, text, -1, NULL);
+			sqlite3_bind_text(stmt, 4, user_guid, -1, NULL);
+			sqlite3_bind_int(stmt, 5, (sqlite3_int64)timestamp);
 			if(!(result = (_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_DONE) ? TRUE : FALSE))
 			{
 				_twitterdb_set_error(err, handle);

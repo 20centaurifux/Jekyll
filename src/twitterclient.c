@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 11. January 2012
  */
 
 #include "twitterclient.h"
@@ -648,7 +648,7 @@ _twitter_client_save_tweet(TwitterClient *twitter_client, TwitterDbHandle *handl
 		/* save status */
 		g_debug("Registering status (\"%s\")", status.id);
 		timestamp = twitter_timestamp_to_unix_timestamp(status.created_at);
-		if(twitterdb_save_status(handle, status.id, user.id, status.text, timestamp, &status_count, err))
+		if(twitterdb_save_status(handle, status.id, status.prev_status, user.id, status.text, timestamp, &status_count, err))
 		{
 			/* add status to related lists */
 			g_debug("Saving tweet in lists");

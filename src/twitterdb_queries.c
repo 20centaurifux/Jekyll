@@ -132,7 +132,7 @@ const gchar *twitterdb_queries_mark_statuses_read = "UPDATE status SET read=1";
 
 const gchar *twitterdb_queries_status_exists = "SELECT COUNT(guid) FROM status WHERE guid=?";
 
-const gchar *twitterdb_queries_insert_status = "INSERT INTO status (guid, text, user_guid, timestamp, read) VALUES (?, ?, ?, ?, 0)";
+const gchar *twitterdb_queries_insert_status = "INSERT INTO status (guid, prev_status, text, user_guid, timestamp, read) VALUES (?, ?, ?, ?, ?, 0)";
 
 const gchar *twitterdb_queries_delete_status = "DELETE FROM status WHERE guid=?";
 

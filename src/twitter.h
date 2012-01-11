@@ -19,7 +19,7 @@
 * \brief Twitter datatypes and functions.
 * \author Sebastian Fedrau <lord-kefir@arcor.de>
 * \version 0.1.0
-* \date 5. May 2011
+* \date 11. January 2012
 */
 
 #ifndef __TWITTER_H__
@@ -77,6 +77,8 @@ typedef struct
 	gchar id[32];
 	/*! The tweet. */
 	gchar text[280];
+	/*! The previous status.*/
+	gchar prev_status[32];
 } TwitterStatus;
 
 /**

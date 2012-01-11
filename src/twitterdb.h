@@ -155,6 +155,7 @@ gboolean twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, 
 /**
  * \param handle a database handle
  * \param guid guid of the status
+ * \param prev_status guid of the previous status
  * \param user_guid guid of the owner
  * \param text text of the status
  * \param timestamp timestamp of the status
@@ -164,7 +165,7 @@ gboolean twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, 
  *
  * Saves a status in the database.
  */
-gboolean twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict user_guid,
+gboolean twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict prev_status, const gchar * restrict user_guid,
                                const gchar * restrict text, gint64 timestamp, gint *count, GError **err);
 
 /**
