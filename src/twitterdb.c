@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 12. January 2012
  */
 
 #include <string.h>
@@ -49,7 +49,7 @@ static GStaticMutex mutex_twitterdb = G_STATIC_MUTEX_INIT;
  *	helpers:
  */
 /*! Copy string from sqlite3_column to destination buffer. */
-#define TWITTERDB_COPY_TEXT_COLUMN(dest, index, size) g_strlcpy(dest, (const gchar *)sqlite3_column_text(stmt, index), size)
+#define TWITTERDB_COPY_TEXT_COLUMN(dest, index, size) if(sqlite3_column_text(stmt, index)) g_strlcpy(dest, (const gchar *)sqlite3_column_text(stmt, index), size)
 
 static void
 _twitterdb_set_error(GError **err, TwitterDbHandle *handle)
@@ -358,6 +358,7 @@ _twitterdb_fetch_tweets(TwitterDbHandle *handle, sqlite3_stmt *stmt, GList **twe
 			TWITTERDB_COPY_TEXT_COLUMN(user->location, 8, 64);
 			TWITTERDB_COPY_TEXT_COLUMN(user->url, 9, 256);
 			TWITTERDB_COPY_TEXT_COLUMN(user->description, 10, 280);
+			TWITTERDB_COPY_TEXT_COLUMN(tweet->prev_status, 11, 32);
 
 			*tweets = g_list_append(*tweets, tweet);
 			*users = g_list_append(*users, user);

@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 12. January 2012
  */
 
 #include "twitterdb_queries.h"
@@ -198,7 +198,7 @@ const gchar *twitterdb_queries_insert_direct_message = "INSERT INTO direct_messa
 
 const gchar *twitterdb_queries_get_tweets_from_timeline =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
-	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description "
+	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description, status.prev_status "
 	"FROM timeline "
 	"INNER JOIN status ON status.guid=timeline.status_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
@@ -208,7 +208,7 @@ const gchar *twitterdb_queries_get_tweets_from_timeline =
 
 const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
-	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description "
+	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description, status.prev_status "
 	"FROM timeline "
 	"INNER JOIN status ON status.guid=timeline.status_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
@@ -218,7 +218,7 @@ const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 
 const gchar *twitterdb_queries_get_tweets_from_list =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
-	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description "
+	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description, status.prev_status "
 	"FROM list_timeline "
 	"INNER JOIN status ON status.guid=list_timeline.status_guid "
 	"INNER JOIN list ON list_timeline.list_guid=list.guid "
