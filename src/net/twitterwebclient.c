@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 12. January 2012
  */
 
 #include <string.h>
@@ -629,16 +629,26 @@ static gboolean
 _twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length)
 {
 	gchar *path;
-	gchar *keys[] = { "status" };
-	gchar *values[1];
+	gchar *keys[] = { "status", "in_reply_to_status_id" };
+	gchar *values[2];
 	gboolean result;
 
 	values[0] = g_uri_escape_string(text, NULL, TRUE);
 
+	if(prev_status)
+	{
+		values[1] = g_uri_escape_string(prev_status, NULL, TRUE);
+	}
+
 	path = g_markup_printf_escaped("/1/statuses/update.%s?status=%s", twitterwebclient->priv->format, values[0]);
-	result = _twitter_web_client_send_request(twitterwebclient, path, keys, values, 1, TRUE, buffer, length);
+	result = _twitter_web_client_send_request(twitterwebclient, path, keys, values, prev_status ? 2 : 1, TRUE, buffer, length);
 	g_free(path);
 	g_free(values[0]);
+
+	if(prev_status)
+	{
+		g_free(values[1]);
+	}
 
 	return result;
 }
