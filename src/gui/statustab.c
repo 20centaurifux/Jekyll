@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 12. January 2012
  */
 
 #include <gio/gio.h>
@@ -376,6 +376,16 @@ _status_tab_account_list_contains(gchar **accounts, const gchar *account)
 
 	return FALSE;
 }
+
+/*
+ *	status history:
+ */
+static void
+_status_tab_history_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+{
+	g_debug("history");
+}
+
 
 /*
  *	reply:
@@ -1404,6 +1414,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			             "edit-friendship-button-has-tooltip", TRUE,
 				     "show-retweet_button", owner ? FALSE : TRUE,
 				     "show-delete-button", FALSE,
+				     "show-history-button", status.prev_status[0] ? TRUE : FALSE,
 				     "selectable", TRUE,
 				     "background-color", tab->background_color,
 				     NULL);
@@ -1422,6 +1433,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			g_signal_connect(G_OBJECT(widget), "edit-friendship-button-query-tooltip", (GCallback)_status_tab_edit_friendship_button_query_tooltip, tab);
 			g_signal_connect(G_OBJECT(widget), "reply-button-clicked", (GCallback)_status_tab_reply_button_clicked, tab);
 			g_signal_connect(G_OBJECT(widget), "retweet-button-clicked", (GCallback)_status_tab_retweet_button_clicked, tab);
+			g_signal_connect(G_OBJECT(widget), "history-button-clicked", (GCallback)_status_tab_history_button_clicked, tab);
 			g_signal_connect(G_OBJECT(widget), "grab-focus", (GCallback)_status_tab_grab_focus, tab);
 
 			/* load pixmap */
