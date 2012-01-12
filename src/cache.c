@@ -108,7 +108,7 @@ _cache_item_expired(_CacheItem *item)
 	usec = g_get_monotonic_time();
 
 	/* check if lifetime has been expired */
-	g_debug("Testing: (usec[%ld] - item->mtime[%ld]) / 1000000 [%ld] > item->lifetime [%d]", usec, item->mtime, (usec - item->mtime) / 1000000, item->lifetime);
+	g_debug("Testing: (usec[%ld] - item->mtime[%ld]) / 1000000 [%ld] > item->lifetime [%d]", (long int)usec, (long int)item->mtime, (long int)((usec - item->mtime) / 1000000), item->lifetime);
 
 	if((gint)((usec - item->mtime) / 1000000) > item->lifetime)
 	{
