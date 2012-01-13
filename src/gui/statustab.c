@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 12. January 2012
+ * \date 13. January 2012
  */
 
 #include <gio/gio.h>
@@ -391,7 +391,7 @@ _status_tab_history_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
  *	reply:
  */
 static gboolean
-_status_tab_compose_tweet_callback(const gchar *username, const gchar *text, _StatusTab *tab)
+_status_tab_compose_tweet_callback(const gchar *username, const gchar *text, const gchar *prev_status, _StatusTab *tab)
 {
 	GtkWidget *mainwindow;
 	TwitterClient *client;
@@ -403,7 +403,7 @@ _status_tab_compose_tweet_callback(const gchar *username, const gchar *text, _St
 
 	if((client = mainwindow_create_twittter_client(mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME)))
 	{
-		if((result = twitter_client_post(client, username, text, NULL, &err)))
+		if((result = twitter_client_post(client, username, text, prev_status, &err)))
 		{
 			mainwindow_sync_gui(mainwindow);
 		}
@@ -438,7 +438,7 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gchar *text;
 
 	/* create & run composer dialog */
-	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, 1, tab->owner, _("Reply"));
+	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, 1, tab->owner, gtk_twitter_status_get_guid(status), _("Reply"));
 	g_object_get(G_OBJECT(status), "username", &username, NULL);
 	text = g_strdup_printf("@%s ", username);
 	composer_dialog_set_apply_callback(dialog, (ComposerApplyCallback)_status_tab_compose_tweet_callback, tab);

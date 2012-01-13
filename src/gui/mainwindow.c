@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 13. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -1725,7 +1725,7 @@ _mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
  *	compose tweets:
  */
 static gboolean
-_mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, GtkWidget *mainwindow)
+_mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, const gchar *prev_status, GtkWidget *mainwindow)
 {
 	TwitterClient *client;
 	GtkWidget *dialog;
@@ -1790,7 +1790,7 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 		g_free(account);
 
 		/* create & run composer dialog */
-		dialog = composer_dialog_create(widget, usernames, count, selected_user, _("Compose new tweet"));
+		dialog = composer_dialog_create(widget, usernames, count, selected_user, NULL, _("Compose new tweet"));
 		composer_dialog_set_apply_callback(dialog, (ComposerApplyCallback)_mainwindow_compose_tweet_callback, widget);
 		gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog));
 
