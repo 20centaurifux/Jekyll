@@ -39,6 +39,7 @@
 #include "remove_list_dialog.h"
 #include "composer_dialog.h"
 #include "retweet_dialog.h"
+#include "status_dialog.h"
 #include "../twitterdb.h"
 #include "../urlopener.h"
 #include "../helpers.h"
@@ -383,7 +384,16 @@ _status_tab_account_list_contains(gchar **accounts, const gchar *account)
 static void
 _status_tab_history_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
 {
-	g_debug("history");
+	GtkWidget *dialog;
+
+	dialog = status_dialog_create(tabbar_get_mainwindow(tab->tabbar), _("History"));
+
+	gtk_dialog_run(GTK_DIALOG(dialog));
+
+	if(GTK_IS_WIDGET(dialog))
+	{
+		gtk_widget_destroy(dialog);
+	}
 }
 
 
