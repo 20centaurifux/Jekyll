@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTER_WEB_CLIENT_H__
@@ -160,6 +160,17 @@ struct _TwitterWebClientClass
 	 * Gets the user timeline.
 	 */
 	gboolean (* get_user_timeline)(TwitterWebClient *twitterwebclient, const gchar *username, gchar **buffer, gint *length);
+
+	/**
+	 * \param twitterwebclient TwitterWebClient instance
+	 * \param guid status guid
+	 * \param buffer a buffer
+	 * \param length length of the buffer
+	 * \return TRUE on success
+	 *
+	 * Gets a single status.
+	 */
+	gboolean (* get_status)(TwitterWebClient *twitterwebclient, const gchar *username, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
@@ -416,6 +427,8 @@ gboolean twitter_web_client_get_mentions(TwitterWebClient *twitterwebclient, gch
 gboolean twitter_web_client_get_direct_messages(TwitterWebClient *twitterwebclient, gchar **buffer, gint *length);
 /*! See _TwitterWebClientClass::get_user_timeline for further information. */
 gboolean twitter_web_client_get_user_timeline(TwitterWebClient *twitterwebclient, const gchar *username, gchar **buffer, gint *length);
+/*! See _TwitterWebClientClass::get_status for further information. */
+gboolean twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, char **buffer, gint *length);
 /*! See _TwitterWebClientClass::get_timeline_from_list for further information. */
 gboolean twitter_web_client_get_timeline_from_list(TwitterWebClient *twitterwebclient, const gchar * restrict username, const gchar * restrict listname, gchar **buffer, gint *length);
 /*! See _TwitterWebClientClass::get_lists for further information. */

@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 13. January 2012
+ * \date 16. January 2012
  */
 
 #include <string.h>
@@ -324,6 +324,19 @@ _twitter_web_client_get_user_timeline(TwitterWebClient *twitterwebclient, const 
 	}
 
 	path = g_markup_printf_escaped("/1/statuses/user_timeline.%s?screen_name=%s&count=%d", twitterwebclient->priv->format, username, twitterwebclient->priv->status_count);
+	result = _twitter_web_client_send_request(twitterwebclient, path, NULL, NULL, 0, FALSE, buffer, length);
+	g_free(path);
+
+	return result;
+}
+
+static gboolean
+_twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, gchar **buffer, gint *length)
+{
+	gchar *path;
+	gboolean result;
+
+	path = g_markup_printf_escaped("/1/statuses/show.%s?id=%s&include_entities=true", twitterwebclient->priv->format, guid);
 	result = _twitter_web_client_send_request(twitterwebclient, path, NULL, NULL, 0, FALSE, buffer, length);
 	g_free(path);
 
@@ -849,6 +862,12 @@ twitter_web_client_get_user_timeline(TwitterWebClient *twitterwebclient, const g
 }
 
 gboolean
+twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, gchar **buffer, gint *length)
+{
+	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->get_status(twitterwebclient, guid, buffer, length);
+}
+
+gboolean
 twitter_web_client_get_timeline_from_list(TwitterWebClient *twitterwebclient, const gchar * restrict username, const gchar * restrict listname, gchar **buffer, gint *length)
 {
 	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->get_timeline_from_list(twitterwebclient, username, listname, buffer, length);
@@ -1042,6 +1061,7 @@ twitter_web_client_class_init(TwitterWebClientClass *klass)
 	klass->get_mentions = _twitter_web_client_get_mentions;
 	klass->get_direct_messages = _twitter_web_client_get_direct_messages;
 	klass->get_user_timeline = _twitter_web_client_get_user_timeline;
+	klass->get_status = _twitter_web_client_get_status;
 	klass->get_timeline_from_list = _twitter_web_client_get_timeline_from_list;
 	klass->get_lists = _twitter_web_client_get_lists;
 	klass->get_users_from_list = _twitter_web_client_get_users_from_list;
