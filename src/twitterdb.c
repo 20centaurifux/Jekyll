@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 12. January 2012
+ * \date 16. January 2012
  */
 
 #include <string.h>
@@ -139,7 +139,6 @@ _twitterdb_execute_statement(TwitterDbHandle *handle, sqlite3_stmt *stmt, gboole
 		case SQLITE_BUSY:
 			if(retry)
 			{
-				g_warning("RETRY"); // TODO
 				g_usleep(5000000);
 				return _twitterdb_execute_statement(handle, stmt, retry, err);
 			}
@@ -1486,6 +1485,71 @@ twitterdb_append_status_to_list(TwitterDbHandle *handle, const gchar * restrict 
 	sqlite3_finalize(stmt);
 
 	g_static_mutex_unlock(&mutex_twitterdb);
+
+	return result;
+}
+
+gboolean
+twitterdb_status_exists(TwitterDbHandle *handle, const gchar *guid, GError **err)
+{
+	sqlite3_stmt *stmt;
+	gboolean result = FALSE;
+
+	g_static_mutex_lock(&mutex_twitterdb);
+
+	if(_twitterdb_prepare_statement(handle, twitterdb_queries_status_exists, &stmt, err))
+	{
+		sqlite3_bind_text(stmt, 1, guid, -1, NULL);
+
+		if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_ROW)
+		{
+			 if(sqlite3_column_int(stmt, 0) > 0)
+			 {
+				 result = TRUE;
+			 }
+		}
+
+		sqlite3_finalize(stmt);
+	}
+
+	g_static_mutex_unlock(&mutex_twitterdb);
+
+	return result;
+}
+
+gboolean
+twitterdb_get_status(TwitterDbHandle *handle, const gchar *guid, TwitterStatus *status, TwitterUser *user, GError **err)
+{
+	sqlite3_stmt *stmt;
+	gchar user_guid[32];
+	gboolean result = FALSE;
+
+	g_static_mutex_lock(&mutex_twitterdb);
+
+	if(_twitterdb_prepare_statement(handle, twitterdb_queries_get_status, &stmt, err))
+	{
+		memset(status, 0, sizeof(TwitterStatus));
+		sqlite3_bind_text(stmt, 1, guid, -1, NULL);
+
+		if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_ROW)
+		{
+			g_strlcpy(status->id, guid, 32);
+			TWITTERDB_COPY_TEXT_COLUMN(user_guid, 1, 32);
+			status->timestamp = sqlite3_column_int(stmt, 1);
+			TWITTERDB_COPY_TEXT_COLUMN(status->text, 0, 280);
+			TWITTERDB_COPY_TEXT_COLUMN(status->prev_status, 3, 32);
+			result = TRUE;
+		}
+
+		sqlite3_finalize(stmt);
+	}
+
+	g_static_mutex_unlock(&mutex_twitterdb);
+
+	if(result)
+	{
+		result = _twitterdb_get_user(handle, user_guid, user, err);
+	}
 
 	return result;
 }

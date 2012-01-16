@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTERDB_QUERIES_H__
@@ -60,6 +60,8 @@ extern const gchar *twitterdb_queries_status_exists;
 extern const gchar *twitterdb_queries_insert_status;
 /*! Deletes an status. */
 extern const gchar *twitterdb_queries_delete_status;
+/*! Gets a status. */
+extern const gchar *twitterdb_queries_get_status;
 /*! Creates follower information. */
 extern const gchar *twitterdb_queries_replace_follower;
 /*! Removes a follower. */

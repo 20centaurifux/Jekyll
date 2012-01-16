@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTER_CLIENT_H__
@@ -156,6 +156,19 @@ struct _TwitterClientClass
 	 */
 	gboolean (* process_list)(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict list,
 	                          TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
+
+	/**
+	 * \param twitterclient TwitterClient instance
+	 * \param username an username
+	 * \param guid guid of the status
+	 * \param status location to store status information
+	 * \param user location to store user information
+	 * \param err structure to store failure messages
+	 * \return TRUE on success
+	 
+	 * Gets a single status.
+	 */
+	gboolean (* get_status)(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err);
 
 	/**
 	 * \param twitterclient TwitterClient instance
@@ -321,6 +334,8 @@ gboolean twitter_client_process_usertimeline(TwitterClient *twitter_client, cons
 /*! See _TwitterClientClass::process_list for further information. */
 gboolean twitter_client_process_list(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict list,
                                      TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
+/*! See _TwitterClientClass::get_status for further information. */
+gboolean twitter_client_get_status(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err);
 /*! See _TwitterClientClass::search for further information. */
 gboolean twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query, TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
 /*! See _TwitterClientClass::add_user_to_list for further information. */

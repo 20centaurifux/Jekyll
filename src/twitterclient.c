@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 16. January 2012
  */
 
 #include "twitterclient.h"
@@ -842,6 +842,81 @@ _twitter_client_process_list(TwitterClient *twitter_client, const gchar * restri
 }
 
 static gboolean
+_twitter_client_get_status(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err)
+{
+	TwitterDbHandle *handle;
+	TwitterWebClient *client;
+	gchar *buffer = NULL;
+	gint length;
+	const GError *client_err;
+	gint status_count;
+	gboolean result = FALSE;
+
+	if(!(handle = twitterdb_get_handle(err)))
+	{
+		return FALSE;
+	}
+
+	/* try to get status from database */
+	g_debug("Getting status \"%s\" from database", guid);
+	if(twitterdb_status_exists(handle, guid, err))
+	{
+		if(!(result = twitterdb_get_status(handle, guid, status, user, err)))
+		{
+			g_warning("Couldn't read status \"%s\" from database", guid);
+		}
+	}
+
+	/* try to get status from Twitter */
+	if(!result && !*err)
+	{
+		g_debug("Couldn't find status in database, fetching data from \"%s\" from Twitter", guid);
+		if((client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err)))
+		{
+			if(twitter_web_client_get_status(client, guid, &buffer, &length))
+			{
+				if(!(result = twitter_xml_parse_status(buffer, length, status, user)))
+				{
+					g_set_error(err, 0, 0, "Couldn't parse status data.");
+				}
+			}
+			else
+			{
+				if(client && (client_err = twitter_web_client_get_last_error(client)))
+				{
+					g_set_error(err, 0, 0, "%s", client_err->message);
+				}
+			}
+
+			g_free(buffer);
+			g_object_unref(client);
+		}
+
+		/* store status & user in database */
+		if(result)
+		{
+			g_debug("Updating user: \"%s\" (%s)", user->name, user->id);
+			if(twitterdb_save_user(handle, user->id, user->screen_name, user->name, user->image, user->location, user->url, user->description, err))
+			{
+				g_debug("Registering status (\"%s\")", status->id);
+				if(!twitterdb_save_status(handle, status->id, status->prev_status, user->id, status->text, status->timestamp, &status_count, err))
+				{
+					g_warning("Couldn't save status \"%s\"", status->id);
+				}
+			}
+			else
+			{
+				g_warning("Couldn't save user \"%s\" (%s)", user->name, user->id);
+			}
+		}
+	}
+
+	twitterdb_close_handle(handle);
+
+	return result;
+}
+
+static gboolean
 _twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query,
                        TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err)
 {
@@ -1250,6 +1325,12 @@ twitter_client_process_list(TwitterClient *twitter_client, const gchar * restric
 }
 
 gboolean
+twitter_client_get_status(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err)
+{
+	return TWITTER_CLIENT_GET_CLASS(twitter_client)->get_status(twitter_client, username, guid, status, user, err);
+}
+
+gboolean
 twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query,
                       TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err)
 {
@@ -1364,6 +1445,7 @@ twitter_client_class_init(TwitterClientClass *klass)
 	klass->process_replies = _twitter_client_process_replies;
 	klass->process_usertimeline = _twitter_client_process_usertimeline;
 	klass->process_list = _twitter_client_process_list;
+	klass->get_status = _twitter_client_get_status;
 	klass->search = _twitter_client_search;
 	klass->add_user_to_list = _twitter_client_add_user_to_list;
 	klass->remove_user_from_list = _twitter_client_remove_user_from_list;

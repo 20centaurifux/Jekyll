@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 12. January 2012
+ * \date 16. January 2012
  */
 
 #include "twitterdb_queries.h"
@@ -135,6 +135,8 @@ const gchar *twitterdb_queries_status_exists = "SELECT COUNT(guid) FROM status W
 const gchar *twitterdb_queries_insert_status = "INSERT INTO status (guid, prev_status, text, user_guid, timestamp, read) VALUES (?, ?, ?, ?, ?, 0)";
 
 const gchar *twitterdb_queries_delete_status = "DELETE FROM status WHERE guid=?";
+
+const gchar *twitterdb_queries_get_status = "SELECT text, user_guid, timestamp, prev_status FROM status WHERE guid=?";
 
 const gchar *twitterdb_queries_replace_follower = "REPLACE INTO follower (user1_guid, user2_guid) VALUES (?, ?)";
 

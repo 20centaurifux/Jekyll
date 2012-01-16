@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 11. January 2012
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTERDB_H__
@@ -435,6 +435,28 @@ gboolean twitterdb_append_status_to_user_timeline(TwitterDbHandle *handle, const
  * Appends a status to a list.
  */
 gboolean twitterdb_append_status_to_list(TwitterDbHandle *handle, const gchar * restrict list_guid, const gchar * restrict status_guid, GError **err);
+
+/**
+ * \param handle a database handle
+ * \param guid status guid
+ * \param err structure for storing error messages
+ * \return TRUE if status does exist
+ *
+ * Tests if a status does exist.
+ */
+gboolean twitterdb_status_exists(TwitterDbHandle *handle, const gchar *guid, GError **err);
+
+/**
+ * \param handle a database handle
+ * \param guid status guid
+ * \param status location to store status information
+ * \param user location to store user information
+ * \param err structure for storing error messages
+ * \return TRUE if status does exist
+ *
+ * Gets a status from the database.
+ */
+gboolean twitterdb_get_status(TwitterDbHandle *handle, const gchar *guid, TwitterStatus *status, TwitterUser *user, GError **err);
 
 /**
  * \param handle a database handle
