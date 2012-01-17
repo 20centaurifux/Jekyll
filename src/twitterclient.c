@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 16. January 2012
+ * \date 17. January 2012
  */
 
 #include "twitterclient.h"
@@ -241,6 +241,26 @@ _twitter_client_create_web_client_for_friend(GList *accounts, const gchar *frien
 		twitter_web_client_set_oauth_authorization(client, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, account->access_key, account->access_secret);
 		
 	}
+
+	return client;
+}
+
+static TwitterWebClient *
+_twitter_client_create_default_web_client(GList *accounts, GError **err)
+{
+	const _TwitterAccountData *account;
+	TwitterWebClient *client = NULL;
+
+	g_return_val_if_fail(accounts != NULL, NULL);
+
+	g_debug("Creating default TwitterWebClient");
+
+	account = (const _TwitterAccountData *)accounts->data;
+
+	client = twitter_web_client_new();
+	twitter_web_client_set_format(client, "xml");
+	twitter_web_client_set_username(client, account->username);
+	twitter_web_client_set_oauth_authorization(client, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, account->access_key, account->access_secret);
 
 	return client;
 }
@@ -871,7 +891,17 @@ _twitter_client_get_status(TwitterClient *twitter_client, const gchar * restrict
 	if(!result && !*err)
 	{
 		g_debug("Couldn't find status in database, fetching data from \"%s\" from Twitter", guid);
-		if((client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err)))
+
+		if(username)
+		{
+			client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err);
+		}
+		else
+		{
+			client = _twitter_client_create_default_web_client(twitter_client->priv->accounts, err);
+		}
+
+		if(client)
 		{
 			if(twitter_web_client_get_status(client, guid, &buffer, &length))
 			{

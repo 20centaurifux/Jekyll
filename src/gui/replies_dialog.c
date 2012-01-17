@@ -44,7 +44,7 @@ typedef struct
 	/*! The parent window. */
 	GtkWidget *parent;
 	/*! Account name. */
-	gchar username[64];
+	gchar *username;
 	/*! First status to append. */
 	gchar first_status[32];
 	/*! Box containing tweets. */
@@ -193,6 +193,7 @@ _replies_dialog_destroy(GtkDialog *dialog, gpointer user_data)
 
 	g_assert(GTK_IS_DELETABLE_DIALOG(dialog));
 
+	g_free(private->username);
 	g_mutex_free(private->mutex);
 	g_object_unref(private->cancellable);
 	g_free(private);
@@ -246,7 +247,7 @@ replies_dialog_create(GtkWidget *parent, const gchar * restrict account, const g
 	private->cancellable = g_cancellable_new();
 	private->finished = FALSE;
 	private->mutex = g_mutex_new();
-	g_strlcpy(private->username, account, 64);
+	private->username = g_strdup(account);
 	g_strlcpy(private->first_status, first_status, 32);
 	sprintf(private->pixbuf_group, "replies-%d", id);
 
