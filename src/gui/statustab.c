@@ -443,12 +443,30 @@ static void
 _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
 {
 	GtkWidget *dialog;
-	gchar *usernames[] = { tab->owner };
 	gchar *username;
 	gchar *text;
+	gchar **usernames = NULL;
+	gint length = 0;
+
+	if(tab->owner)
+	{
+		usernames = (gchar **)g_malloc(sizeof(gchar *) * 2);
+		usernames[0] = g_strdup(tab->owner);
+		usernames[1] = NULL;
+		length = 1;
+	}
+	else
+	{
+		g_mutex_lock(tab->accountlist.mutex);
+		usernames = g_strdupv(tab->accountlist.accounts);
+		length = g_strv_length(tab->accountlist.accounts);
+		g_mutex_unlock(tab->accountlist.mutex);
+	}
+
+	g_warning("length: %d", length);
 
 	/* create & run composer dialog */
-	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, 1, tab->owner, gtk_twitter_status_get_guid(status), _("Reply"));
+	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, length, tab->owner, gtk_twitter_status_get_guid(status), _("Reply"));
 	g_object_get(G_OBJECT(status), "username", &username, NULL);
 	text = g_strdup_printf("@%s ", username);
 	composer_dialog_set_apply_callback(dialog, (ComposerApplyCallback)_status_tab_compose_tweet_callback, tab);
@@ -456,8 +474,10 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog));
 
 	/* cleanup */
+	g_strfreev(usernames);
 	g_free(username);
 	g_free(text);
+	
 
 	if(GTK_IS_WIDGET(dialog))
 	{
