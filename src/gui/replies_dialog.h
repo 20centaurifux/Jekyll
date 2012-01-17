@@ -15,18 +15,18 @@
     General Public License for more details.
  ***************************************************************************/
 /*!
- * \file status_dialog.h
+ * \file replies_dialog.h
  * \brief A dialog displaying tweets.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 16. January 2012
+ * \date 17. January 2012
  */
 
 #include <gtk/gtk.h>
 #include "../twitter.h"
 
-#ifndef __STATUS_DIALOG_H__
-#define __STATUS_DIALOG_H__
+#ifndef __REPLIES_DIALOG_H__
+#define __REPLIES_DIALOG_H__
 
 /**
  * @addtogroup Gui
@@ -41,14 +41,14 @@
  *
  * Creates the status dialog.
  */
-GtkWidget *status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gchar * restrict first_status);
+GtkWidget *replies_dialog_create(GtkWidget *parent, const gchar * restrict account, const gchar * restrict first_status);
 
 /**
  * \param widget status dialog
  *
  * Runs the status dialog.
  */
-void status_dialog_run(GtkWidget *widget);
+void replies_dialog_run(GtkWidget *widget);
 
 /**
  * @}

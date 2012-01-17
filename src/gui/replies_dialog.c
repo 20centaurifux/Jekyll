@@ -15,7 +15,7 @@
     General Public License for more details.
  ***************************************************************************/
 /*!
- * \file status_dialog.h
+ * \file replies_dialog.c
  * \brief A dialog displaying tweets.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
@@ -24,7 +24,7 @@
 
 #include <glib/gi18n.h>
 #include "gtkdeletabledialog.h"
-#include "status_dialog.h"
+#include "replies_dialog.h"
 #include "gtktwitterstatus.h"
 #include "mainwindow.h"
 #include "gtk_helpers.h"
@@ -36,7 +36,7 @@
  */
 
 /**
- * \struct _StatusDialogPrivate
+ * \struct _RepliesDialogPrivate
  * \brief Private data of the "status" dialog.
  */
 typedef struct
@@ -59,15 +59,15 @@ typedef struct
 	GMutex *mutex;
 	/*! Unique pixbuf group. */
 	gchar pixbuf_group[32];
-} _StatusDialogPrivate;
+} _RepliesDialogPrivate;
 
 /*
  *	helpers:
  */
 static void
-_status_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser user)
+_replies_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser user)
 {
-	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
 	GtkWidget *tweet;
 
 	gdk_threads_enter();
@@ -93,9 +93,9 @@ _status_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser u
 }
 
 static gboolean
-_status_dialog_finished(GtkWidget *widget)
+_replies_dialog_finished(GtkWidget *widget)
 {
-	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
 	gboolean finished;
 
 	g_mutex_lock(private->mutex);
@@ -109,9 +109,9 @@ _status_dialog_finished(GtkWidget *widget)
  *	worker:
  */
 static gpointer
-_status_dialog_worker(GtkWidget *widget)
+_replies_dialog_worker(GtkWidget *widget)
 {
-	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
 	TwitterClient *client;
 	TwitterStatus status;
 	TwitterUser user;
@@ -129,7 +129,7 @@ _status_dialog_worker(GtkWidget *widget)
 		{
 			if(twitter_client_get_status(client, private->username, guid, &status, &user, &err))
 			{
-				_status_dialog_add_status(widget, status, user);
+				_replies_dialog_add_status(widget, status, user);
 
 				if(status.prev_status[0])
 				{
@@ -169,9 +169,9 @@ _status_dialog_worker(GtkWidget *widget)
 }
 
 static gboolean
-_status_dialog_close_worker(GtkWidget *dialog)
+_replies_dialog_close_worker(GtkWidget *dialog)
 {
-	while(!_status_dialog_finished(dialog))
+	while(!_replies_dialog_finished(dialog))
 	{
 		g_usleep(150000);
 	}
@@ -187,9 +187,9 @@ _status_dialog_close_worker(GtkWidget *dialog)
  *	events:
  */
 static void
-_status_dialog_destroy(GtkDialog *dialog, gpointer user_data)
+_replies_dialog_destroy(GtkDialog *dialog, gpointer user_data)
 {
-	_StatusDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
+	_RepliesDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
 
 	g_assert(GTK_IS_DELETABLE_DIALOG(dialog));
 
@@ -199,7 +199,7 @@ _status_dialog_destroy(GtkDialog *dialog, gpointer user_data)
 }
 
 static gboolean
-_status_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user_data)
+_replies_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user_data)
 {
 	g_assert(GTK_IS_DELETABLE_DIALOG(dialog));
 
@@ -212,21 +212,21 @@ _status_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user_
 }
 
 static void
-_status_dialog_button_ok_clicked(GtkWidget *button, GtkWidget *dialog)
+_replies_dialog_button_ok_clicked(GtkWidget *button, GtkWidget *dialog)
 {
-	_StatusDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
+	_RepliesDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
 
 	mainwindow_remove_pixbuf_group(private->parent, private->pixbuf_group);
 	gtk_helpers_set_widget_busy(dialog, TRUE);
 	g_cancellable_cancel(private->cancellable);
-	g_idle_add((GSourceFunc)_status_dialog_close_worker, dialog);
+	g_idle_add((GSourceFunc)_replies_dialog_close_worker, dialog);
 }
 
 /*
  *	public:
  */
 GtkWidget *
-status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gchar * restrict first_status)
+replies_dialog_create(GtkWidget *parent, const gchar * restrict account, const gchar * restrict first_status)
 {
 	GtkWidget *dialog;
 	GtkWidget *hbox;
@@ -235,7 +235,7 @@ status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gc
 	GtkWidget *scrolled;
 	GtkWidget *area;
 	GtkWidget *button_ok;
-	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_malloc(sizeof(_StatusDialogPrivate));
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_malloc(sizeof(_RepliesDialogPrivate));
 	static guint id = 0;
 
 	g_assert(GTK_IS_WINDOW(parent));
@@ -292,9 +292,9 @@ status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gc
 	gtk_widget_show_all(dialog);
 
 	/* signals */
-	g_signal_connect(dialog, "destroy", G_CALLBACK(_status_dialog_destroy), NULL);
-	g_signal_connect(dialog, "delete-event", G_CALLBACK(_status_dialog_delete), NULL);
-	g_signal_connect(button_ok, "clicked", G_CALLBACK(_status_dialog_button_ok_clicked), dialog);
+	g_signal_connect(dialog, "destroy", G_CALLBACK(_replies_dialog_destroy), NULL);
+	g_signal_connect(dialog, "delete-event", G_CALLBACK(_replies_dialog_delete), NULL);
+	g_signal_connect(button_ok, "clicked", G_CALLBACK(_replies_dialog_button_ok_clicked), dialog);
 
 	/* update id */
 	if(id != G_MAXUINT)
@@ -310,14 +310,14 @@ status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gc
 }
 
 void
-status_dialog_run(GtkWidget *widget)
+replies_dialog_run(GtkWidget *widget)
 {
-	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
 	GError *err = NULL;
 
 	g_assert(GTK_IS_DELETABLE_DIALOG(widget));
 
-	private->thread = g_thread_create((GThreadFunc)_status_dialog_worker, widget, TRUE, &err);
+	private->thread = g_thread_create((GThreadFunc)_replies_dialog_worker, widget, TRUE, &err);
 
 	if(err)
 	{
