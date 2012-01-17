@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. June 2011
+ * \date 16. January 2012
  */
 
 #include "twitterdb_queries.h"
@@ -47,6 +47,7 @@ const gchar *twitterdb_queries_create_tables[] =
 
 	"CREATE TABLE IF NOT EXISTS status ("
 	"guid VARCHAR(32) NOT NULL, "
+	"prev_status VARCHAR(32), "
 	"text VARCHAR(140) NOT NULL, "
 	"user_guid VARCHAR(32) NOT NULL REFERENCES user(guid) ON DELETE CASCADE, "
 	"timestamp INTEGER NOT NULL, "
@@ -131,9 +132,11 @@ const gchar *twitterdb_queries_mark_statuses_read = "UPDATE status SET read=1";
 
 const gchar *twitterdb_queries_status_exists = "SELECT COUNT(guid) FROM status WHERE guid=?";
 
-const gchar *twitterdb_queries_insert_status = "INSERT INTO status (guid, text, user_guid, timestamp, read) VALUES (?, ?, ?, ?, 0)";
+const gchar *twitterdb_queries_insert_status = "INSERT INTO status (guid, prev_status, text, user_guid, timestamp, read) VALUES (?, ?, ?, ?, ?, 0)";
 
 const gchar *twitterdb_queries_delete_status = "DELETE FROM status WHERE guid=?";
+
+const gchar *twitterdb_queries_get_status = "SELECT text, user_guid, timestamp, prev_status FROM status WHERE guid=?";
 
 const gchar *twitterdb_queries_replace_follower = "REPLACE INTO follower (user1_guid, user2_guid) VALUES (?, ?)";
 
@@ -197,7 +200,7 @@ const gchar *twitterdb_queries_insert_direct_message = "INSERT INTO direct_messa
 
 const gchar *twitterdb_queries_get_tweets_from_timeline =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
-	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description "
+	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description, status.prev_status "
 	"FROM timeline "
 	"INNER JOIN status ON status.guid=timeline.status_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
@@ -207,7 +210,7 @@ const gchar *twitterdb_queries_get_tweets_from_timeline =
 
 const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
-	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description "
+	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description, status.prev_status "
 	"FROM timeline "
 	"INNER JOIN status ON status.guid=timeline.status_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
@@ -217,7 +220,7 @@ const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 
 const gchar *twitterdb_queries_get_tweets_from_list =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
-	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description "
+	"publisher.username, publisher.realname, publisher.image, publisher.location, publisher.website, publisher.description, status.prev_status "
 	"FROM list_timeline "
 	"INNER JOIN status ON status.guid=list_timeline.status_guid "
 	"INNER JOIN list ON list_timeline.list_guid=list.guid "
@@ -246,6 +249,8 @@ const gchar *twitterdb_queries_get_sync_seconds = "SELECT seconds FROM last_sync
 const gchar *twitterdb_queries_replace_sync_seconds = "REPLACE INTO last_sync (source, user_guid, seconds) VALUES (?, ?, ?)";
 
 const gchar *twitterdb_queries_remove_sync_seconds = "DELETE FROM last_sync WHERE source=?";
+
+const gchar *twitterdb_queries_add_prev_status_column = "ALTER TABLE status ADD COLUMN prev_status VARCHAR(32)";
 
 /**
  * @}

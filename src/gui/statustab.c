@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 6. January 2012
+ * \date 17. January 2012
  */
 
 #include <gio/gio.h>
@@ -39,6 +39,7 @@
 #include "remove_list_dialog.h"
 #include "composer_dialog.h"
 #include "retweet_dialog.h"
+#include "replies_dialog.h"
 #include "../twitterdb.h"
 #include "../urlopener.h"
 #include "../helpers.h"
@@ -378,10 +379,29 @@ _status_tab_account_list_contains(gchar **accounts, const gchar *account)
 }
 
 /*
+ *	status replies:
+ */
+static void
+_status_tab_replies_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+{
+	GtkWidget *dialog;
+
+	dialog = replies_dialog_create(tabbar_get_mainwindow(tab->tabbar), tab->owner, gtk_twitter_status_get_guid(status));
+
+	replies_dialog_run(dialog);
+
+	if(GTK_IS_WIDGET(dialog))
+	{
+		gtk_widget_destroy(dialog);
+	}
+}
+
+
+/*
  *	reply:
  */
 static gboolean
-_status_tab_compose_tweet_callback(const gchar *username, const gchar *text, _StatusTab *tab)
+_status_tab_compose_tweet_callback(const gchar *username, const gchar *text, const gchar *prev_status, _StatusTab *tab)
 {
 	GtkWidget *mainwindow;
 	TwitterClient *client;
@@ -393,7 +413,7 @@ _status_tab_compose_tweet_callback(const gchar *username, const gchar *text, _St
 
 	if((client = mainwindow_create_twittter_client(mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME)))
 	{
-		if((result = twitter_client_post(client, username, text, &err)))
+		if((result = twitter_client_post(client, username, text, prev_status, &err)))
 		{
 			mainwindow_sync_gui(mainwindow);
 		}
@@ -428,7 +448,7 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gchar *text;
 
 	/* create & run composer dialog */
-	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, 1, tab->owner, _("Reply"));
+	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, 1, tab->owner, gtk_twitter_status_get_guid(status), _("Reply"));
 	g_object_get(G_OBJECT(status), "username", &username, NULL);
 	text = g_strdup_printf("@%s ", username);
 	composer_dialog_set_apply_callback(dialog, (ComposerApplyCallback)_status_tab_compose_tweet_callback, tab);
@@ -1404,6 +1424,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			             "edit-friendship-button-has-tooltip", TRUE,
 				     "show-retweet_button", owner ? FALSE : TRUE,
 				     "show-delete-button", FALSE,
+				     "show-replies-button", status.prev_status[0] ? TRUE : FALSE,
 				     "selectable", TRUE,
 				     "background-color", tab->background_color,
 				     NULL);
@@ -1422,6 +1443,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			g_signal_connect(G_OBJECT(widget), "edit-friendship-button-query-tooltip", (GCallback)_status_tab_edit_friendship_button_query_tooltip, tab);
 			g_signal_connect(G_OBJECT(widget), "reply-button-clicked", (GCallback)_status_tab_reply_button_clicked, tab);
 			g_signal_connect(G_OBJECT(widget), "retweet-button-clicked", (GCallback)_status_tab_retweet_button_clicked, tab);
+			g_signal_connect(G_OBJECT(widget), "replies-button-clicked", (GCallback)_status_tab_replies_button_clicked, tab);
 			g_signal_connect(G_OBJECT(widget), "grab-focus", (GCallback)_status_tab_grab_focus, tab);
 
 			/* load pixmap */

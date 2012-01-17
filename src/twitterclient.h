@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. December 2011
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTER_CLIENT_H__
@@ -160,6 +160,19 @@ struct _TwitterClientClass
 	/**
 	 * \param twitterclient TwitterClient instance
 	 * \param username an username
+	 * \param guid guid of the status
+	 * \param status location to store status information
+	 * \param user location to store user information
+	 * \param err structure to store failure messages
+	 * \return TRUE on success
+	 
+	 * Gets a single status.
+	 */
+	gboolean (* get_status)(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err);
+
+	/**
+	 * \param twitterclient TwitterClient instance
+	 * \param username an username
 	 * \param query search query
 	 * \param func callback function
 	 * \param user_data  user data
@@ -270,12 +283,13 @@ struct _TwitterClientClass
 	 * \param twitterclient TwitterClient instance
 	 * \param account name of the Twitter account
 	 * \param text text to post
+	 * \param prev_status guid of an status that the update is in reply to
 	 * \param err structure to store failure messages
 	 * \return TRUE on success
 	 *
 	 * Posts a tweet.
 	 */
-	gboolean (* post)(TwitterClient *client, const gchar * restrict account, const gchar * restrict text, GError **err);
+	gboolean (* post)(TwitterClient *client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err);
 
 	/**
 	 * \param twitterclient TwitterClient instance
@@ -320,6 +334,8 @@ gboolean twitter_client_process_usertimeline(TwitterClient *twitter_client, cons
 /*! See _TwitterClientClass::process_list for further information. */
 gboolean twitter_client_process_list(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict list,
                                      TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
+/*! See _TwitterClientClass::get_status for further information. */
+gboolean twitter_client_get_status(TwitterClient *twitterclient, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err);
 /*! See _TwitterClientClass::search for further information. */
 gboolean twitter_client_search(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict query, TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err);
 /*! See _TwitterClientClass::add_user_to_list for further information. */
@@ -339,7 +355,7 @@ gboolean twitter_client_add_friend(TwitterClient *twitter_client, const gchar * 
 /*! See _TwitterClientClass::remove_friend for further information. */
 gboolean twitter_client_remove_friend(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict friend, GError **err);
 /*! See _TwitterClientClass::post for further information. */
-gboolean twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err);
+gboolean twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err);
 /*! See _TwitterClientClass::retweet for further information. */
 gboolean twitter_client_retweet(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict guid, GError **err);
 

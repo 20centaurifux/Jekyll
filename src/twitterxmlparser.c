@@ -19,7 +19,7 @@
  * \brief Parsing XML data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. June 2011
+ * \date 11. January 2012
  */
 
 #include <stdlib.h>
@@ -140,6 +140,10 @@ _twitter_xml_process_status_section(TwitterStatus *status, const gchar *element_
 	else if(!g_ascii_strcasecmp(element_name, "text"))
 	{
 		g_strlcpy(status->text, buffer->str, 280);
+	}
+	else if(!g_ascii_strcasecmp(element_name, "in_reply_to_status_id"))
+	{
+		g_strlcpy(status->prev_status, buffer->str, 32);
 	}
 }
 

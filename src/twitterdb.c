@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. September 2011
+ * \date 16. January 2012
  */
 
 #include <string.h>
@@ -49,7 +49,7 @@ static GStaticMutex mutex_twitterdb = G_STATIC_MUTEX_INIT;
  *	helpers:
  */
 /*! Copy string from sqlite3_column to destination buffer. */
-#define TWITTERDB_COPY_TEXT_COLUMN(dest, index, size) g_strlcpy(dest, (const gchar *)sqlite3_column_text(stmt, index), size)
+#define TWITTERDB_COPY_TEXT_COLUMN(dest, index, size) if(sqlite3_column_text(stmt, index)) g_strlcpy(dest, (const gchar *)sqlite3_column_text(stmt, index), size)
 
 static void
 _twitterdb_set_error(GError **err, TwitterDbHandle *handle)
@@ -139,7 +139,6 @@ _twitterdb_execute_statement(TwitterDbHandle *handle, sqlite3_stmt *stmt, gboole
 		case SQLITE_BUSY:
 			if(retry)
 			{
-				g_warning("RETRY"); // TODO
 				g_usleep(5000000);
 				return _twitterdb_execute_statement(handle, stmt, retry, err);
 			}
@@ -358,6 +357,7 @@ _twitterdb_fetch_tweets(TwitterDbHandle *handle, sqlite3_stmt *stmt, GList **twe
 			TWITTERDB_COPY_TEXT_COLUMN(user->location, 8, 64);
 			TWITTERDB_COPY_TEXT_COLUMN(user->url, 9, 256);
 			TWITTERDB_COPY_TEXT_COLUMN(user->description, 10, 280);
+			TWITTERDB_COPY_TEXT_COLUMN(tweet->prev_status, 11, 32);
 
 			*tweets = g_list_append(*tweets, tweet);
 			*users = g_list_append(*users, user);
@@ -820,7 +820,7 @@ twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, GError **
 }
 
 gboolean
-twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict user_guid, const gchar * restrict text, gint64 timestamp, gint *count, GError **err)
+twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict prev_status, const gchar * restrict user_guid, const gchar * restrict text, gint64 timestamp, gint *count, GError **err)
 {
 	sqlite3_stmt *stmt;
 	gboolean exists = FALSE;
@@ -858,9 +858,10 @@ twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, cons
 		if(_twitterdb_prepare_statement(handle, twitterdb_queries_insert_status, &stmt, err))
 		{
 			sqlite3_bind_text(stmt, 1, guid, -1, NULL);
-			sqlite3_bind_text(stmt, 2, text, -1, NULL);
-			sqlite3_bind_text(stmt, 3, user_guid, -1, NULL);
-			sqlite3_bind_int(stmt, 4, (sqlite3_int64)timestamp);
+			sqlite3_bind_text(stmt, 2, prev_status, -1, NULL);
+			sqlite3_bind_text(stmt, 3, text, -1, NULL);
+			sqlite3_bind_text(stmt, 4, user_guid, -1, NULL);
+			sqlite3_bind_int(stmt, 5, (sqlite3_int64)timestamp);
 			if(!(result = (_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_DONE) ? TRUE : FALSE))
 			{
 				_twitterdb_set_error(err, handle);
@@ -1489,6 +1490,71 @@ twitterdb_append_status_to_list(TwitterDbHandle *handle, const gchar * restrict 
 }
 
 gboolean
+twitterdb_status_exists(TwitterDbHandle *handle, const gchar *guid, GError **err)
+{
+	sqlite3_stmt *stmt;
+	gboolean result = FALSE;
+
+	g_static_mutex_lock(&mutex_twitterdb);
+
+	if(_twitterdb_prepare_statement(handle, twitterdb_queries_status_exists, &stmt, err))
+	{
+		sqlite3_bind_text(stmt, 1, guid, -1, NULL);
+
+		if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_ROW)
+		{
+			 if(sqlite3_column_int(stmt, 0) > 0)
+			 {
+				 result = TRUE;
+			 }
+		}
+
+		sqlite3_finalize(stmt);
+	}
+
+	g_static_mutex_unlock(&mutex_twitterdb);
+
+	return result;
+}
+
+gboolean
+twitterdb_get_status(TwitterDbHandle *handle, const gchar *guid, TwitterStatus *status, TwitterUser *user, GError **err)
+{
+	sqlite3_stmt *stmt;
+	gchar user_guid[32];
+	gboolean result = FALSE;
+
+	g_static_mutex_lock(&mutex_twitterdb);
+
+	if(_twitterdb_prepare_statement(handle, twitterdb_queries_get_status, &stmt, err))
+	{
+		memset(status, 0, sizeof(TwitterStatus));
+		sqlite3_bind_text(stmt, 1, guid, -1, NULL);
+
+		if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_ROW)
+		{
+			g_strlcpy(status->id, guid, 32);
+			TWITTERDB_COPY_TEXT_COLUMN(user_guid, 1, 32);
+			status->timestamp = sqlite3_column_int(stmt, 1);
+			TWITTERDB_COPY_TEXT_COLUMN(status->text, 0, 280);
+			TWITTERDB_COPY_TEXT_COLUMN(status->prev_status, 3, 32);
+			result = TRUE;
+		}
+
+		sqlite3_finalize(stmt);
+	}
+
+	g_static_mutex_unlock(&mutex_twitterdb);
+
+	if(result)
+	{
+		result = _twitterdb_get_user(handle, user_guid, user, err);
+	}
+
+	return result;
+}
+
+gboolean
 twitterdb_append_user_to_list(TwitterDbHandle *handle, const gchar * restrict list_guid, const gchar * restrict user_guid, GError **err)
 {
 	gboolean result;
@@ -1858,6 +1924,33 @@ twitterdb_remove_last_sync_source(TwitterDbHandle *handle, TwitterDbSyncSource s
 	sqlite3_finalize(stmt);
 
 	g_static_mutex_unlock(&mutex_twitterdb);
+
+	return result;
+}
+
+gboolean
+twitterdb_upgrade_0_1_to_0_2(TwitterDbHandle *handle, GError **err)
+{
+	sqlite3_stmt *stmt;
+	gboolean result = FALSE;
+
+	g_debug("Altering status table: \"%s\"", twitterdb_queries_add_prev_status_column);
+	if(_twitterdb_execute_non_query(handle, twitterdb_queries_add_prev_status_column, err))
+	{
+		g_debug("Updating version to 0.2");
+		if(_twitterdb_prepare_statement(handle, twitterdb_queries_replace_version, &stmt, err))
+		{
+			sqlite3_bind_int(stmt, 1, 0);
+			sqlite3_bind_int(stmt, 2, 2);
+	
+			if(_twitterdb_execute_statement(handle, stmt, TRUE, err) == SQLITE_DONE)
+			{
+				result = TRUE;
+			}
+
+			sqlite3_finalize(stmt);
+		}
+	}
 
 	return result;
 }

@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. June 2011
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTERDB_QUERIES_H__
@@ -60,6 +60,8 @@ extern const gchar *twitterdb_queries_status_exists;
 extern const gchar *twitterdb_queries_insert_status;
 /*! Deletes an status. */
 extern const gchar *twitterdb_queries_delete_status;
+/*! Gets a status. */
+extern const gchar *twitterdb_queries_get_status;
 /*! Creates follower information. */
 extern const gchar *twitterdb_queries_replace_follower;
 /*! Removes a follower. */
@@ -126,6 +128,8 @@ extern const gchar *twitterdb_queries_get_sync_seconds;
 extern const gchar *twitterdb_queries_replace_sync_seconds;
 /*! Delete last synchronization timestamps related to a source. */
 extern const gchar *twitterdb_queries_remove_sync_seconds;
+/*! Add prev_status column to status table, */
+extern const gchar *twitterdb_queries_add_prev_status_column;
 
 /**
  * @}

@@ -19,7 +19,7 @@
  * \brief A dialog for composing messages.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. June 2011
+ * \date 13. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -33,19 +33,20 @@
  */
 
 /*! ComposerDialog apply callback function. */
-typedef gboolean (* ComposerApplyCallback)(const gchar *user, const gchar *text, gpointer user_data);
+typedef gboolean (* ComposerApplyCallback)(const gchar *user, const gchar *text, const gchar *prev_status, gpointer user_data);
 
 /**
  * \param parent parent window
  * \param users list of users shown in a combobox
  * \param users_count number of users
  * \param selected_user name of the selected user
+ * \param prev_status the previous
  * \param title window title
  * \return a GTK dialog
  *
  * Creates the dialog.
  */
-GtkWidget *composer_dialog_create(GtkWidget *parent, gchar **users, gint users_count, const gchar *selected_user, const gchar *title);
+GtkWidget *composer_dialog_create(GtkWidget *parent, gchar **users, gint users_count, const gchar *selected_user, const gchar *prev_status, const gchar *title);
 
 /**
  * \param dialog composer dialog
@@ -71,7 +72,6 @@ void composer_dialog_set_text(GtkWidget *dialog, const gchar *text);
  * Returns the selected user.
  */
 gchar *composer_dialog_get_user(GtkWidget *dialog);
-
 
 /**
  * \param dialog composer dialog

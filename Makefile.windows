@@ -1,6 +1,6 @@
 # compiler options:
 CC=gcc
-CFLAGS=-std=c99 -Wall -mms-bitfields -O2 -DGTK_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DPANGO_DISABLE_DEPRECATED -Wl,-subsystem,windows
+CFLAGS=-std=c99 -Wall -mms-bitfields -O2 -DGTK_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DPANGO_DISABLE_DEPRECATED 
 CFLAGS_SQLITE3=-O0 -DTHREADSAFE=1 -D_REENTRANT
 
 # utilities:
@@ -11,11 +11,11 @@ MSGFMT=c:/Programme/GnuWin32/bin/msgfmt.exe
 DOXYGEN=doxygen
 
 # include files & libraries:
-GLIB_INC=-IC:\MinGW\include\glib-2.0 -IC:\MinGW\lib\glib-2.0\include
+GLIB_INC=-ID:\MinGW\include\glib-2.0 -ID:\MinGW\lib\glib-2.0\include
 GLIB_LIB=-lglib-2.0 -lgio-2.0 -lgobject-2.0 -lgthread-2.0
-GTK_INC=-IC:\MinGW\include\gtk-2.0 -IC:\MinGW\include\cairo -IC:\MinGW\include\pango-1.0 -IC:\MinGW\include\atk-1.0 -IC:\MinGW\lib\gtk-2.0\include
+GTK_INC=-ID:\MinGW\include\gtk-2.0 -ID:\MinGW\include\cairo -ID:\MinGW\include\pango-1.0 -ID:\MinGW\include\atk-1.0 -ID:\MinGW\lib\gtk-2.0\include
 GTK_LIB=-lpango-1.0 -latk-1.0 -lgdk-win32-2.0 -lgtk-win32-2.0 -llibgdk_pixbuf-2.0 -lcairo
-OPENSSL_INC=-IC:\MinGW\include\openssl
+OPENSSL_INC=-ID:\MinGW\include\openssl
 OPENSSL_LIB=-leay32 -lssleay32
 
 LIBS=-lwsock32 -lws2_32 -lwst -lshell32 $(GLIB_LIB) $(GTK_LIB) $(OPENSSL_LIB) -llibintl

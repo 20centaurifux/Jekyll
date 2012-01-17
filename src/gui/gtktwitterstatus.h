@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author sebastian fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. December 2011
+ * \date 17. January 2012
  */
 
 #ifndef __GTK_TWITTER_STATUS_H__
@@ -83,6 +83,7 @@ struct _GtkTwitterStatus
  * - \b show-retweet-button: show retweet button (boolean, rw)\n
  * - \b edit-friendship-button-has-tooltip: activate friendship button tooltip (boolean, rw)\n
  * - \b show-delete-button: show delete button (boolean, rw)\n
+ * - \b show-replies-button: show replies button (boolean, rw)\n
  * - \b selectable: enable text selection (boolean, rw)\n
  * - \b background-color: the background-color (string, rw)\n
  *
@@ -94,6 +95,7 @@ struct _GtkTwitterStatus
  * - \b edit-friendship-button-query-tooltip: gboolean user_function(GtkTwitterStatus *status, GtkTooltip *tooltip, gpointer user_data)
  * - \b retweet-button-clicked: void user_function(GtkTwitterStatus *status, gchar *guid, gpointer user_data)
  * - \b delete-button-clicked: void user_function(GtkTwitterStatus *status, gchar *status_guid, gpointer user_data)
+ * - \b replies-button-clicked: void user_function(GtkTwitterStatus *status, gchar *status_guid, gpointer user_data)
  * - \b username-clicked: void user_function(GtkTwitterStatus *status, gchar *username, gpointer user_data)
  * - \b url-activated: void user_function(GtkTwitterStatus *status, gchar *url, gpointer user_data)
  */

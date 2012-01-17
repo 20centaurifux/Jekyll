@@ -19,7 +19,7 @@
  * \brief Twitter synchronization functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. May 2011
+ * \date 11. January 2012
  */
 
 #include <string.h>
@@ -54,7 +54,7 @@ _twittersync_save_status(TwitterDbHandle *handle, TwitterStatus status, TwitterU
 		/* save status */
 		g_debug("Registering status (\"%s\")", status.id);
 		timestamp = twitter_timestamp_to_unix_timestamp(status.created_at);
-		result = twitterdb_save_status(handle, status.id, user.id, status.text, timestamp, status_count, &err);
+		result = twitterdb_save_status(handle, status.id, status.prev_status, user.id, status.text, timestamp, status_count, &err);
 	}
 
 	/* display & free error message */

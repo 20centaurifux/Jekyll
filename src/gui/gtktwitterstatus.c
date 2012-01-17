@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 6. January 2012
+ * \date 17. January 2012
  */
 
 #include <string.h>
@@ -64,6 +64,7 @@ enum
 	PROP_FRIENDSHIP_BUTTON_HAS_TOOLIP,
 	PROP_LISTS_BUTTON_HAS_TOOLIP,
 	PROP_SHOW_DELETE_BUTTON,
+	PROP_SHOW_REPLIES_BUTTON,
 	PROP_SELECTABLE
 };
 
@@ -74,6 +75,7 @@ enum
 	GTK_TWITTER_STATUS_ACTION_EDIT_FRIENDSHIP,
 	GTK_TWITTER_STATUS_ACTION_RETWEET,
 	GTK_TWITTER_STATUS_ACTION_DELETE,
+	GTK_TWITTER_STATUS_ACTION_REPLIES,
 	GTK_TWITTER_STATUS_ACTION_SHOW_USER
 };
 
@@ -262,8 +264,22 @@ struct _GtkTwitterStatusPrivate
 		/*! Visibility of the button. */
 		gboolean visible;
 	} delete_button;
+	/**
+	 * \struct _replies_button
+	 * \brief Holds replies button visibility and widget.
+	 *
+	 * \var replies_button
+	 * \brief History button visibility and widget.
+	 */
+	struct _replies_button
+	{
+		/*! A button. */
+		GtkWidget *widget;
+		/*! Visibility of the button. */
+		gboolean visible;
+	} replies_button;
 	/*! Event parameters. */
-	_GtkTwitterStatusEventArg args[6];
+	_GtkTwitterStatusEventArg args[7];
 };
 
 /*! Define GtkTwitterStatus. */
@@ -648,6 +664,7 @@ _gtk_twitter_status_update_button_visibility(GtkWidget *twitter_status)
 	gtk_widget_set_visible(priv->edit_friendship_button.widget, priv->edit_friendship_button.visible);
 	gtk_widget_set_visible(priv->retweet_button.widget, priv->retweet_button.visible);
 	gtk_widget_set_visible(priv->delete_button.widget, priv->delete_button.visible);
+	gtk_widget_set_visible(priv->replies_button.widget, priv->replies_button.visible);
 }
 
 static void
@@ -706,6 +723,10 @@ _gtk_twitter_status_link_label_clicked(GtkLinkLabel *label, _GtkTwitterStatusEve
 
 		case GTK_TWITTER_STATUS_ACTION_DELETE:
 			g_signal_emit_by_name(arg->widget, "delete-button-clicked", priv->guid);
+			break;
+
+		case GTK_TWITTER_STATUS_ACTION_REPLIES:
+			g_signal_emit_by_name(arg->widget, "replies-button-clicked", priv->guid);
 			break;
 
 		case GTK_TWITTER_STATUS_ACTION_SHOW_USER:
@@ -779,6 +800,7 @@ _gtk_twitter_status_set_background(GtkTwitterStatus *twitter_status, gchar *spec
 			gtk_widget_modify_bg(GTK_WIDGET(priv->retweet_button.widget), states[i], &color);
 			gtk_widget_modify_bg(GTK_WIDGET(priv->edit_lists_button.widget), states[i], &color);
 			gtk_widget_modify_bg(GTK_WIDGET(priv->delete_button.widget), states[i], &color);
+			gtk_widget_modify_bg(GTK_WIDGET(priv->replies_button.widget), states[i], &color);
 		}
 	}
 	else
@@ -881,6 +903,10 @@ gtk_twitter_status_class_init(GtkTwitterStatusClass *klass)
 	                                g_param_spec_boolean("show-delete-button", NULL, NULL, FALSE, G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
+	                                PROP_SHOW_REPLIES_BUTTON,
+	                                g_param_spec_boolean("show-replies.button", NULL, NULL, FALSE, G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
 	                                PROP_SELECTABLE,
 	                                g_param_spec_boolean("selectable", NULL, NULL, FALSE, G_PARAM_READWRITE));
 
@@ -889,6 +915,7 @@ gtk_twitter_status_class_init(GtkTwitterStatusClass *klass)
 	g_signal_new("edit-lists-button-clicked", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	g_signal_new("edit-lists-button-query-tooltip", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_BOOLEAN__OBJECT, G_TYPE_BOOLEAN, 1, G_TYPE_OBJECT);
 	g_signal_new("delete-button-clicked", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
+	g_signal_new("replies_button-clicked", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	g_signal_new("username-activated", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	g_signal_new("url-activated", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	g_signal_new("edit-friendship-button-clicked", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
@@ -905,6 +932,7 @@ gtk_twitter_status_init(GtkTwitterStatus *twitter_status)
 	twitter_status->priv->edit_friendship_button.visible = TRUE;
 	twitter_status->priv->edit_lists_button.visible = TRUE;
 	twitter_status->priv->delete_button.visible = FALSE;
+	twitter_status->priv->replies_button.visible = FALSE;
 }
 
 static GObject*
@@ -1061,6 +1089,18 @@ gtk_twitter_status_constructor(GType type, guint n_construct_properties, GObject
 	gtk_link_label_set_attributes(GTK_LINK_LABEL(priv->delete_button.widget), attrs);
 	pango_attr_list_unref(attrs);
 
+	/* replies button */
+	alignment = gtk_alignment_new(0, 0, 0, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), alignment, FALSE, FALSE, 0);
+
+	priv->replies_button.widget = gtk_link_label_new(_("Replies"));
+	g_object_set(G_OBJECT(priv->replies_button.widget), "xmargin", 2, NULL);
+	gtk_container_add(GTK_CONTAINER(alignment), priv->replies_button.widget);
+
+	attrs = _gtk_twitter_status_create_link_label_attributes();
+	gtk_link_label_set_attributes(GTK_LINK_LABEL(priv->replies_button.widget), attrs);
+	pango_attr_list_unref(attrs);
+
 	/* pack widgets */
 	priv->ebox = gtk_event_box_new();
 	gtk_container_add(GTK_CONTAINER(priv->ebox), priv->hbox);
@@ -1077,6 +1117,7 @@ gtk_twitter_status_constructor(GType type, guint n_construct_properties, GObject
 	BUILD_GTK_TWITTER_STATUS_ARG(GTK_TWITTER_STATUS_ACTION_EDIT_FRIENDSHIP);
 	BUILD_GTK_TWITTER_STATUS_ARG(GTK_TWITTER_STATUS_ACTION_RETWEET);
 	BUILD_GTK_TWITTER_STATUS_ARG(GTK_TWITTER_STATUS_ACTION_DELETE);
+	BUILD_GTK_TWITTER_STATUS_ARG(GTK_TWITTER_STATUS_ACTION_REPLIES);
 	BUILD_GTK_TWITTER_STATUS_ARG(GTK_TWITTER_STATUS_ACTION_SHOW_USER);
 
 	g_signal_connect(priv->reply_button.widget, "clicked", (GCallback)_gtk_twitter_status_link_label_clicked, &priv->args[GTK_TWITTER_STATUS_ACTION_REPLY]);
@@ -1086,6 +1127,7 @@ gtk_twitter_status_constructor(GType type, guint n_construct_properties, GObject
 	g_signal_connect(priv->edit_friendship_button.widget, "query-tooltip", (GCallback)_gtk_twitter_status_link_label_query_tooltip, &priv->args[GTK_TWITTER_STATUS_ACTION_EDIT_FRIENDSHIP]);
 	g_signal_connect(priv->retweet_button.widget, "clicked", (GCallback)_gtk_twitter_status_link_label_clicked, &priv->args[GTK_TWITTER_STATUS_ACTION_RETWEET]);
 	g_signal_connect(priv->delete_button.widget, "clicked", (GCallback)_gtk_twitter_status_link_label_clicked, &priv->args[GTK_TWITTER_STATUS_ACTION_DELETE]);
+	g_signal_connect(priv->replies_button.widget, "clicked", (GCallback)_gtk_twitter_status_link_label_clicked, &priv->args[GTK_TWITTER_STATUS_ACTION_REPLIES]);
 	g_signal_connect(priv->username.widget, "clicked", (GCallback)_gtk_twitter_status_link_label_clicked, &priv->args[GTK_TWITTER_STATUS_ACTION_SHOW_USER]);
 	g_signal_connect(priv->status.widget, "url_activated", (GCallback)_gtk_twitter_status_url_activated, object);
 
@@ -1190,6 +1232,11 @@ gtk_twitter_status_set_property(GObject *object, guint property_id, const GValue
 			_gtk_twitter_status_update_button_visibility(GTK_WIDGET(self));
 			break;
 
+		case PROP_SHOW_REPLIES_BUTTON:
+			self->priv->replies_button.visible = g_value_get_boolean(value);
+			_gtk_twitter_status_update_button_visibility(GTK_WIDGET(self));
+			break;
+
 		case PROP_SELECTABLE:
 			self->priv->status.selectable = g_value_get_boolean(value);
 			gtk_label_set_selectable(GTK_LABEL(self->priv->status.widget), self->priv->status.selectable);
@@ -1262,6 +1309,11 @@ gtk_twitter_status_get_property(GObject *object, guint property_id, GValue *valu
 
 		case PROP_SHOW_DELETE_BUTTON:
 			g_value_set_boolean(value, self->priv->delete_button.visible);
+			_gtk_twitter_status_update_button_visibility(GTK_WIDGET(self));
+			break;
+
+		case PROP_SHOW_REPLIES_BUTTON:
+			g_value_set_boolean(value, self->priv->replies_button.visible);
 			_gtk_twitter_status_update_button_visibility(GTK_WIDGET(self));
 			break;
 
