@@ -463,8 +463,6 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 		g_mutex_unlock(tab->accountlist.mutex);
 	}
 
-	g_warning("length: %d", length);
-
 	/* create & run composer dialog */
 	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, length, tab->owner, gtk_twitter_status_get_guid(status), _("Reply"));
 	g_object_get(G_OBJECT(status), "username", &username, NULL);
@@ -2092,7 +2090,7 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 
 	mainwindow = tabbar_get_mainwindow(tabbar);
 	config = mainwindow_lock_config(mainwindow);
-	meta->owner = _status_tab_get_owner_from_id(id, tab_id, config);
+	meta->owner = _status_tab_get_owner_from_id(id, type_id, config);
 	mainwindow_unlock_config(mainwindow);
 
 	g_object_set_data(G_OBJECT(widget), "meta", (gpointer)meta);
