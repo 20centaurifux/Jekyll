@@ -19,7 +19,7 @@
  * \brief A dialog displaying tweets.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 13. January 2012
+ * \date 17. January 2012
  */
 
 #include <glib/gi18n.h>
@@ -84,7 +84,7 @@ _replies_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser 
 	             "show-edit-friendship-button", FALSE,
 	             "show-retweet-button", FALSE,
 	             "show-delete-button", FALSE,
-	             "show-history-button", FALSE,
+	             "show-replies-button", FALSE,
 	             NULL);
 	gtk_box_pack_start(GTK_BOX(private->vbox), tweet, FALSE, FALSE, 2);
 	gtk_widget_show_all(tweet);
