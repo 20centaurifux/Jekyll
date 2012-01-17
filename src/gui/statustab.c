@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 13. January 2012
+ * \date 17. January 2012
  */
 
 #include <gio/gio.h>
@@ -386,9 +386,9 @@ _status_tab_history_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 {
 	GtkWidget *dialog;
 
-	dialog = status_dialog_create(tabbar_get_mainwindow(tab->tabbar), _("History"));
+	dialog = status_dialog_create(tabbar_get_mainwindow(tab->tabbar), tab->owner, gtk_twitter_status_get_guid(status));
 
-	gtk_dialog_run(GTK_DIALOG(dialog));
+	status_dialog_run(dialog);
 
 	if(GTK_IS_WIDGET(dialog))
 	{

@@ -19,7 +19,7 @@
  * \brief A dialog displaying tweets.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 13. January 2012
+ * \date 16. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -35,21 +35,20 @@
 
 /**
  * \param parent parent window
- * \param title window title
+ * \param account name of an user account
+ * \param first_status first status to append
  * \return a GTK dialog
  *
  * Creates the status dialog.
  */
-GtkWidget *status_dialog_create(GtkWidget *parent, const gchar *title);
+GtkWidget *status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gchar * restrict first_status);
 
 /**
- * \param widget the status dialog
- * \param user author of the status
- * \param status status to append
+ * \param widget status dialog
  *
- * Adds a status to the dialog.
+ * Runs the status dialog.
  */
-void status_dialog_add_status(GtkWidget *widget, TwitterUser *user, TwitterStatus *status);
+void status_dialog_run(GtkWidget *widget);
 
 /**
  * @}

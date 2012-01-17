@@ -23,8 +23,12 @@
  */
 
 #include <glib/gi18n.h>
+#include "gtkdeletabledialog.h"
 #include "status_dialog.h"
 #include "gtktwitterstatus.h"
+#include "mainwindow.h"
+#include "gtk_helpers.h"
+#include "pixbuf_helpers.H"
 
 /**
  * @addtogroup Gui
@@ -39,9 +43,145 @@ typedef struct
 {
 	/*! The parent window. */
 	GtkWidget *parent;
+	/*! Account name. */
+	gchar username[64];
+	/*! First status to append. */
+	gchar first_status[32];
 	/*! Box containing tweets. */
 	GtkWidget *vbox;
+	/*! A cancellable. */
+	GCancellable *cancellable;
+	/*! Background worker thread. */
+	GThread *thread;
+	/*! Background worker status. */
+	gboolean finished;
+	/*! Mutex protecting finished. */
+	GMutex *mutex;
+	/*! Unique pixbuf group. */
+	gchar pixbuf_group[32];
 } _StatusDialogPrivate;
+
+/*
+ *	helpers:
+ */
+static void
+_status_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser user)
+{
+	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	GtkWidget *tweet;
+
+	gdk_threads_enter();
+	tweet = gtk_twitter_status_new();
+	g_object_set(G_OBJECT(tweet),
+	             "guid", status.id,
+	             "username", user.screen_name,
+	             "realname", user.name,
+	             "timestamp", status.timestamp,
+	             "status", status.text,
+	             "selectable", TRUE,
+	             "show-reply-button", FALSE,
+	             "show-edit-lists-button", FALSE,
+	             "show-edit-friendship-button", FALSE,
+	             "show-retweet-button", FALSE,
+	             "show-delete-button", FALSE,
+	             "show-history-button", FALSE,
+	             NULL);
+	gtk_box_pack_start(GTK_BOX(private->vbox), tweet, FALSE, FALSE, 2);
+	gtk_widget_show_all(tweet);
+	mainwindow_load_pixbuf(private->parent, private->pixbuf_group, user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, tweet, NULL);
+	gdk_threads_leave();
+}
+
+static gboolean
+_status_dialog_finished(GtkWidget *widget)
+{
+	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	gboolean finished;
+
+	g_mutex_lock(private->mutex);
+	finished = private->finished;
+	g_mutex_unlock(private->mutex);
+
+	return finished;
+}
+
+/*
+ *	worker:
+ */
+static gpointer
+_status_dialog_worker(GtkWidget *widget)
+{
+	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+	TwitterClient *client;
+	TwitterStatus status;
+	TwitterUser user;
+	gboolean abort = FALSE;
+	gchar guid[32];
+	GError *err = NULL;
+
+	g_debug("Starting worker: %s", __func__);
+
+	if((client = mainwindow_create_twittter_client(private->parent, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME)))
+	{
+		g_strlcpy(guid, private->first_status, 32);
+
+		while(!abort && !g_cancellable_is_cancelled(private->cancellable))
+		{
+			if(twitter_client_get_status(client, private->username, guid, &status, &user, &err))
+			{
+				_status_dialog_add_status(widget, status, user);
+
+				if(status.prev_status[0])
+				{
+					g_strlcpy(guid, status.prev_status, 32);
+				}
+				else
+				{
+					abort = TRUE;
+				}
+			}
+			else
+			{
+				abort = TRUE;
+			}
+		}
+
+		g_object_unref(client);
+	}
+	else
+	{
+		g_warning("Couldn't create TwitterClient instance.");
+	}
+
+	if(err)
+	{
+		g_warning("%s", err->message);
+		g_error_free(err);
+	}
+
+	g_mutex_lock(private->mutex);
+	private->finished = TRUE;
+	g_mutex_unlock(private->mutex);
+
+	g_debug("Leaving worker: %s", __func__);
+
+	return NULL;
+}
+
+static gboolean
+_status_dialog_close_worker(GtkWidget *dialog)
+{
+	while(!_status_dialog_finished(dialog))
+	{
+		g_usleep(150000);
+	}
+
+	gdk_threads_enter();
+	gtk_deletable_dialog_response(GTK_DELETABLE_DIALOG(dialog), GTK_RESPONSE_OK);
+	gdk_threads_leave();
+
+	return FALSE;
+}
 
 /*
  *	events:
@@ -49,38 +189,75 @@ typedef struct
 static void
 _status_dialog_destroy(GtkDialog *dialog, gpointer user_data)
 {
-	g_assert(GTK_IS_DIALOG(dialog));
+	_StatusDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
 
-	g_free(g_object_get_data(G_OBJECT(dialog), "private"));
+	g_assert(GTK_IS_DELETABLE_DIALOG(dialog));
+
+	g_mutex_free(private->mutex);
+	g_object_unref(private->cancellable);
+	g_free(private);
+}
+
+static gboolean
+_status_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user_data)
+{
+	g_assert(GTK_IS_DELETABLE_DIALOG(dialog));
+
+	if(gtk_widget_get_sensitive(GTK_WIDGET(dialog)))
+	{
+		gtk_deletable_dialog_response(dialog, GTK_RESPONSE_DELETE_EVENT);
+	}
+
+	return TRUE;
+}
+
+static void
+_status_dialog_button_ok_clicked(GtkWidget *button, GtkWidget *dialog)
+{
+	_StatusDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
+
+	mainwindow_remove_pixbuf_group(private->parent, private->pixbuf_group);
+	gtk_helpers_set_widget_busy(dialog, TRUE);
+	g_cancellable_cancel(private->cancellable);
+	g_idle_add((GSourceFunc)_status_dialog_close_worker, dialog);
 }
 
 /*
  *	public:
  */
 GtkWidget *
-status_dialog_create(GtkWidget *parent, const gchar *title)
+status_dialog_create(GtkWidget *parent, const gchar * restrict account, const gchar * restrict first_status)
 {
 	GtkWidget *dialog;
 	GtkWidget *hbox;
 	GtkWidget *frame;
 	GtkWidget *vbox;
 	GtkWidget *scrolled;
+	GtkWidget *area;
+	GtkWidget *button_ok;
 	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_malloc(sizeof(_StatusDialogPrivate));
+	static guint id = 0;
 
 	g_assert(GTK_IS_WINDOW(parent));
 
 	g_debug("Opening \"status\" dialog");
 
 	private->parent = parent;
+	private->cancellable = g_cancellable_new();
+	private->finished = FALSE;
+	private->mutex = g_mutex_new();
+	g_strlcpy(private->username, account, 64);
+	g_strlcpy(private->first_status, first_status, 32);
+	sprintf(private->pixbuf_group, "replies-%d", id);
 
-	dialog = gtk_dialog_new_with_buttons(title, GTK_WINDOW(parent), GTK_DIALOG_MODAL | GTK_DIALOG_NO_SEPARATOR, GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
+	dialog = gtk_deletable_dialog_new_with_buttons(_("Replies"), GTK_WINDOW(parent), GTK_DIALOG_MODAL | GTK_DIALOG_NO_SEPARATOR, NULL);
 	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ON_PARENT);
 	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
 	g_object_set_data(G_OBJECT(dialog), "private", private);
 
 	/* mainbox */
 	hbox = gtk_hbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+	gtk_container_add(GTK_CONTAINER(gtk_deletable_dialog_get_content_area(GTK_DELETABLE_DIALOG(dialog))), hbox);
 
 	/* create status list */
 	frame = gtk_frame_new(_("Tweets"));
@@ -104,39 +281,53 @@ status_dialog_create(GtkWidget *parent, const gchar *title)
 
 	private->vbox = vbox;
 
+	/* ok button */
+	area = gtk_deletable_dialog_get_action_area(GTK_DELETABLE_DIALOG(dialog));
+
+	button_ok = gtk_button_new_from_stock(GTK_STOCK_OK);
+	gtk_box_pack_start(GTK_BOX(area), button_ok, FALSE, FALSE, 0);
+
 	/* set size & show widgets */
 	gtk_widget_set_size_request(dialog, 500, 300);
 	gtk_widget_show_all(dialog);
 
 	/* signals */
 	g_signal_connect(dialog, "destroy", G_CALLBACK(_status_dialog_destroy), NULL);
+	g_signal_connect(dialog, "delete-event", G_CALLBACK(_status_dialog_delete), NULL);
+	g_signal_connect(button_ok, "clicked", G_CALLBACK(_status_dialog_button_ok_clicked), dialog);
+
+	/* update id */
+	if(id != G_MAXUINT)
+	{
+		++id;
+	}
+	else
+	{
+		id = 0;
+	}
 
 	return dialog;
 }
 
 void
-status_dialog_add_status(GtkWidget *widget, TwitterUser *user, TwitterStatus *status)
+status_dialog_run(GtkWidget *widget)
 {
 	_StatusDialogPrivate *private = (_StatusDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
-	GtkWidget *tweet;
+	GError *err = NULL;
 
-	tweet = gtk_twitter_status_new();
-	g_object_set(G_OBJECT(tweet),
-	             "guid", status->id,
-	             "username", user->screen_name,
-	             "realname", user->name,
-	             "timestamp", status->timestamp,
-	             "status", status->text,
-	             "selectable", TRUE,
-	             "show-reply-button", FALSE,
-	             "show-edit-lists-button", FALSE,
-	             "show-edit-friendship-button", FALSE,
-	             "show-retweet-button", FALSE,
-	             "show-delete-button", FALSE,
-	             "show-history-button", FALSE,
-	             NULL);
-	gtk_box_pack_start(GTK_BOX(private->vbox), tweet, FALSE, FALSE, 2);
-	gtk_widget_show_all(tweet);
+	g_assert(GTK_IS_DELETABLE_DIALOG(widget));
+
+	private->thread = g_thread_create((GThreadFunc)_status_dialog_worker, widget, TRUE, &err);
+
+	if(err)
+	{
+		g_warning("%s\n", err->message);
+		g_error_free(err);
+	}
+
+	g_assert(private->thread != NULL);
+
+	gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(widget));
 }
 
 /**
