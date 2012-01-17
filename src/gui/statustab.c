@@ -61,7 +61,7 @@ typedef struct
 	/*! An unique id. */
 	guint tab_id;
 	/*! Name of the owner. */
-	gchar owner[64];
+	gchar *owner;
 	/*! TRUE if tab has been initialized. */
 	gboolean initialized;
 	/*! The page widget. */
@@ -1404,7 +1404,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			/* create widget */
 			widget = gtk_twitter_status_new();
 
-			if(!g_strcmp0(user.screen_name, tab->owner))
+			if(tab->owner && !g_strcmp0(user.screen_name, tab->owner))
 			{
 				g_mutex_lock(tab->accountlist.mutex);
 				owner = _status_tab_account_list_contains(tab->accountlist.accounts, user.screen_name);
@@ -1842,6 +1842,7 @@ _status_tab_destroyed(GtkWidget *widget)
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
+	g_free(meta->owner);
 
 	g_slice_free1(sizeof(_StatusTab), meta);
 }
@@ -1957,6 +1958,47 @@ static TabFuncs status_tab_funcs =
 	_status_tab_scroll
 };
 
+static gchar *
+_status_tab_get_owner_from_id(const gchar *id, TabTypeId type_id, Config *config)
+{
+	gchar **pieces;
+	gchar *owner;
+	gchar **accounts;
+
+	if(type_id == TAB_TYPE_ID_LIST)
+	{
+		if((pieces = g_strsplit(id, "@", 2)))
+		{
+			owner = g_strdup(pieces[0]);
+			g_strfreev(pieces);
+		}
+	}
+	else if(type_id == TAB_TYPE_ID_SEARCH)
+	{
+		if((pieces = g_strsplit(id, ":", 2)))
+		{
+			owner = g_strdup(pieces[0]);
+			g_strfreev(pieces);
+		}
+	}
+	else
+	{
+		owner = g_strdup(id);
+	}
+
+	accounts = _status_tab_get_accounts(config);
+
+	if(!_status_tab_account_list_contains(accounts, owner))
+	{
+		g_free(owner);
+		owner = NULL;
+	}
+
+	g_strfreev(accounts);
+
+	return owner;
+}
+
 GtkWidget *
 status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 {
@@ -1968,7 +2010,8 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	GtkWidget *vbox;
 	_StatusTab *meta;
 	static guint tab_id = 0;
-	gchar **pieces;
+	GtkWidget *mainwindow;
+	Config *config;
 	GError *err = NULL;
 
 	/* create widget */
@@ -2027,28 +2070,10 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->background_color = NULL;
 	meta->background_changed = FALSE;
 
-	memset(meta->owner, 0, 64);
-
-	if(type_id == TAB_TYPE_ID_LIST)
-	{
-		if((pieces = g_strsplit(id, "@", 2)))
-		{
-			g_strlcpy(meta->owner, pieces[0], 64);
-			g_strfreev(pieces);
-		}
-	}
-	else if(type_id == TAB_TYPE_ID_SEARCH)
-	{
-		if((pieces = g_strsplit(id, ":", 2)))
-		{
-			g_strlcpy(meta->owner, pieces[0], 64);
-			g_strfreev(pieces);
-		}
-	}
-	else
-	{
-		g_strlcpy(meta->owner, id, 64);
-	}
+	mainwindow = tabbar_get_mainwindow(tabbar);
+	config = mainwindow_lock_config(mainwindow);
+	meta->owner = _status_tab_get_owner_from_id(id, tab_id, config);
+	mainwindow_unlock_config(mainwindow);
 
 	g_object_set_data(G_OBJECT(widget), "meta", (gpointer)meta);
 
