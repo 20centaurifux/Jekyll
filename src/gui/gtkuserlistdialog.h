@@ -19,7 +19,7 @@
  * \brief A dialog containing an user list.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 9. June 2011
+ * \date 18. January 2012
  */
 
 #ifndef __GTK_USER_LIST_DIALOG_H__
@@ -69,6 +69,7 @@ typedef struct _GtkUserListDialog GtkUserListDialog;
  * - \b checkbox-column-title: (string, rw)
  * - \b username-column-title: (string, rw)
  * - \b show-user-count: (boolean, rw)
+ * - \b message: (string, rw)
  */
 struct _GtkUserListDialogClass
 {
@@ -101,7 +102,15 @@ struct _GtkUserListDialogClass
 	 *
 	 * Returns assigned users.
 	 */
-	GList *(* get_users)(GtkUserListDialog *userlistdialog, gboolean checked);
+	GList *(* get_users)(GtkUserListDialog *dialog, gboolean checked);
+
+	/**
+	 * \param userlistdialog GtkUserListDialog instance
+	 * \return a new allocated string
+	 *
+	 * Gets the selected username.
+	 */
+	gchar *(* get_selected_user)(GtkUserListDialog *userlistdialog);
 };
 
 /**
@@ -125,6 +134,8 @@ void gtk_user_list_dialog_append_user(GtkUserListDialog *dialog, const gchar *us
 void gtk_user_list_dialog_set_user_pixbuf(GtkUserListDialog *dialog, const gchar *username, GdkPixbuf *pixbuf);
 /*! See _GtkUserListDialogClass::get_users for further information. */
 GList *gtk_user_list_dialog_get_users(GtkUserListDialog *dialog, gboolean checked);
+/*! See _GtkUserListDialogClass::get_selected_user for further information. */
+gchar *gtk_user_list_dialog_get_selected_user(GtkUserListDialog *dialog);
 
 /**
  * \return a GType

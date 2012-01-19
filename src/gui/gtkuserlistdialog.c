@@ -19,7 +19,7 @@
  * \brief A dialog containing an user list.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 30. September 2011
+ * \date 19. January 2012
  */
 
 #include <glib/gi18n.h>
@@ -46,7 +46,8 @@ enum
 	PROP_CHECKBOX_COLUMN_ACTIVATABLE,
 	PROP_CHECKBOX_COLUMN_TITLE,
 	PROP_USERNAME_COLUMN_TITLE,
-	PROP_SHOW_USER_COUNT
+	PROP_SHOW_USER_COUNT,
+	PROP_MESSAGE
 };
 
 enum
@@ -62,6 +63,8 @@ enum
  */
 struct _GtkUserListDialogPrivate
 {
+	/*! Label displaying a message. */
+	GtkWidget *label_message;
 	/*! TRUE to show checkboxes. */
 	gboolean checkbox_column_visible;
 	/*! TRUE to make the list activatable. */
@@ -279,6 +282,24 @@ _gtk_user_list_dialog_get_users(GtkUserListDialog *dialog, gboolean checked)
 	return users;
 }
 
+static gchar *
+_gtk_user_list_dialog_get_selected_user(GtkUserListDialog *dialog)
+{
+	GtkUserListDialogPrivate *priv = dialog->priv;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gchar *username = NULL;
+	
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(priv->tree));
+
+	if(gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(priv->tree)), &model, &iter))
+	{
+		gtk_tree_model_get(model, &iter, GTK_USER_LIST_TREEVIEW_COLUMN_USERNAME, &username, -1);
+	}
+
+	return username;
+}
+
 static void
 _gtk_user_list_dialog_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
 {
@@ -306,6 +327,10 @@ _gtk_user_list_dialog_get_property(GObject *object, guint prop_id, GValue *value
 			g_value_set_boolean(value, dialog->priv->show_user_count);
 			break;
 
+		case PROP_MESSAGE:
+			g_value_set_string(value, gtk_label_get_text(GTK_LABEL(dialog->priv->label_message)));
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	}
@@ -315,6 +340,7 @@ static void
 _gtk_user_list_dialog_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
 {
 	GtkUserListDialog *dialog = GTK_USER_LIST_DIALOG(object);
+	gchar *text;
 
 	switch(prop_id)
 	{
@@ -344,6 +370,19 @@ _gtk_user_list_dialog_set_property(GObject *object, guint prop_id, const GValue 
 			gtk_widget_set_visible(dialog->priv->label_count, dialog->priv->show_user_count);
 			break;
 
+		case PROP_MESSAGE:
+			if((text = g_value_dup_string(value)))
+			{
+				gtk_label_set_text(GTK_LABEL(dialog->priv->label_message), text);
+				gtk_widget_set_visible(dialog->priv->label_message, TRUE);
+				g_free(text);
+			}
+			else
+			{
+				gtk_widget_set_visible(dialog->priv->label_message, FALSE);
+			}
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	}
@@ -370,6 +409,12 @@ gtk_user_list_dialog_get_users(GtkUserListDialog *dialog, gboolean checked)
 	return GTK_USER_LIST_DIALOG_GET_CLASS(dialog)->get_users(dialog, checked);
 }
 
+gchar *
+gtk_user_list_dialog_get_selected_user(GtkUserListDialog *dialog)
+{
+	return GTK_USER_LIST_DIALOG_GET_CLASS(dialog)->get_selected_user(dialog);
+}
+
 GtkWidget *
 gtk_user_list_dialog_new(GtkWindow *parent, const gchar *title, gboolean modal)
 {
@@ -394,6 +439,7 @@ _gtk_user_list_dialog_constructor(GType type, guint n_construct_properties, GObj
 	GtkWidget *hbox;
 	GtkWidget *vbox;
 	GtkWidget *frame;
+	GtkWidget *align;
 	GtkWidget *scrolled;
 	GtkUserListDialogPrivate *priv;
 
@@ -408,7 +454,7 @@ _gtk_user_list_dialog_constructor(GType type, guint n_construct_properties, GObj
 	gtk_container_add(GTK_CONTAINER(gtk_deletable_dialog_get_content_area(GTK_DELETABLE_DIALOG(object))), hbox);
 
 	/* create frame */
-	frame = gtk_frame_new(_("Users"));
+	frame = gtk_frame_new(NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 2);
 
 	vbox = gtk_vbox_new(FALSE, 5);
@@ -419,6 +465,13 @@ _gtk_user_list_dialog_constructor(GType type, guint n_construct_properties, GObj
 
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 2);
+
+	/* dialog message */
+	align = gtk_alignment_new(0, 0, 0, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), align, FALSE, TRUE, 10);
+
+	priv->label_message = gtk_label_new("");
+	gtk_container_add(GTK_CONTAINER(align), priv->label_message);
 
 	/* create tree */
 	scrolled = gtk_scrolled_window_new(NULL, NULL);
@@ -434,7 +487,7 @@ _gtk_user_list_dialog_constructor(GType type, guint n_construct_properties, GObj
 
 	/* show widgets */
 	gtk_widget_show_all(gtk_deletable_dialog_get_content_area(GTK_DELETABLE_DIALOG(object)));
-	gtk_widget_show_all(gtk_deletable_dialog_get_action_area(GTK_DELETABLE_DIALOG(object)));
+	gtk_widget_set_visible(priv->label_message, FALSE);
 
 	gtk_widget_push_composite_child();
 
@@ -465,6 +518,7 @@ gtk_user_list_dialog_class_init(GtkUserListDialogClass *klass)
 	klass->append_user = _gtk_user_list_dialog_append_user;
 	klass->set_user_pixbuf = _gtk_user_list_dialog_set_user_pixbuf;
 	klass->get_users = _gtk_user_list_dialog_get_users;
+	klass->get_selected_user = _gtk_user_list_dialog_get_selected_user;
 
 	g_object_class_install_property(gobject_class, PROP_CHECKBOX_COLUMN_VISIBLE,
 	                                g_param_spec_boolean("checkbox-column-visible", NULL, NULL, FALSE, G_PARAM_READWRITE));
@@ -480,6 +534,9 @@ gtk_user_list_dialog_class_init(GtkUserListDialogClass *klass)
 
 	g_object_class_install_property(gobject_class, PROP_SHOW_USER_COUNT,
 	                                g_param_spec_boolean("show-user-count", NULL, NULL, FALSE, G_PARAM_READWRITE));
+
+	g_object_class_install_property(gobject_class, PROP_MESSAGE,
+	                                g_param_spec_string("message", NULL, NULL, FALSE, G_PARAM_READWRITE));
 }
 
 static void
