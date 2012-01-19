@@ -567,6 +567,7 @@ _status_tab_retweet_multiple_account(GtkWidget *mainwindow, gchar **accounts, gi
 {
 	GtkWidget *dialog;
 	GtkWidget *button;
+	GtkWidget *message_dialog;
 	_RetweetArg *arg = (_RetweetArg *)g_slice_alloc(sizeof(_RetweetArg));
 
 	/* let user select an account to retweet the status */
@@ -587,6 +588,15 @@ _status_tab_retweet_multiple_account(GtkWidget *mainwindow, gchar **accounts, gi
 	if(select_account_dialog_run(dialog) == GTK_RESPONSE_OK)
 	{
 		mainwindow_sync_gui(mainwindow);
+	}
+	else
+	{
+		message_dialog = gtk_message_dialog_new(GTK_WINDOW(mainwindow),
+		                                        GTK_DIALOG_MODAL,
+		                                        GTK_MESSAGE_WARNING,
+		                                        GTK_BUTTONS_OK,
+		                                        _("Couldn't retweet status, please try again later."));
+		g_idle_add((GSourceFunc)gtk_helpers_run_and_destroy_dialog_worker, message_dialog);
 	}
 
 	/* cleanup */
