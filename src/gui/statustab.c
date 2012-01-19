@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 17. January 2012
+ * \date 19. January 2012
  */
 
 #include <gio/gio.h>
@@ -39,6 +39,7 @@
 #include "remove_list_dialog.h"
 #include "composer_dialog.h"
 #include "retweet_dialog.h"
+#include "select_account_dialog.h"
 #include "replies_dialog.h"
 #include "../twitterdb.h"
 #include "../urlopener.h"
@@ -182,6 +183,22 @@ typedef struct
 	gchar username[64];
 }
 _StatusTabFriendshipWorkerArg;
+
+/**
+ * \struct _RetweetArg
+ * \brief Holds data required to retweet a status.
+ */
+typedef struct
+{
+	/*! A "select status" dialog.  */
+	GtkWidget *dialog;
+	/*! The Mainwindow. */
+	GtkWidget *mainwindow;
+	/*! Guid of the status to retweet. */
+	gchar guid[32];
+	/*! An user account. */
+	gchar *account;
+} _RetweetArg;
 
 /*
  *	url handling:
@@ -486,16 +503,110 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 /*
  *	retweet:
  */
-static void
-_status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+static gpointer
+_status_tab_retweet_worker(_RetweetArg *arg)
 {
-	GtkWidget *mainwindow;
-	GtkWidget *dialog;
-	GtkWidget *message_dialog;
-	gint response;
+	TwitterClient *client;
+	GError *err = NULL;
+	gint response = GTK_RESPONSE_OK;
 
-	mainwindow = tabbar_get_mainwindow(tab->tabbar);
-	dialog = retweet_dialog_create(mainwindow, tab->owner, guid);
+	/* retweet status & close dialog */
+	client = mainwindow_create_twittter_client(arg->mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME);
+
+	if(!twitter_client_retweet(client, arg->account, arg->guid, &err))
+	{
+		response = GTK_RESPONSE_CANCEL;
+	}
+
+	if(err)
+	{
+		g_warning("%s", err->message);
+		g_error_free(err);
+	}
+
+	g_object_unref(client);
+
+	gtk_deletable_dialog_response(GTK_DELETABLE_DIALOG(arg->dialog), response);
+
+	return NULL;
+}
+
+static void
+_status_tab_retweet_multiple_account_ok_clicked(GtkWidget *button, _RetweetArg *arg)
+{
+	GThread *thread;
+	GError *err = NULL;
+
+	g_assert(arg != NULL);
+	g_assert(GTK_IS_WIDGET(arg->dialog));
+	g_assert(GTK_IS_WINDOW(arg->mainwindow));
+
+	/* disable dialog & start thread to retweet the status */
+	gtk_helpers_set_widget_busy(arg->dialog, TRUE);
+	arg->account = select_account_dialog_get_account(arg->dialog);
+
+	g_debug("Retweeting status \"%s\" using account \"%s\"", arg->guid, arg->account);
+	thread = g_thread_create((GThreadFunc)_status_tab_retweet_worker, arg, FALSE, &err);
+
+	if(!thread)
+	{
+		if(err)
+		{
+			g_error("%s", err->message);
+			g_error_free(err);
+		}
+		else
+		{
+			g_error("Couldn't create worker.");
+		}
+	}	
+}
+
+static void
+_status_tab_retweet_multiple_account(GtkWidget *mainwindow, gchar **accounts, gint length, const gchar *guid)
+{
+	GtkWidget *dialog;
+	GtkWidget *button;
+	_RetweetArg *arg = (_RetweetArg *)g_slice_alloc(sizeof(_RetweetArg));
+
+	/* let user select an account to retweet the status */
+	dialog = select_account_dialog_create(mainwindow, accounts, length, _("Retweet"), _("Please specify an user account to retweet the selected status:"));
+
+	arg->dialog = dialog;
+	arg->mainwindow = mainwindow;
+	g_strlcpy(arg->guid, guid, 32);
+	arg->account = NULL;
+
+	button = gtk_button_new_from_stock(GTK_STOCK_OK);
+	gtk_box_pack_start(GTK_BOX(select_account_dialog_get_action_area(dialog)), button, FALSE, FALSE, 0);
+	gtk_widget_set_visible(button, TRUE);
+	g_signal_connect(button, "clicked", (GCallback)_status_tab_retweet_multiple_account_ok_clicked, arg);
+	select_account_dialog_add_button(dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+
+	/* run dialog */
+	if(select_account_dialog_run(dialog) == GTK_RESPONSE_OK)
+	{
+		mainwindow_sync_gui(mainwindow);
+	}
+
+	/* cleanup */
+	if(GTK_IS_WIDGET(dialog))
+	{
+		gtk_widget_destroy(dialog);
+	}
+
+	g_free(arg->account);
+	g_slice_free1(sizeof(_RetweetArg), arg);
+}
+
+static void
+_status_tab_retweet_single_account(GtkWidget *mainwindow, const gchar *account, const gchar *guid)
+{
+	GtkWidget *dialog;
+	gint response;
+	GtkWidget *message_dialog;
+
+	dialog = retweet_dialog_create(mainwindow, account, guid);
 
 	if((response = gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog))) == GTK_RESPONSE_YES)
 	{
@@ -515,6 +626,51 @@ _status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 	{
 		gtk_widget_destroy(dialog);
 	}
+}
+
+static void
+_status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+{
+	GtkWidget *mainwindow;
+	gchar **accounts = NULL;
+	gint length = 0;
+
+	g_debug("Retweeting status \"%s\"", guid);
+	mainwindow = tabbar_get_mainwindow(tab->tabbar);
+
+	/* ask user if he wants to retweet the status if tab has an assigned owner */
+	if(tab->owner)
+	{
+		_status_tab_retweet_single_account(mainwindow, tab->owner, guid);
+	}
+	else
+	{
+		g_debug("Tab has no owner, detecting account to retweet status");
+
+		/* copy account list */
+		g_mutex_lock(tab->accountlist.mutex);
+
+		if((length = g_strv_length(tab->accountlist.accounts)) > 1)
+		{
+			accounts = g_strdupv(tab->accountlist.accounts);
+		}
+
+		g_mutex_unlock(tab->accountlist.mutex);
+
+		/* let user select an account if account list contains more than one account */
+		if(length == 1)
+		{
+			g_debug("Account list contains only a single user");
+			_status_tab_retweet_single_account(mainwindow, tab->owner, guid);
+		}
+		else
+		{
+			g_debug("Account list contains multiple users");
+			_status_tab_retweet_multiple_account(mainwindow, accounts, length, guid);
+		}
+	}
+	
+	g_strfreev(accounts);
 }
 
 /*
@@ -712,7 +868,6 @@ _status_tab_friendship_worker(_StatusTabFriendshipWorkerArg *arg)
 	gdk_threads_leave();
 
 	/* populate list */
-
 	if((handle = twitterdb_get_handle(&err)))
 	{
 		g_mutex_lock(arg->tab->accountlist.mutex);
