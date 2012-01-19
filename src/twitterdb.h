@@ -265,14 +265,14 @@ gboolean twitterdb_remove_followers(TwitterDbHandle *handle, const gchar *user_g
 
 /**
  * \param handle a database handle
- * \param user1_guid guid of an user
- * \param user2_guid guid of an user
+ * \param user1 name of an user
+ * \param user2 name of an user
  * \param err structure for storing error messages
  * \return TRUE if user1 followers user2
  *
  * Checks if an user1 follows user2.
  */
-gboolean twitterdb_is_follower(TwitterDbHandle *handle, const gchar * restrict user1_guid, const gchar * restrict user2_guid, GError **err);
+gboolean twitterdb_is_follower(TwitterDbHandle *handle, const gchar * restrict user1, const gchar * restrict user2, GError **err);
 
 /**
  * \param handle a database handle

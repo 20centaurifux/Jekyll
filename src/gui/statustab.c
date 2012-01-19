@@ -402,15 +402,75 @@ static void
 _status_tab_replies_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
 {
 	GtkWidget *dialog;
+	gchar *username = NULL;
+	gchar *friend = NULL;
+	TwitterDbHandle *handle;
+	gint i = 0;
+	gboolean failure = FALSE;
+	GError *err = NULL;
 
-	dialog = replies_dialog_create(tabbar_get_mainwindow(tab->tabbar), tab->owner, gtk_twitter_status_get_guid(status));
+	if(tab->owner)
+	{
+		username = g_strdup(username);
+	}
+	else
+	{
+		/* try to find account following author of the status */
+		if((handle = twitterdb_get_handle(&err)))
+		{
+			g_object_get(G_OBJECT(status), "username", &friend, NULL);
+			g_debug("Searching friend of user \"%s\"", friend);
 
+			g_mutex_lock(tab->accountlist.mutex);
+
+			while(!failure && !username && tab->accountlist.accounts[i])
+			{
+				g_debug("Testing friendship \"%s\" => \"%s\"", tab->accountlist.accounts[i], friend);
+				if(twitterdb_is_follower(handle, tab->accountlist.accounts[i], friend, &err))
+				{
+					g_debug("\"%s\" is following \"%s\"", tab->accountlist.accounts[i], friend);
+					username = g_strdup(tab->accountlist.accounts[i]);
+				}
+				else if(err)
+				{
+					failure = TRUE;
+				}
+			
+				++i;
+			}
+
+			if(!username)
+			{
+				/* didn't find friend in database => use first account */
+				username = g_strdup(tab->accountlist.accounts[0]);
+			}
+
+			g_mutex_unlock(tab->accountlist.mutex);
+
+			twitterdb_close_handle(handle);
+		}
+		else
+		{
+			g_warning("Couldn't connect to database.");
+		}
+	}
+
+	dialog = replies_dialog_create(tabbar_get_mainwindow(tab->tabbar), username, gtk_twitter_status_get_guid(status));
 	replies_dialog_run(dialog);
 
 	if(GTK_IS_WIDGET(dialog))
 	{
 		gtk_widget_destroy(dialog);
 	}
+
+	if(err)
+	{
+		g_warning("%s", err->message);
+		g_error_free(err);
+	}
+
+	g_free(friend);
+	g_free(username);
 }
 
 
