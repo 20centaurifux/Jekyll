@@ -129,13 +129,10 @@ _edit_members_dialog_destroy_worker(GtkWidget *dialog)
 static gboolean
 _edit_members_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user_data)
 {
-	_EditMembersDialogPrivate *private = (_EditMembersDialogPrivate *)g_object_get_data(G_OBJECT(dialog), "private");
 	g_assert(GTK_IS_DELETABLE_DIALOG(dialog));
 
 	if(gtk_widget_get_sensitive(GTK_WIDGET(dialog)))
 	{
-		g_object_unref(private->pixbuf);
-		g_free(private);
 		gtk_deletable_dialog_response(dialog, GTK_RESPONSE_DELETE_EVENT);
 	}
 
