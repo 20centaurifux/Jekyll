@@ -139,7 +139,6 @@ _twitterdb_execute_statement(TwitterDbHandle *handle, sqlite3_stmt *stmt, gboole
 		case SQLITE_BUSY:
 			if(retry)
 			{
-				g_warning("RETRY"); // TODO
 				g_usleep(5000000);
 				return _twitterdb_execute_statement(handle, stmt, retry, err);
 			}

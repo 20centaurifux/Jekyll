@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 4. January 2012
+ * \date 19. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -2183,14 +2183,8 @@ _mainwindow_edit_followers_worker(_MainwindowEditFollowersWorker *arg)
 
 	/* run dialog */
 	gdk_threads_enter();
-
-	if(gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
-	{
-		// TODO
-	}
-
+	gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog));
 	edit_members_dialog_destroy(dialog);
-
 	gdk_threads_leave();
 
 	/* free memory */
