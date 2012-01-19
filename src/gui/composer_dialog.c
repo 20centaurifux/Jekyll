@@ -210,7 +210,6 @@ _composer_dialog_destroy_pixbuf_arg(_ComposerWindowPixbufArg *arg)
 	g_slice_free1(sizeof(_ComposerWindowPixbufArg), arg);
 }
 
-
 static gboolean
 _composer_dialog_set_image_worker(_ComposerWindowPixbufArg *arg)
 {
