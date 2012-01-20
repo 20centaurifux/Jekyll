@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 13. January 2012
+ * \date 20. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -1642,82 +1642,31 @@ _mainwindow_apply_preferences(GtkWidget *widget, gboolean save_preferences)
 static gchar *
 _mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
 {
-	_MainWindowPrivate *private;
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 	gint count;
 	gchar **usernames = NULL;
-	gchar *id;
 	gchar *username = NULL;
-	gchar **pieces = NULL;
-	gint i;
-	gchar *result = NULL;
 
-	/* get user accounts */
-	if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)))
+	if(!(username = tabbar_get_current_owner(private->tabbar)))
 	{
-		/* get username from current tab id */
-		private = MAINWINDOW_GET_DATA(widget);
-
-		if((id = tabbar_get_current_id(private->tabbar)))
+		/* get user accounts */
+		if(set_default)
 		{
-			switch(tabbar_get_current_type(private->tabbar))
+			if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)) > 0)
 			{
-				case TAB_TYPE_ID_PUBLIC_TIMELINE:
-				case TAB_TYPE_ID_REPLIES:
-				case TAB_TYPE_ID_DIRECT_MESSAGES:
-				case TAB_TYPE_ID_USER_TIMELINE:
-					username = id;
-					break;
+				username = g_strdup(usernames[0]);
 
-				case TAB_TYPE_ID_LIST:
-					pieces = g_strsplit(id, "@", 2);
-					break;
-
-				case TAB_TYPE_ID_SEARCH:
-					pieces = g_strsplit(id, ":", 2);
-					break;
-
-				default:
-					g_warning("Invalid tab type");
-			}
-		}
-
-		if(pieces)
-		{
-			username = g_strdup(pieces[0]);
-			g_strfreev(pieces);
-			g_free(id);
-		}
-
-		/* check if found username is an account */
-		if(username)
-		{
-			for(i = 0; i < count; ++i)
-			{
-				if(!g_strcmp0(username, usernames[i]))
+				for(gint i = 0; i < count; ++i)
 				{
-					result = g_strdup(username);
-					break;
+					g_free(usernames[i]);
 				}
+
+				g_free(usernames);
 			}
 		}
-
-		if(set_default && !result)
-		{
-			/* copy first found username if username is empty */
-			result = g_strdup(usernames[0]);
-		}
-
-		/* cleanup */
-		for(i = 0; i < count; ++i)
-		{
-			g_free(usernames[i]);
-		}
-
-		g_free(usernames);
-		g_free(username);
 	}
 
-	return result;
+	return username;
 }
 
 
