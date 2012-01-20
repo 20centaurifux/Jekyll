@@ -524,6 +524,8 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gchar *text;
 	gchar **usernames = NULL;
 	gint length = 0;
+	gint i = 0;
+	gchar *author = NULL;
 
 	if(tab->owner)
 	{
@@ -535,8 +537,25 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	else
 	{
 		g_mutex_lock(tab->accountlist.mutex);
-		usernames = g_strdupv(tab->accountlist.accounts);
-		length = g_strv_length(tab->accountlist.accounts);
+
+		usernames = (gchar **)g_malloc(sizeof(gchar *) * g_strv_length(tab->accountlist.accounts + 1));
+		g_object_get(G_OBJECT(status), "username", &author, NULL);
+
+		while(tab->accountlist.accounts[i])
+		{
+			usernames[length] = g_strdup(tab->accountlist.accounts[i]);
+
+			if(g_ascii_strcasecmp(author, tab->accountlist.accounts[i]))
+			{
+				usernames[length] = g_strdup(tab->accountlist.accounts[i]);
+				++length;
+			}
+
+			++i;
+		}
+
+		usernames[length] = NULL;
+
 		g_mutex_unlock(tab->accountlist.mutex);
 	}
 
@@ -549,6 +568,7 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog));
 
 	/* cleanup */
+	g_free(author);
 	g_strfreev(usernames);
 	g_free(username);
 	g_free(text);
