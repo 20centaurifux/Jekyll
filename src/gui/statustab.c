@@ -395,6 +395,34 @@ _status_tab_account_list_contains(gchar **accounts, const gchar *account)
 	return FALSE;
 }
 
+static gint
+_status_tab_copy_accounts(_StatusTab *tab, const gchar *exclude, gchar ***usernames)
+{
+	gint length = 0;
+	gint i = 0;
+
+	g_mutex_lock(tab->accountlist.mutex);
+
+	(*usernames) = (gchar **)g_malloc(sizeof(gchar *) * (g_strv_length(tab->accountlist.accounts) + 1));
+
+	while(tab->accountlist.accounts[i])
+	{
+		if(!exclude || g_ascii_strcasecmp(exclude, tab->accountlist.accounts[i]))
+		{
+			(*usernames)[length] = g_strdup(tab->accountlist.accounts[i]);
+			++length;
+		}
+
+		++i;
+	}
+
+	(*usernames)[length] = NULL;
+
+	g_mutex_unlock(tab->accountlist.mutex);
+
+	return length;
+}
+
 /*
  *	status replies:
  */
@@ -523,11 +551,10 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gchar *username;
 	gchar *text;
 	gchar **usernames = NULL;
-	gint length = 0;
-	gint i = 0;
 	gchar *author = NULL;
+	gint length;
 
-	if(tab->owner)
+	if(FALSE&&tab->owner)
 	{
 		usernames = (gchar **)g_malloc(sizeof(gchar *) * 2);
 		usernames[0] = g_strdup(tab->owner);
@@ -536,27 +563,9 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	}
 	else
 	{
-		g_mutex_lock(tab->accountlist.mutex);
-
-		usernames = (gchar **)g_malloc(sizeof(gchar *) * g_strv_length(tab->accountlist.accounts + 1));
+		usernames = (gchar **)g_realloc(usernames, sizeof(gchar *) * (g_strv_length(tab->accountlist.accounts) + 1));
 		g_object_get(G_OBJECT(status), "username", &author, NULL);
-
-		while(tab->accountlist.accounts[i])
-		{
-			usernames[length] = g_strdup(tab->accountlist.accounts[i]);
-
-			if(g_ascii_strcasecmp(author, tab->accountlist.accounts[i]))
-			{
-				usernames[length] = g_strdup(tab->accountlist.accounts[i]);
-				++length;
-			}
-
-			++i;
-		}
-
-		usernames[length] = NULL;
-
-		g_mutex_unlock(tab->accountlist.mutex);
+		length = _status_tab_copy_accounts(tab, author, &usernames);
 	}
 
 	/* create & run composer dialog */
