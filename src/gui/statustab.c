@@ -2339,6 +2339,19 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	return widget;
 }
 
+gchar *
+status_tab_get_owner(GtkWidget *page)
+{
+	_StatusTab *meta = g_object_get_data(G_OBJECT(page), "meta");
+
+	if(meta->owner)
+	{
+		return g_strdup(meta->owner);
+	}
+
+	return NULL;
+}
+
 /**
  * @}
  */

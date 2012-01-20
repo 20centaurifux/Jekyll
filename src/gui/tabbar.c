@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 26. December 2011
+ * \date 20. January 2012
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -633,6 +633,31 @@ tabbar_get_current_id(GtkWidget *widget)
 	}
 
 	return NULL;
+}
+
+gchar *
+tabbar_get_current_owner(GtkWidget *widget)
+{
+	Tab *tab;
+	gchar *owner = NULL;
+
+	g_assert(GTK_IS_NOTEBOOK(widget));
+
+	if((tab = _tabbar_get_current_tab(widget)))
+	{
+		/* test if current tab is a status tab */
+		if(tab->type_id == TAB_TYPE_ID_PUBLIC_TIMELINE ||
+		   tab->type_id == TAB_TYPE_ID_DIRECT_MESSAGES ||
+		   tab->type_id == TAB_TYPE_ID_REPLIES ||
+		   tab->type_id == TAB_TYPE_ID_USER_TIMELINE ||
+		   tab->type_id == TAB_TYPE_ID_LIST)
+		{
+			/* try to get owner */
+			owner = status_tab_get_owner(tab->widget);
+		}
+	}
+
+	return owner;
 }
 
 gint

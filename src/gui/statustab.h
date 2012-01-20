@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author sebastian fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 10. June 2011
+ * \date 19. January 2012
  */
 
 #ifndef __STATUS_TAB_H__
@@ -41,6 +41,14 @@
  * Creates a new status tab.
  */
 GtkWidget *status_tab_create(GtkWidget *tabbar, TabTypeId identifier, const gchar *id);
+
+/**
+ * \param tab the tab page
+ * \return a new allocated string or NULL
+ *
+ * Gets the tab owner.
+ */
+gchar *status_tab_get_owner(GtkWidget *page);
 
 /**
  * @}
