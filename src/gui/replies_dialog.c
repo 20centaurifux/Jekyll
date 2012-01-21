@@ -183,6 +183,18 @@ _replies_dialog_close_worker(GtkWidget *dialog)
 	return FALSE;
 }
 
+static void
+_replies_dialog_close(GtkWidget *dialog)
+{
+	_RepliesDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
+
+	mainwindow_remove_pixbuf_group(private->parent, private->pixbuf_group);
+	gtk_helpers_set_widget_busy(dialog, TRUE);
+	g_cancellable_cancel(private->cancellable);
+	g_idle_add((GSourceFunc)_replies_dialog_close_worker, dialog);
+
+}
+
 /*
  *	events:
  */
@@ -206,7 +218,7 @@ _replies_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user
 
 	if(gtk_widget_get_sensitive(GTK_WIDGET(dialog)))
 	{
-		gtk_deletable_dialog_response(dialog, GTK_RESPONSE_DELETE_EVENT);
+		_replies_dialog_close(GTK_WIDGET(dialog));
 	}
 
 	return TRUE;
@@ -215,12 +227,7 @@ _replies_dialog_delete(GtkDeletableDialog *dialog, GdkEvent event, gpointer user
 static void
 _replies_dialog_button_ok_clicked(GtkWidget *button, GtkWidget *dialog)
 {
-	_RepliesDialogPrivate *private = g_object_get_data(G_OBJECT(dialog), "private");
-
-	mainwindow_remove_pixbuf_group(private->parent, private->pixbuf_group);
-	gtk_helpers_set_widget_busy(dialog, TRUE);
-	g_cancellable_cancel(private->cancellable);
-	g_idle_add((GSourceFunc)_replies_dialog_close_worker, dialog);
+	_replies_dialog_close(dialog);
 }
 
 /*
