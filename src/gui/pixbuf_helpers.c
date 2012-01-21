@@ -19,7 +19,7 @@
  * \brief PixbufLoader helper functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 17. January 2012
+ * \date 21. January 2012
  */
 
 #ifndef __PIXBUF_HELPERS_H__
@@ -51,7 +51,12 @@ static gboolean
 _pixbuf_helpers_set_gtktwitterstatus_worker(_GtkWidgetPixbufArg *arg)
 {
 	gdk_threads_enter();
-	g_object_set(G_OBJECT(arg->widget), "pixbuf", arg->pixbuf, NULL);
+
+	if(GTK_IS_TWITTER_STATUS(arg->widget))
+	{
+		g_object_set(G_OBJECT(arg->widget), "pixbuf", arg->pixbuf, NULL);
+	}
+
 	gdk_pixbuf_unref(arg->pixbuf);
 	g_slice_free1(sizeof(_GtkWidgetPixbufArg), arg);
 	gdk_threads_leave();
@@ -66,11 +71,14 @@ pixbuf_helpers_set_gtktwitterstatus_callback(GdkPixbuf *pixbuf, GtkTwitterStatus
 
 	g_assert(pixbuf != NULL);
 
-	arg = (_GtkWidgetPixbufArg *)g_slice_alloc(sizeof(_GtkWidgetPixbufArg));
-	arg->widget = GTK_WIDGET(status);
-	arg->pixbuf = pixbuf;
-	gdk_pixbuf_ref(pixbuf);
-	g_idle_add((GSourceFunc)_pixbuf_helpers_set_gtktwitterstatus_worker, arg);
+	if(GTK_IS_WIDGET(status))
+	{
+		arg = (_GtkWidgetPixbufArg *)g_slice_alloc(sizeof(_GtkWidgetPixbufArg));
+		arg->widget = GTK_WIDGET(status);
+		arg->pixbuf = pixbuf;
+		gdk_pixbuf_ref(pixbuf);
+		g_idle_add((GSourceFunc)_pixbuf_helpers_set_gtktwitterstatus_worker, arg);
+	}
 }
 
 /**
