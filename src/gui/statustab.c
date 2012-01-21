@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 19. January 2012
+ * \date 21. January 2012
  */
 
 #include <gio/gio.h>
@@ -730,6 +730,7 @@ _status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 {
 	GtkWidget *mainwindow;
 	gchar **accounts = NULL;
+	gchar *author = NULL;
 	gint length = 0;
 
 	g_debug("Retweeting status \"%s\"", guid);
@@ -745,14 +746,9 @@ _status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 		g_debug("Tab has no owner, detecting account to retweet status");
 
 		/* copy account list */
-		g_mutex_lock(tab->accountlist.mutex);
-
-		if((length = g_strv_length(tab->accountlist.accounts)) > 1)
-		{
-			accounts = g_strdupv(tab->accountlist.accounts);
-		}
-
-		g_mutex_unlock(tab->accountlist.mutex);
+		g_object_get(G_OBJECT(status), "username", &author, NULL);
+		length = _status_tab_copy_accounts(tab, author, &accounts);
+		g_free(author);
 
 		/* let user select an account if account list contains more than one account */
 		if(length == 1)
