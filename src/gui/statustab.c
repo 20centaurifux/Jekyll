@@ -554,7 +554,7 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gchar *author = NULL;
 	gint length;
 
-	if(FALSE&&tab->owner)
+	if(tab->owner)
 	{
 		usernames = (gchar **)g_malloc(sizeof(gchar *) * 2);
 		usernames[0] = g_strdup(tab->owner);
@@ -1622,6 +1622,8 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 	gboolean exists = FALSE;
 	gchar group[128];
 	gboolean owner = FALSE;
+	TabTypeId type_id;
+	gboolean show_extra_buttons = TRUE;
 
 	gdk_threads_enter();
 
@@ -1670,10 +1672,23 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			/* create widget */
 			widget = gtk_twitter_status_new();
 
-			if(tab->owner && !g_strcmp0(user.screen_name, tab->owner))
+			if(tab->owner && !g_strcasecmp(user.screen_name, tab->owner))
 			{
 				g_mutex_lock(tab->accountlist.mutex);
-				owner = _status_tab_account_list_contains(tab->accountlist.accounts, user.screen_name);
+
+				if((owner = _status_tab_account_list_contains(tab->accountlist.accounts, user.screen_name)))
+				{
+					show_extra_buttons = FALSE;
+
+					if((type_id = tabbar_get_current_type(tab->tabbar)) == TAB_TYPE_ID_SEARCH || type_id == TAB_TYPE_ID_USER_TIMELINE)
+					{
+						if(g_strv_length(tab->accountlist.accounts) > 1)
+						{
+							show_extra_buttons = TRUE;
+						}
+					}
+				}
+	
 				g_mutex_unlock(tab->accountlist.mutex);
 			}
 
@@ -1683,12 +1698,12 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			             "realname", user.name,
 			             "timestamp", status.timestamp,
 			             "status", status.text,
-			             "show-reply-button", owner ? FALSE : TRUE,
+			             "show-reply-button", show_extra_buttons,
 				     "show-edit-lists-button", TRUE,
 			             "edit-lists-button-has-tooltip", TRUE,
-			             "show-edit-friendship-button", owner ? FALSE : TRUE,
+			             "show-edit-friendship-button", show_extra_buttons,
 			             "edit-friendship-button-has-tooltip", TRUE,
-				     "show-retweet_button", owner ? FALSE : TRUE,
+				     "show-retweet_button", show_extra_buttons,
 				     "show-delete-button", FALSE,
 				     "show-replies-button", status.prev_status[0] ? TRUE : FALSE,
 				     "selectable", TRUE,
