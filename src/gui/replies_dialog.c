@@ -28,7 +28,7 @@
 #include "gtktwitterstatus.h"
 #include "mainwindow.h"
 #include "gtk_helpers.h"
-#include "pixbuf_helpers.H"
+#include "pixbuf_helpers.h"
 
 /**
  * @addtogroup Gui

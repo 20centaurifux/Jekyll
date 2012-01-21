@@ -2243,7 +2243,7 @@ static gchar *
 _status_tab_get_owner_from_id(const gchar *id, TabTypeId type_id, Config *config)
 {
 	gchar **pieces;
-	gchar *owner;
+	gchar *owner = NULL;
 	gchar **accounts;
 
 	if(type_id == TAB_TYPE_ID_LIST)
@@ -2269,7 +2269,7 @@ _status_tab_get_owner_from_id(const gchar *id, TabTypeId type_id, Config *config
 
 	accounts = _status_tab_get_accounts(config);
 
-	if(!_status_tab_account_list_contains(accounts, owner))
+	if(owner && !_status_tab_account_list_contains(accounts, owner))
 	{
 		g_free(owner);
 		owner = NULL;
