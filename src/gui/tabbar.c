@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. January 2012
+ * \date 22. January 2012
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -234,7 +234,6 @@ _tabbar_page_changed(GtkNotebook *notebook, gint index)
 	GtkWidget *page;
 	gchar *id;
 	gchar *title = NULL;
-	gchar **pieces;
 
 	g_assert(GTK_IS_NOTEBOOK(notebook));
 
@@ -266,11 +265,7 @@ _tabbar_page_changed(GtkNotebook *notebook, gint index)
 				break;
 
 			case TAB_TYPE_ID_SEARCH:
-				if((pieces = g_strsplit(id, ":", 2)))
-				{
-					title = g_strdup_printf("%s: %s", _("Search"), pieces[1] + 1);
-					g_strfreev(pieces);
-				}
+				title = g_strdup_printf("%s: %s", _("Search"), id);
 				break;
 
 			case TAB_TYPE_ID_USER_TIMELINE:
@@ -793,13 +788,9 @@ tabbar_update_list(GtkWidget *widget, const gchar *user, const gchar *old_listna
 }
 
 void
-tabbar_open_search_query(GtkWidget *widget, const gchar *user, const gchar *query)
+tabbar_open_search_query(GtkWidget *widget, const gchar *query)
 {
-	gchar *id;
-
-	id = g_strdup_printf("%s: %s", user, query);
-	_tabbar_open_status_page(GTK_NOTEBOOK(widget), TAB_TYPE_ID_SEARCH, id);
-	g_free(id);
+	_tabbar_open_status_page(GTK_NOTEBOOK(widget), TAB_TYPE_ID_SEARCH, query);
 }
 
 void

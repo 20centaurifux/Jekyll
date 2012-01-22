@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. January 2012
+ * \date 22. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -1784,7 +1784,7 @@ _mainwindow_search(GtkWidget *mainwindow)
 		if((query = search_dialog_get_query(dialog)))
 		{
 			account = _mainwindow_get_selected_account(mainwindow, TRUE);
-			tabbar_open_search_query(private->tabbar, account, query);
+			tabbar_open_search_query(private->tabbar, query);
 		}
 	}
 

@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. January 2012
+ * \date 22. January 2012
  */
 
 #include <gio/gio.h>
@@ -278,7 +278,7 @@ _status_tab_url_activated(GtkTwitterStatus *status, const gchar *url, _StatusTab
 			/* open search tab */
 			query = g_strdup_printf("#%s", part + 12);
 			g_debug("Found search query url: \"%s\"", query);
-			tabbar_open_search_query(tab->tabbar, tab->owner, query);
+			tabbar_open_search_query(tab->tabbar, query);
 			open_browser = FALSE;
 		}
 		else
@@ -1768,16 +1768,14 @@ static void
 _status_tab_populate_search_query(TwitterClient *client, _StatusTab *tab, GError **err)
 {
 	gchar *tab_id;
-	gchar **pieces;
+	gchar *account;
+
+	g_mutex_lock(tab->accountlist.mutex);
+	account = g_strdup(tab->accountlist.accounts[0]);
+	g_mutex_unlock(tab->accountlist.mutex);
 
 	tab_id = tab_get_id((Tab *)tab);
-
-	if((pieces = g_strsplit(tab_id, ":", 2)))
-	{
-		twitter_client_search(client, pieces[0], pieces[1] + 1, (TwitterProcessStatusFunc)_status_tab_add_tweet, tab, tab->cancellable, err);
-		g_strfreev(pieces);
-	}
-
+	twitter_client_search(client, account, tab_id, (TwitterProcessStatusFunc)_status_tab_add_tweet, tab, tab->cancellable, err);
 	g_free(tab_id);
 }
 
@@ -2254,28 +2252,23 @@ _status_tab_get_owner_from_id(const gchar *id, TabTypeId type_id, Config *config
 			g_strfreev(pieces);
 		}
 	}
-	else if(type_id == TAB_TYPE_ID_SEARCH)
-	{
-		if((pieces = g_strsplit(id, ":", 2)))
-		{
-			owner = g_strdup(pieces[0]);
-			g_strfreev(pieces);
-		}
-	}
-	else
+	else if(type_id != TAB_TYPE_ID_SEARCH)
 	{
 		owner = g_strdup(id);
 	}
 
-	accounts = _status_tab_get_accounts(config);
-
-	if(owner && !_status_tab_account_list_contains(accounts, owner))
+	if(owner)
 	{
-		g_free(owner);
-		owner = NULL;
-	}
+		accounts = _status_tab_get_accounts(config);
 
-	g_strfreev(accounts);
+		if(!_status_tab_account_list_contains(accounts, owner))
+		{
+			g_free(owner);
+			owner = NULL;
+		}
+
+		g_strfreev(accounts);
+	}
 
 	return owner;
 }

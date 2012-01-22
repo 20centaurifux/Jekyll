@@ -19,7 +19,7 @@
  * \brief Tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 19. January 2012
+ * \date 22. January 2012
  */
 
 #ifndef __TABS_H__
@@ -228,7 +228,7 @@ void tabbar_update_list(GtkWidget *widget, const gchar *user, const gchar *old_l
  *
  * Opens a search query.
  */
-void tabbar_open_search_query(GtkWidget *widget, const gchar *user, const gchar *query);
+void tabbar_open_search_query(GtkWidget *widget, const gchar *query);
 
 /**
  * \param widget the tabbar widget
