@@ -305,7 +305,7 @@ replies_dialog_create(GtkWidget *parent, const gchar * restrict account, const g
 	gtk_container_add(GTK_CONTAINER(gtk_deletable_dialog_get_content_area(GTK_DELETABLE_DIALOG(dialog))), hbox);
 
 	/* create status list */
-	frame = gtk_frame_new(_("Tweets"));
+	frame = gtk_frame_new(_("Replies"));
 	gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 5);
 
 	hbox = gtk_hbox_new(FALSE, 0);
