@@ -28,6 +28,7 @@
 #include "mainwindow.h"
 #include "gtk_helpers.h"
 #include "pixbuf_helpers.h"
+#include "../twitter.h"
 
 /**
  * @addtogroup Gui
@@ -101,6 +102,11 @@ _replies_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser 
 {
 	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
 	GtkWidget *tweet;
+
+	if(!status.timestamp)
+	{
+		status.timestamp = twitter_timestamp_to_unix_timestamp(status.created_at);
+	}
 
 	gdk_threads_enter();
 	tweet = gtk_twitter_status_new();
