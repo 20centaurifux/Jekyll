@@ -510,6 +510,7 @@ _mainwindow_populate(GtkWidget *widget)
 				if(!g_list_find_custom(accounts, iter->data, (GCompareFunc)g_strcmp0))
 				{
 					accountbrowser_remove_account(private->accountbrowser, (gchar *)iter->data);
+					tabbar_close_tabs_from_user(private->tabbar, (gchar *)iter->data);
 				}
 				iter = iter->next;
 			}
@@ -1007,25 +1008,27 @@ _mainwindow_sync_followers(GtkWidget *widget, const gchar *username, const gchar
 	}
 }
 
-static void
+static gboolean
 _mainwindow_sync_gui(GtkWidget *widget)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 	GTimeVal last_sync;
-	
+
 	g_mutex_lock(private->last_gui_sync.mutex);
 	last_sync = private->last_gui_sync.time;
 	g_mutex_unlock(private->last_gui_sync.mutex);
 
 	if((_mainwindow_sync_get_time_diff(last_sync) > MAINWINDOW_GUI_SYNC_MIN) || !last_sync.tv_sec)
 	{
-		tabbar_refresh(private->tabbar);
 		_mainwindow_populate(widget);
+		tabbar_refresh(private->tabbar);
 
 		g_mutex_lock(private->last_gui_sync.mutex);
 		g_get_current_time(&private->last_gui_sync.time);
 		g_mutex_unlock(private->last_gui_sync.mutex);
 	}
+
+	return FALSE;
 }
 
 static gboolean
@@ -1848,8 +1851,8 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 			dialog = accounts_dialog_create(menu->window);
 			gtk_dialog_run(GTK_DIALOG(dialog));
 
-			/* update accounts */
-			_mainwindow_send_sync_message(menu->window, MAINWINDOW_SYNC_EVENT_UPDATE_GUI);
+			/* update gui & timelines */
+			mainwindow_sync_gui(menu->window);
 			_mainwindow_send_sync_message(menu->window, MAINWINDOW_SYNC_EVENT_UPDATE_TIMELINES);
 			break;
 
@@ -2981,7 +2984,7 @@ mainwindow_sync_lists(GtkWidget *widget)
 void
 mainwindow_sync_gui(GtkWidget *widget)
 {
-	_mainwindow_send_sync_message(widget, MAINWINDOW_SYNC_EVENT_UPDATE_GUI);
+	g_timeout_add(0, (GSourceFunc)_mainwindow_sync_gui, widget);
 }
 
 void
