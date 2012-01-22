@@ -19,7 +19,7 @@
  * \brief Displays notifications.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. March 2011
+ * \date 22. January 2011
  */
 
 #include <time.h>
@@ -65,7 +65,7 @@ notification_area_notify(GtkWidget *area, NotificationLevel level, const gchar *
 	GtkTreeIter iter;
 	time_t now;
 	struct tm *time_info;
-	gchar timestamp[32];
+	gchar timestamp[24];
 	GdkPixbuf *pixbuf = NULL;
 
 	g_assert(GTK_IS_BOX(area));
@@ -75,7 +75,7 @@ notification_area_notify(GtkWidget *area, NotificationLevel level, const gchar *
 
 	time(&now);
 	time_info = localtime(&now);
-	strftime(timestamp, 32, "%F %T", time_info);
+	strftime(timestamp, 24, "%d.%m.%Y %H:%M:%S", time_info);
 
 	if(level == NOTIFICATION_LEVEL_WARNING)
 	{
