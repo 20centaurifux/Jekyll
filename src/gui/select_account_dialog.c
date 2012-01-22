@@ -19,7 +19,7 @@
  * \brief A dialog for selecting an account.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 19. January 2012
+ * \date 22. January 2012
  */
 
 #include <glib/gi18n.h>
@@ -222,7 +222,7 @@ select_account_dialog_create(GtkWidget *parent, gchar **accounts, gint length, c
 	g_signal_connect(dialog, "delete-event", (GCallback)_select_account_dialog_delete, NULL);
 
 	/* set default size */
-	gtk_widget_set_size_request(dialog, 350, 300);
+	gtk_widget_set_size_request(dialog, -1, 300);
 
 	/* generate unique group id */
 	if(id == G_MAXUINT)
