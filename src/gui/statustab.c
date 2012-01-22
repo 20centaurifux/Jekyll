@@ -31,6 +31,7 @@
 #include "tabbar.h"
 #include "mainwindow.h"
 #include "gtktwitterstatus.h"
+#include "pixbuf_helpers.h"
 #include "edit_list_membership_dialog.h"
 #include "edit_members_dialog.h"
 #include "gtk_helpers.h"
@@ -138,19 +139,6 @@ enum
 	/*! Do nothing. */
 	STATUS_TAB_SIGNAL_IDLE = 3
 };
-
-/**
- * \struct _StatusTabPixbufArg
- * \brief Holds a GtkTwitterStatus and a GdkPixbuf to set.
- */
-typedef struct
-{
-	/*! A GtkTwitterStatus. */
-	GtkTwitterStatus *status;
-	/*! A GdkPixbuf to set. */
-	GdkPixbuf *pixbuf;
-}
-_StatusTabPixbufArg;
 
 /**
  * \struct _StatusTabListWorkerArg
@@ -1581,35 +1569,6 @@ _status_tab_grab_focus(GtkTwitterStatus *status, _StatusTab *tab)
 }
 
 /*
- *	populate data:
- */
-static gboolean 
-_status_tab_set_image_worker(_StatusTabPixbufArg *arg)
-{
-	gdk_threads_enter();
-	g_object_set(arg->status, "pixbuf", arg->pixbuf, NULL);
-	gdk_pixbuf_unref(arg->pixbuf);
-	g_slice_free1(sizeof(_StatusTabPixbufArg), arg);
-	gdk_threads_leave();
-
-	return FALSE;
-}
-
-static void
-_status_tab_set_image(GdkPixbuf *pixbuf, GtkTwitterStatus *status)
-{
-	_StatusTabPixbufArg *arg;
-
-	g_assert(pixbuf != NULL);
-
-	arg = (_StatusTabPixbufArg *)g_slice_alloc(sizeof(_StatusTabPixbufArg));
-	arg->status = status;
-	arg->pixbuf = pixbuf;
-	gdk_pixbuf_ref(pixbuf);
-	g_idle_add((GSourceFunc)_status_tab_set_image_worker, arg);
-}
-
-/*
  *	add tweets:
  */
 static void
@@ -1729,7 +1688,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 
 			/* load pixmap */
 			sprintf(group, "statustab-%d", tab->tab_id);
-			mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, user.image, (PixbufLoaderCallback)_status_tab_set_image, widget, NULL);
+			mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
 		}
 	}
 
