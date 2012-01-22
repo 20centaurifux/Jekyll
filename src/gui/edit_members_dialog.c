@@ -19,7 +19,7 @@
  * \brief A dialog for editing (list) members.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 16. June 2011
+ * \date 19. January 2012
  */
 
 #include "edit_members_dialog.h"

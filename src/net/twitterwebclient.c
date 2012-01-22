@@ -19,7 +19,7 @@
  * \brief A Twitter client.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 16. January 2012
  */
 
 #include <string.h>
@@ -331,6 +331,19 @@ _twitter_web_client_get_user_timeline(TwitterWebClient *twitterwebclient, const 
 }
 
 static gboolean
+_twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, gchar **buffer, gint *length)
+{
+	gchar *path;
+	gboolean result;
+
+	path = g_markup_printf_escaped("/1/statuses/show.%s?id=%s&include_entities=true", twitterwebclient->priv->format, guid);
+	result = _twitter_web_client_send_request(twitterwebclient, path, NULL, NULL, 0, FALSE, buffer, length);
+	g_free(path);
+
+	return result;
+}
+
+static gboolean
 _twitter_web_client_get_timeline_from_list(TwitterWebClient *twitterwebclient, const gchar * restrict username, const gchar * restrict listname, gchar **buffer, gint *length)
 {
 	gchar *path;
@@ -626,19 +639,33 @@ _twitter_web_client_get_user_details_by_id(TwitterWebClient *twitterwebclient, c
 }
 
 static gboolean
-_twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, gchar **buffer, gint *length)
+_twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length)
 {
 	gchar *path;
-	gchar *keys[] = { "status" };
-	gchar *values[1];
+	gchar *keys[] = { "status", "in_reply_to_status_id" };
+	gchar *values[2];
 	gboolean result;
 
 	values[0] = g_uri_escape_string(text, NULL, TRUE);
 
-	path = g_markup_printf_escaped("/1/statuses/update.%s?status=%s", twitterwebclient->priv->format, values[0]);
-	result = _twitter_web_client_send_request(twitterwebclient, path, keys, values, 1, TRUE, buffer, length);
+	if(prev_status)
+	{
+		values[1] = g_uri_escape_string(prev_status, NULL, TRUE);
+		path = g_markup_printf_escaped("/1/statuses/update.%s?status=%s&in_reply_to_status_id=%s", twitterwebclient->priv->format, values[0], values[1]);
+	}
+	else
+	{
+		path = g_markup_printf_escaped("/1/statuses/update.%s?status=%s", twitterwebclient->priv->format, values[0]);
+	}
+
+	result = _twitter_web_client_send_request(twitterwebclient, path, keys, values, prev_status ? 2 : 1, TRUE, buffer, length);
 	g_free(path);
 	g_free(values[0]);
+
+	if(prev_status)
+	{
+		g_free(values[1]);
+	}
 
 	return result;
 }
@@ -835,6 +862,12 @@ twitter_web_client_get_user_timeline(TwitterWebClient *twitterwebclient, const g
 }
 
 gboolean
+twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, gchar **buffer, gint *length)
+{
+	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->get_status(twitterwebclient, guid, buffer, length);
+}
+
+gboolean
 twitter_web_client_get_timeline_from_list(TwitterWebClient *twitterwebclient, const gchar * restrict username, const gchar * restrict listname, gchar **buffer, gint *length)
 {
 	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->get_timeline_from_list(twitterwebclient, username, listname, buffer, length);
@@ -932,9 +965,9 @@ twitter_web_client_get_user_details_by_id(TwitterWebClient *twitterwebclient, co
 }
 
 gboolean
-twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, gchar **buffer, gint *length)
+twitter_web_client_post_tweet(TwitterWebClient *twitterwebclient, const gchar *text, const gchar *prev_status, gchar **buffer, gint *length)
 {
-	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->post_tweet(twitterwebclient, text, buffer, length);
+	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->post_tweet(twitterwebclient, text, prev_status, buffer, length);
 }
 
 gboolean
@@ -1028,6 +1061,7 @@ twitter_web_client_class_init(TwitterWebClientClass *klass)
 	klass->get_mentions = _twitter_web_client_get_mentions;
 	klass->get_direct_messages = _twitter_web_client_get_direct_messages;
 	klass->get_user_timeline = _twitter_web_client_get_user_timeline;
+	klass->get_status = _twitter_web_client_get_status;
 	klass->get_timeline_from_list = _twitter_web_client_get_timeline_from_list;
 	klass->get_lists = _twitter_web_client_get_lists;
 	klass->get_users_from_list = _twitter_web_client_get_users_from_list;

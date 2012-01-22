@@ -19,7 +19,7 @@
  * \brief Store data from Twitter.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 26. September 2011
+ * \date 16. January 2012
  */
 
 #ifndef __TWITTERDB_H__
@@ -155,6 +155,7 @@ gboolean twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, 
 /**
  * \param handle a database handle
  * \param guid guid of the status
+ * \param prev_status guid of the previous status
  * \param user_guid guid of the owner
  * \param text text of the status
  * \param timestamp timestamp of the status
@@ -164,7 +165,7 @@ gboolean twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, 
  *
  * Saves a status in the database.
  */
-gboolean twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict user_guid,
+gboolean twitterdb_save_status(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict prev_status, const gchar * restrict user_guid,
                                const gchar * restrict text, gint64 timestamp, gint *count, GError **err);
 
 /**
@@ -264,14 +265,14 @@ gboolean twitterdb_remove_followers(TwitterDbHandle *handle, const gchar *user_g
 
 /**
  * \param handle a database handle
- * \param user1_guid guid of an user
- * \param user2_guid guid of an user
+ * \param user1 name of an user
+ * \param user2 name of an user
  * \param err structure for storing error messages
  * \return TRUE if user1 followers user2
  *
  * Checks if an user1 follows user2.
  */
-gboolean twitterdb_is_follower(TwitterDbHandle *handle, const gchar * restrict user1_guid, const gchar * restrict user2_guid, GError **err);
+gboolean twitterdb_is_follower(TwitterDbHandle *handle, const gchar * restrict user1, const gchar * restrict user2, GError **err);
 
 /**
  * \param handle a database handle
@@ -434,6 +435,28 @@ gboolean twitterdb_append_status_to_user_timeline(TwitterDbHandle *handle, const
  * Appends a status to a list.
  */
 gboolean twitterdb_append_status_to_list(TwitterDbHandle *handle, const gchar * restrict list_guid, const gchar * restrict status_guid, GError **err);
+
+/**
+ * \param handle a database handle
+ * \param guid status guid
+ * \param err structure for storing error messages
+ * \return TRUE if status does exist
+ *
+ * Tests if a status does exist.
+ */
+gboolean twitterdb_status_exists(TwitterDbHandle *handle, const gchar *guid, GError **err);
+
+/**
+ * \param handle a database handle
+ * \param guid status guid
+ * \param status location to store status information
+ * \param user location to store user information
+ * \param err structure for storing error messages
+ * \return TRUE if status does exist
+ *
+ * Gets a status from the database.
+ */
+gboolean twitterdb_get_status(TwitterDbHandle *handle, const gchar *guid, TwitterStatus *status, TwitterUser *user, GError **err);
 
 /**
  * \param handle a database handle
@@ -604,6 +627,15 @@ void twitterdb_set_last_sync(TwitterDbHandle *handle, TwitterDbSyncSource source
  * Removes all timestamps related to the given source.
  */
 gboolean twitterdb_remove_last_sync_source(TwitterDbHandle *handle, TwitterDbSyncSource source, GError **err);
+
+/**
+ * \param handle a database handle
+ * \param err structure for storing error messages
+ * \return TRUE on success
+ *
+ * Upgrades database format from version 0.1 to 0.2.
+ */
+gboolean twitterdb_upgrade_0_1_to_0_2(TwitterDbHandle *handle, GError **err);
 
 /**
  * @}

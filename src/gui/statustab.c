@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 6. January 2012
+ * \date 22. January 2012
  */
 
 #include <gio/gio.h>
@@ -39,6 +39,8 @@
 #include "remove_list_dialog.h"
 #include "composer_dialog.h"
 #include "retweet_dialog.h"
+#include "select_account_dialog.h"
+#include "replies_dialog.h"
 #include "../twitterdb.h"
 #include "../urlopener.h"
 #include "../helpers.h"
@@ -60,7 +62,7 @@ typedef struct
 	/*! An unique id. */
 	guint tab_id;
 	/*! Name of the owner. */
-	gchar owner[64];
+	gchar *owner;
 	/*! TRUE if tab has been initialized. */
 	gboolean initialized;
 	/*! The page widget. */
@@ -182,6 +184,22 @@ typedef struct
 }
 _StatusTabFriendshipWorkerArg;
 
+/**
+ * \struct _RetweetArg
+ * \brief Holds data required to retweet a status.
+ */
+typedef struct
+{
+	/*! A "select status" dialog.  */
+	GtkWidget *dialog;
+	/*! The Mainwindow. */
+	GtkWidget *mainwindow;
+	/*! Guid of the status to retweet. */
+	gchar guid[32];
+	/*! An user account. */
+	gchar *account;
+} _RetweetArg;
+
 /*
  *	url handling:
  */
@@ -260,7 +278,7 @@ _status_tab_url_activated(GtkTwitterStatus *status, const gchar *url, _StatusTab
 			/* open search tab */
 			query = g_strdup_printf("#%s", part + 12);
 			g_debug("Found search query url: \"%s\"", query);
-			tabbar_open_search_query(tab->tabbar, tab->owner, query);
+			tabbar_open_search_query(tab->tabbar, query);
 			open_browser = FALSE;
 		}
 		else
@@ -377,11 +395,118 @@ _status_tab_account_list_contains(gchar **accounts, const gchar *account)
 	return FALSE;
 }
 
+static gint
+_status_tab_copy_accounts(_StatusTab *tab, const gchar *exclude, gchar ***usernames)
+{
+	gint length = 0;
+	gint i = 0;
+
+	g_mutex_lock(tab->accountlist.mutex);
+
+	(*usernames) = (gchar **)g_malloc(sizeof(gchar *) * (g_strv_length(tab->accountlist.accounts) + 1));
+
+	while(tab->accountlist.accounts[i])
+	{
+		if(!exclude || g_ascii_strcasecmp(exclude, tab->accountlist.accounts[i]))
+		{
+			(*usernames)[length] = g_strdup(tab->accountlist.accounts[i]);
+			++length;
+		}
+
+		++i;
+	}
+
+	(*usernames)[length] = NULL;
+
+	g_mutex_unlock(tab->accountlist.mutex);
+
+	return length;
+}
+
+/*
+ *	status replies:
+ */
+static void
+_status_tab_replies_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+{
+	GtkWidget *dialog;
+	gchar *username = NULL;
+	gchar *friend = NULL;
+	TwitterDbHandle *handle;
+	gint i = 0;
+	gboolean failure = FALSE;
+	GError *err = NULL;
+
+	if(tab->owner)
+	{
+		username = g_strdup(username);
+	}
+	else
+	{
+		/* try to find account following author of the status */
+		if((handle = twitterdb_get_handle(&err)))
+		{
+			g_object_get(G_OBJECT(status), "username", &friend, NULL);
+			g_debug("Searching friend of user \"%s\"", friend);
+
+			g_mutex_lock(tab->accountlist.mutex);
+
+			while(!failure && !username && tab->accountlist.accounts[i])
+			{
+				g_debug("Testing friendship \"%s\" => \"%s\"", tab->accountlist.accounts[i], friend);
+				if(twitterdb_is_follower(handle, tab->accountlist.accounts[i], friend, &err))
+				{
+					g_debug("\"%s\" is following \"%s\"", tab->accountlist.accounts[i], friend);
+					username = g_strdup(tab->accountlist.accounts[i]);
+				}
+				else if(err)
+				{
+					failure = TRUE;
+				}
+			
+				++i;
+			}
+
+			if(!username)
+			{
+				/* didn't find friend in database => use first account */
+				username = g_strdup(tab->accountlist.accounts[0]);
+			}
+
+			g_mutex_unlock(tab->accountlist.mutex);
+
+			twitterdb_close_handle(handle);
+		}
+		else
+		{
+			g_warning("Couldn't connect to database.");
+		}
+	}
+
+	dialog = replies_dialog_create(tabbar_get_mainwindow(tab->tabbar), username, gtk_twitter_status_get_guid(status));
+	replies_dialog_run(dialog);
+
+	if(GTK_IS_WIDGET(dialog))
+	{
+		gtk_widget_destroy(dialog);
+	}
+
+	if(err)
+	{
+		g_warning("%s", err->message);
+		g_error_free(err);
+	}
+
+	g_free(friend);
+	g_free(username);
+}
+
+
 /*
  *	reply:
  */
 static gboolean
-_status_tab_compose_tweet_callback(const gchar *username, const gchar *text, _StatusTab *tab)
+_status_tab_compose_tweet_callback(const gchar *username, const gchar *text, const gchar *prev_status, _StatusTab *tab)
 {
 	GtkWidget *mainwindow;
 	TwitterClient *client;
@@ -393,7 +518,7 @@ _status_tab_compose_tweet_callback(const gchar *username, const gchar *text, _St
 
 	if((client = mainwindow_create_twittter_client(mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME)))
 	{
-		if((result = twitter_client_post(client, username, text, &err)))
+		if((result = twitter_client_post(client, username, text, prev_status, &err)))
 		{
 			mainwindow_sync_gui(mainwindow);
 		}
@@ -423,12 +548,28 @@ static void
 _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
 {
 	GtkWidget *dialog;
-	gchar *usernames[] = { tab->owner };
 	gchar *username;
 	gchar *text;
+	gchar **usernames = NULL;
+	gchar *author = NULL;
+	gint length;
+
+	if(tab->owner)
+	{
+		usernames = (gchar **)g_malloc(sizeof(gchar *) * 2);
+		usernames[0] = g_strdup(tab->owner);
+		usernames[1] = NULL;
+		length = 1;
+	}
+	else
+	{
+		usernames = (gchar **)g_realloc(usernames, sizeof(gchar *) * (g_strv_length(tab->accountlist.accounts) + 1));
+		g_object_get(G_OBJECT(status), "username", &author, NULL);
+		length = _status_tab_copy_accounts(tab, author, &usernames);
+	}
 
 	/* create & run composer dialog */
-	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, 1, tab->owner, _("Reply"));
+	dialog = composer_dialog_create(tabbar_get_mainwindow(tab->tabbar), usernames, length, tab->owner, gtk_twitter_status_get_guid(status), _("Reply"));
 	g_object_get(G_OBJECT(status), "username", &username, NULL);
 	text = g_strdup_printf("@%s ", username);
 	composer_dialog_set_apply_callback(dialog, (ComposerApplyCallback)_status_tab_compose_tweet_callback, tab);
@@ -436,8 +577,11 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 	gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog));
 
 	/* cleanup */
+	g_free(author);
+	g_strfreev(usernames);
 	g_free(username);
 	g_free(text);
+	
 
 	if(GTK_IS_WIDGET(dialog))
 	{
@@ -448,16 +592,118 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 /*
  *	retweet:
  */
-static void
-_status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+static gpointer
+_status_tab_retweet_worker(_RetweetArg *arg)
 {
-	GtkWidget *mainwindow;
 	GtkWidget *dialog;
-	GtkWidget *message_dialog;
-	gint response;
+	TwitterClient *client;
+	GError *err = NULL;
+	gint response = GTK_RESPONSE_OK;
 
-	mainwindow = tabbar_get_mainwindow(tab->tabbar);
-	dialog = retweet_dialog_create(mainwindow, tab->owner, guid);
+	/* retweet status & close dialog */
+	client = mainwindow_create_twittter_client(arg->mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME);
+
+	if(!twitter_client_retweet(client, arg->account, arg->guid, &err))
+	{
+		response = GTK_RESPONSE_CANCEL;
+
+		dialog = gtk_message_dialog_new(GTK_WINDOW(arg->mainwindow),
+		                                GTK_DIALOG_MODAL,
+		                                GTK_MESSAGE_WARNING,
+		                                GTK_BUTTONS_OK,
+		                                _("Couldn't retweet status, please try again later."));
+		g_idle_add((GSourceFunc)gtk_helpers_run_and_destroy_dialog_worker, dialog);
+	}
+
+	if(err)
+	{
+		g_warning("%s", err->message);
+		g_error_free(err);
+	}
+
+	g_object_unref(client);
+
+	gtk_deletable_dialog_response(GTK_DELETABLE_DIALOG(arg->dialog), response);
+
+	return NULL;
+}
+
+static void
+_status_tab_retweet_multiple_account_ok_clicked(GtkWidget *button, _RetweetArg *arg)
+{
+	GThread *thread;
+	GError *err = NULL;
+
+	g_assert(arg != NULL);
+	g_assert(GTK_IS_WIDGET(arg->dialog));
+	g_assert(GTK_IS_WINDOW(arg->mainwindow));
+
+	/* disable dialog & start thread to retweet the status */
+	gtk_helpers_set_widget_busy(arg->dialog, TRUE);
+	arg->account = select_account_dialog_get_account(arg->dialog);
+
+	g_debug("Retweeting status \"%s\" using account \"%s\"", arg->guid, arg->account);
+	thread = g_thread_create((GThreadFunc)_status_tab_retweet_worker, arg, FALSE, &err);
+
+	if(!thread)
+	{
+		if(err)
+		{
+			g_error("%s", err->message);
+			g_error_free(err);
+		}
+		else
+		{
+			g_error("Couldn't create worker.");
+		}
+	}	
+}
+
+static void
+_status_tab_retweet_multiple_account(GtkWidget *mainwindow, gchar **accounts, gint length, const gchar *guid)
+{
+	GtkWidget *dialog;
+	GtkWidget *button;
+	_RetweetArg *arg = (_RetweetArg *)g_slice_alloc(sizeof(_RetweetArg));
+
+	/* let user select an account to retweet the status */
+	dialog = select_account_dialog_create(mainwindow, accounts, length, _("Retweet"), _("Please specify an user account to retweet the selected status:"));
+
+	arg->dialog = dialog;
+	arg->mainwindow = mainwindow;
+	g_strlcpy(arg->guid, guid, 32);
+	arg->account = NULL;
+
+	button = gtk_button_new_from_stock(GTK_STOCK_OK);
+	gtk_box_pack_start(GTK_BOX(select_account_dialog_get_action_area(dialog)), button, FALSE, FALSE, 0);
+	gtk_widget_set_visible(button, TRUE);
+	g_signal_connect(button, "clicked", (GCallback)_status_tab_retweet_multiple_account_ok_clicked, arg);
+	select_account_dialog_add_button(dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+
+	/* run dialog */
+	if(select_account_dialog_run(dialog) == GTK_RESPONSE_OK)
+	{
+		mainwindow_sync_gui(mainwindow);
+	}
+
+	/* cleanup */
+	if(GTK_IS_WIDGET(dialog))
+	{
+		gtk_widget_destroy(dialog);
+	}
+
+	g_free(arg->account);
+	g_slice_free1(sizeof(_RetweetArg), arg);
+}
+
+static void
+_status_tab_retweet_single_account(GtkWidget *mainwindow, const gchar *account, const gchar *guid)
+{
+	GtkWidget *dialog;
+	gint response;
+	GtkWidget *message_dialog;
+
+	dialog = retweet_dialog_create(mainwindow, account, guid);
 
 	if((response = gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog))) == GTK_RESPONSE_YES)
 	{
@@ -477,6 +723,47 @@ _status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 	{
 		gtk_widget_destroy(dialog);
 	}
+}
+
+static void
+_status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, _StatusTab *tab)
+{
+	GtkWidget *mainwindow;
+	gchar **accounts = NULL;
+	gchar *author = NULL;
+	gint length = 0;
+
+	g_debug("Retweeting status \"%s\"", guid);
+	mainwindow = tabbar_get_mainwindow(tab->tabbar);
+
+	/* ask user if he wants to retweet the status if tab has an assigned owner */
+	if(tab->owner)
+	{
+		_status_tab_retweet_single_account(mainwindow, tab->owner, guid);
+	}
+	else
+	{
+		g_debug("Tab has no owner, detecting account to retweet status");
+
+		/* copy account list */
+		g_object_get(G_OBJECT(status), "username", &author, NULL);
+		length = _status_tab_copy_accounts(tab, author, &accounts);
+		g_free(author);
+
+		/* let user select an account if account list contains more than one account */
+		if(length == 1)
+		{
+			g_debug("Account list contains only a single user");
+			_status_tab_retweet_single_account(mainwindow, tab->owner, guid);
+		}
+		else
+		{
+			g_debug("Account list contains multiple users");
+			_status_tab_retweet_multiple_account(mainwindow, accounts, length, guid);
+		}
+	}
+	
+	g_strfreev(accounts);
 }
 
 /*
@@ -674,7 +961,6 @@ _status_tab_friendship_worker(_StatusTabFriendshipWorkerArg *arg)
 	gdk_threads_leave();
 
 	/* populate list */
-
 	if((handle = twitterdb_get_handle(&err)))
 	{
 		g_mutex_lock(arg->tab->accountlist.mutex);
@@ -1336,6 +1622,8 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 	gboolean exists = FALSE;
 	gchar group[128];
 	gboolean owner = FALSE;
+	TabTypeId type_id;
+	gboolean show_extra_buttons = TRUE;
 
 	gdk_threads_enter();
 
@@ -1384,10 +1672,23 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			/* create widget */
 			widget = gtk_twitter_status_new();
 
-			if(!g_strcmp0(user.screen_name, tab->owner))
+			if(tab->owner && !g_strcasecmp(user.screen_name, tab->owner))
 			{
 				g_mutex_lock(tab->accountlist.mutex);
-				owner = _status_tab_account_list_contains(tab->accountlist.accounts, user.screen_name);
+
+				if((owner = _status_tab_account_list_contains(tab->accountlist.accounts, user.screen_name)))
+				{
+					show_extra_buttons = FALSE;
+
+					if((type_id = tabbar_get_current_type(tab->tabbar)) == TAB_TYPE_ID_SEARCH || type_id == TAB_TYPE_ID_USER_TIMELINE)
+					{
+						if(g_strv_length(tab->accountlist.accounts) > 1)
+						{
+							show_extra_buttons = TRUE;
+						}
+					}
+				}
+	
 				g_mutex_unlock(tab->accountlist.mutex);
 			}
 
@@ -1397,13 +1698,14 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			             "realname", user.name,
 			             "timestamp", status.timestamp,
 			             "status", status.text,
-			             "show-reply-button", owner ? FALSE : TRUE,
+			             "show-reply-button", show_extra_buttons,
 				     "show-edit-lists-button", TRUE,
 			             "edit-lists-button-has-tooltip", TRUE,
-			             "show-edit-friendship-button", owner ? FALSE : TRUE,
+			             "show-edit-friendship-button", show_extra_buttons,
 			             "edit-friendship-button-has-tooltip", TRUE,
-				     "show-retweet_button", owner ? FALSE : TRUE,
+				     "show-retweet_button", show_extra_buttons,
 				     "show-delete-button", FALSE,
+				     "show-replies-button", status.prev_status[0] ? TRUE : FALSE,
 				     "selectable", TRUE,
 				     "background-color", tab->background_color,
 				     NULL);
@@ -1422,6 +1724,7 @@ _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 			g_signal_connect(G_OBJECT(widget), "edit-friendship-button-query-tooltip", (GCallback)_status_tab_edit_friendship_button_query_tooltip, tab);
 			g_signal_connect(G_OBJECT(widget), "reply-button-clicked", (GCallback)_status_tab_reply_button_clicked, tab);
 			g_signal_connect(G_OBJECT(widget), "retweet-button-clicked", (GCallback)_status_tab_retweet_button_clicked, tab);
+			g_signal_connect(G_OBJECT(widget), "replies-button-clicked", (GCallback)_status_tab_replies_button_clicked, tab);
 			g_signal_connect(G_OBJECT(widget), "grab-focus", (GCallback)_status_tab_grab_focus, tab);
 
 			/* load pixmap */
@@ -1465,16 +1768,14 @@ static void
 _status_tab_populate_search_query(TwitterClient *client, _StatusTab *tab, GError **err)
 {
 	gchar *tab_id;
-	gchar **pieces;
+	gchar *account;
+
+	g_mutex_lock(tab->accountlist.mutex);
+	account = g_strdup(tab->accountlist.accounts[0]);
+	g_mutex_unlock(tab->accountlist.mutex);
 
 	tab_id = tab_get_id((Tab *)tab);
-
-	if((pieces = g_strsplit(tab_id, ":", 2)))
-	{
-		twitter_client_search(client, pieces[0], pieces[1] + 1, (TwitterProcessStatusFunc)_status_tab_add_tweet, tab, tab->cancellable, err);
-		g_strfreev(pieces);
-	}
-
+	twitter_client_search(client, account, tab_id, (TwitterProcessStatusFunc)_status_tab_add_tweet, tab, tab->cancellable, err);
 	g_free(tab_id);
 }
 
@@ -1820,6 +2121,7 @@ _status_tab_destroyed(GtkWidget *widget)
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
+	g_free(meta->owner);
 
 	g_slice_free1(sizeof(_StatusTab), meta);
 }
@@ -1935,6 +2237,42 @@ static TabFuncs status_tab_funcs =
 	_status_tab_scroll
 };
 
+static gchar *
+_status_tab_get_owner_from_id(const gchar *id, TabTypeId type_id, Config *config)
+{
+	gchar **pieces;
+	gchar *owner = NULL;
+	gchar **accounts;
+
+	if(type_id == TAB_TYPE_ID_LIST)
+	{
+		if((pieces = g_strsplit(id, "@", 2)))
+		{
+			owner = g_strdup(pieces[0]);
+			g_strfreev(pieces);
+		}
+	}
+	else if(type_id != TAB_TYPE_ID_SEARCH)
+	{
+		owner = g_strdup(id);
+	}
+
+	if(owner)
+	{
+		accounts = _status_tab_get_accounts(config);
+
+		if(!_status_tab_account_list_contains(accounts, owner))
+		{
+			g_free(owner);
+			owner = NULL;
+		}
+
+		g_strfreev(accounts);
+	}
+
+	return owner;
+}
+
 GtkWidget *
 status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 {
@@ -1946,7 +2284,8 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	GtkWidget *vbox;
 	_StatusTab *meta;
 	static guint tab_id = 0;
-	gchar **pieces;
+	GtkWidget *mainwindow;
+	Config *config;
 	GError *err = NULL;
 
 	/* create widget */
@@ -2005,28 +2344,10 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->background_color = NULL;
 	meta->background_changed = FALSE;
 
-	memset(meta->owner, 0, 64);
-
-	if(type_id == TAB_TYPE_ID_LIST)
-	{
-		if((pieces = g_strsplit(id, "@", 2)))
-		{
-			g_strlcpy(meta->owner, pieces[0], 64);
-			g_strfreev(pieces);
-		}
-	}
-	else if(type_id == TAB_TYPE_ID_SEARCH)
-	{
-		if((pieces = g_strsplit(id, ":", 2)))
-		{
-			g_strlcpy(meta->owner, pieces[0], 64);
-			g_strfreev(pieces);
-		}
-	}
-	else
-	{
-		g_strlcpy(meta->owner, id, 64);
-	}
+	mainwindow = tabbar_get_mainwindow(tabbar);
+	config = mainwindow_lock_config(mainwindow);
+	meta->owner = _status_tab_get_owner_from_id(id, type_id, config);
+	mainwindow_unlock_config(mainwindow);
 
 	g_object_set_data(G_OBJECT(widget), "meta", (gpointer)meta);
 
@@ -2049,6 +2370,19 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	gtk_widget_show_all(widget);
 
 	return widget;
+}
+
+gchar *
+status_tab_get_owner(GtkWidget *page)
+{
+	_StatusTab *meta = g_object_get_data(G_OBJECT(page), "meta");
+
+	if(meta->owner)
+	{
+		return g_strdup(meta->owner);
+	}
+
+	return NULL;
 }
 
 /**

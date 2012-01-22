@@ -19,11 +19,10 @@
  * \brief A dialog for composing messages.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 7. August 2011
+ * \date 13. January 2012
  */
 
 #include <string.h>
-
 #include "composer_dialog.h"
 #include "gtkdeletabledialog.h"
 #include "mainwindow.h"
@@ -51,6 +50,8 @@ typedef struct
 	GtkWidget *parent;
 	/*! Unique name of the pixbuf group. */
 	gchar pixbuf_group[64];
+	/*! The previous status. */
+	gchar *prev_status;
 	/*! Comboxbox containing users. */
 	GtkWidget *combo_users;
 	/*! Text field. */
@@ -129,7 +130,7 @@ _composer_dialog_update_remaining_characters(GtkWidget *widget)
 /*
  *	events:
  */
-static gboolean
+gboolean
 _composer_dialog_apply_worker(GtkWidget *dialog)
 {
 	_ComposerWindowPrivate *private = (_ComposerWindowPrivate *)g_object_get_data(G_OBJECT(dialog), "private");
@@ -143,7 +144,7 @@ _composer_dialog_apply_worker(GtkWidget *dialog)
 	{
 		if((text = composer_dialog_get_text(dialog)) && strlen(text))
 		{
-			if(!private->callback(user, text, private->user_data))
+			if(!private->callback(user, text, private->prev_status, private->user_data))
 			{
 				response = GTK_RESPONSE_CANCEL;
 			}
@@ -178,6 +179,7 @@ _composer_dialog_text_buffer_changed(GtkTextBuffer *buffer, GtkWidget *widget)
 static void
 _composer_dialog_destroy(GtkWidget *dialog, _ComposerWindowPrivate *private)
 {
+	g_free(private->prev_status);
 	mainwindow_remove_pixbuf_group(private->parent, private->pixbuf_group);
 }
 
@@ -207,7 +209,6 @@ _composer_dialog_destroy_pixbuf_arg(_ComposerWindowPixbufArg *arg)
 
 	g_slice_free1(sizeof(_ComposerWindowPixbufArg), arg);
 }
-
 
 static gboolean
 _composer_dialog_set_image_worker(_ComposerWindowPixbufArg *arg)
@@ -327,7 +328,7 @@ _composer_dialog_populate_users(GtkWidget *dialog, gchar **users, gint count, co
  *	public:
  */
 GtkWidget *
-composer_dialog_create(GtkWidget *parent, gchar **users, gint users_count, const gchar *selected_user, const gchar *title)
+composer_dialog_create(GtkWidget *parent, gchar **users, gint users_count, const gchar *selected_user, const gchar *prev_status, const gchar *title)
 {
 	GtkWidget *dialog;
 	GtkWidget *hbox;
@@ -355,6 +356,7 @@ composer_dialog_create(GtkWidget *parent, gchar **users, gint users_count, const
 	/* create meta data */
 	private->parent = parent;
 	sprintf(private->pixbuf_group, "composer-%d", group_id);
+	private->prev_status = prev_status ? g_strdup(prev_status) : NULL;
 
 	dialog = gtk_deletable_dialog_new_with_buttons(title, GTK_WINDOW(parent), GTK_DIALOG_MODAL | GTK_DIALOG_NO_SEPARATOR, NULL);
 	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ON_PARENT);

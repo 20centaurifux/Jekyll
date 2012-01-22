@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 19. January 2012
+ * \date 22. January 2012
  */
 
 #include <gtk/gtk.h>
@@ -1642,82 +1642,31 @@ _mainwindow_apply_preferences(GtkWidget *widget, gboolean save_preferences)
 static gchar *
 _mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
 {
-	_MainWindowPrivate *private;
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 	gint count;
 	gchar **usernames = NULL;
-	gchar *id;
 	gchar *username = NULL;
-	gchar **pieces = NULL;
-	gint i;
-	gchar *result = NULL;
 
-	/* get user accounts */
-	if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)))
+	if(!(username = tabbar_get_current_owner(private->tabbar)))
 	{
-		/* get username from current tab id */
-		private = MAINWINDOW_GET_DATA(widget);
-
-		if((id = tabbar_get_current_id(private->tabbar)))
+		/* get user accounts */
+		if(set_default)
 		{
-			switch(tabbar_get_current_type(private->tabbar))
+			if((count = _mainwindow_sync_get_accounts(widget, &usernames, NULL, NULL)) > 0)
 			{
-				case TAB_TYPE_ID_PUBLIC_TIMELINE:
-				case TAB_TYPE_ID_REPLIES:
-				case TAB_TYPE_ID_DIRECT_MESSAGES:
-				case TAB_TYPE_ID_USER_TIMELINE:
-					username = id;
-					break;
+				username = g_strdup(usernames[0]);
 
-				case TAB_TYPE_ID_LIST:
-					pieces = g_strsplit(id, "@", 2);
-					break;
-
-				case TAB_TYPE_ID_SEARCH:
-					pieces = g_strsplit(id, ":", 2);
-					break;
-
-				default:
-					g_warning("Invalid tab type");
-			}
-		}
-
-		if(pieces)
-		{
-			username = g_strdup(pieces[0]);
-			g_strfreev(pieces);
-			g_free(id);
-		}
-
-		/* check if found username is an account */
-		if(username)
-		{
-			for(i = 0; i < count; ++i)
-			{
-				if(!g_strcmp0(username, usernames[i]))
+				for(gint i = 0; i < count; ++i)
 				{
-					result = g_strdup(username);
-					break;
+					g_free(usernames[i]);
 				}
+
+				g_free(usernames);
 			}
 		}
-
-		if(set_default && !result)
-		{
-			/* copy first found username if username is empty */
-			result = g_strdup(usernames[0]);
-		}
-
-		/* cleanup */
-		for(i = 0; i < count; ++i)
-		{
-			g_free(usernames[i]);
-		}
-
-		g_free(usernames);
-		g_free(username);
 	}
 
-	return result;
+	return username;
 }
 
 
@@ -1725,7 +1674,7 @@ _mainwindow_get_selected_account(GtkWidget *widget, gboolean set_default)
  *	compose tweets:
  */
 static gboolean
-_mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, GtkWidget *mainwindow)
+_mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, const gchar *prev_status, GtkWidget *mainwindow)
 {
 	TwitterClient *client;
 	GtkWidget *dialog;
@@ -1736,7 +1685,7 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, Gtk
 
 	if((client = mainwindow_create_twittter_client(mainwindow, TWITTER_CLIENT_DEFAULT_CACHE_LIFETIME)))
 	{
-		if((result = twitter_client_post(client, username, text, &err)))
+		if((result = twitter_client_post(client, username, text, NULL, &err)))
 		{
 			mainwindow_sync_gui(mainwindow);
 		}
@@ -1790,7 +1739,7 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 		g_free(account);
 
 		/* create & run composer dialog */
-		dialog = composer_dialog_create(widget, usernames, count, selected_user, _("Compose new tweet"));
+		dialog = composer_dialog_create(widget, usernames, count, selected_user, NULL, _("Compose new tweet"));
 		composer_dialog_set_apply_callback(dialog, (ComposerApplyCallback)_mainwindow_compose_tweet_callback, widget);
 		gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(dialog));
 
@@ -1835,7 +1784,7 @@ _mainwindow_search(GtkWidget *mainwindow)
 		if((query = search_dialog_get_query(dialog)))
 		{
 			account = _mainwindow_get_selected_account(mainwindow, TRUE);
-			tabbar_open_search_query(private->tabbar, account, query);
+			tabbar_open_search_query(private->tabbar, query);
 		}
 	}
 

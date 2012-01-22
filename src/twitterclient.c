@@ -19,7 +19,7 @@
  * \brief Access to Twitter webservice and data caching.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 23. December 2011
+ * \date 17. January 2012
  */
 
 #include "twitterclient.h"
@@ -241,6 +241,26 @@ _twitter_client_create_web_client_for_friend(GList *accounts, const gchar *frien
 		twitter_web_client_set_oauth_authorization(client, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, account->access_key, account->access_secret);
 		
 	}
+
+	return client;
+}
+
+static TwitterWebClient *
+_twitter_client_create_default_web_client(GList *accounts, GError **err)
+{
+	const _TwitterAccountData *account;
+	TwitterWebClient *client = NULL;
+
+	g_return_val_if_fail(accounts != NULL, NULL);
+
+	g_debug("Creating default TwitterWebClient");
+
+	account = (const _TwitterAccountData *)accounts->data;
+
+	client = twitter_web_client_new();
+	twitter_web_client_set_format(client, "xml");
+	twitter_web_client_set_username(client, account->username);
+	twitter_web_client_set_oauth_authorization(client, OAUTH_CONSUMER_KEY, OAUTH_CONSUMER_SECRET, account->access_key, account->access_secret);
 
 	return client;
 }
@@ -648,7 +668,7 @@ _twitter_client_save_tweet(TwitterClient *twitter_client, TwitterDbHandle *handl
 		/* save status */
 		g_debug("Registering status (\"%s\")", status.id);
 		timestamp = twitter_timestamp_to_unix_timestamp(status.created_at);
-		if(twitterdb_save_status(handle, status.id, user.id, status.text, timestamp, &status_count, err))
+		if(twitterdb_save_status(handle, status.id, status.prev_status, user.id, status.text, timestamp, &status_count, err))
 		{
 			/* add status to related lists */
 			g_debug("Saving tweet in lists");
@@ -669,7 +689,7 @@ _twitter_client_save_tweet(TwitterClient *twitter_client, TwitterDbHandle *handl
 }
 
 static gboolean
-_twitter_client_publish(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict arg, gboolean retweet, GError **err)
+_twitter_client_publish(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict arg1, const gchar * restrict arg2, gboolean retweet, GError **err)
 {
 	TwitterClientPrivate *priv = twitter_client->priv;
 	TwitterDbHandle *handle;
@@ -693,11 +713,11 @@ _twitter_client_publish(TwitterClient *twitter_client, const gchar * restrict ac
 			{
 				if(retweet)
 				{
-					result = twitter_web_client_retweet(client, arg, &buffer, &length);
+					result = twitter_web_client_retweet(client, arg1, &buffer, &length);
 				}
 				else
 				{
-					result = twitter_web_client_post_tweet(client, arg, &buffer, &length);
+					result = twitter_web_client_post_tweet(client, arg1, arg2, &buffer, &length);
 				}
 
 				if(result)
@@ -839,6 +859,91 @@ _twitter_client_process_list(TwitterClient *twitter_client, const gchar * restri
 	}
 
 	return FALSE;
+}
+
+static gboolean
+_twitter_client_get_status(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err)
+{
+	TwitterDbHandle *handle;
+	TwitterWebClient *client;
+	gchar *buffer = NULL;
+	gint length;
+	const GError *client_err;
+	gint status_count;
+	gboolean result = FALSE;
+
+	if(!(handle = twitterdb_get_handle(err)))
+	{
+		return FALSE;
+	}
+
+	/* try to get status from database */
+	g_debug("Getting status \"%s\" from database", guid);
+	if(twitterdb_status_exists(handle, guid, err))
+	{
+		if(!(result = twitterdb_get_status(handle, guid, status, user, err)))
+		{
+			g_warning("Couldn't read status \"%s\" from database", guid);
+		}
+	}
+
+	/* try to get status from Twitter */
+	if(!result && !*err)
+	{
+		g_debug("Couldn't find status in database, fetching data from \"%s\" from Twitter", guid);
+
+		if(username)
+		{
+			client = _twitter_client_create_web_client(twitter_client->priv->accounts, username, err);
+		}
+		else
+		{
+			client = _twitter_client_create_default_web_client(twitter_client->priv->accounts, err);
+		}
+
+		if(client)
+		{
+			if(twitter_web_client_get_status(client, guid, &buffer, &length))
+			{
+				if(!(result = twitter_xml_parse_status(buffer, length, status, user)))
+				{
+					g_set_error(err, 0, 0, "Couldn't parse status data.");
+				}
+			}
+			else
+			{
+				if(client && (client_err = twitter_web_client_get_last_error(client)))
+				{
+					g_set_error(err, 0, 0, "%s", client_err->message);
+				}
+			}
+
+			g_free(buffer);
+			g_object_unref(client);
+		}
+
+		/* store status & user in database */
+		if(result)
+		{
+			g_debug("Updating user: \"%s\" (%s)", user->name, user->id);
+			if(twitterdb_save_user(handle, user->id, user->screen_name, user->name, user->image, user->location, user->url, user->description, err))
+			{
+				g_debug("Registering status (\"%s\")", status->id);
+				if(!twitterdb_save_status(handle, status->id, status->prev_status, user->id, status->text, status->timestamp, &status_count, err))
+				{
+					g_warning("Couldn't save status \"%s\"", status->id);
+				}
+			}
+			else
+			{
+				g_warning("Couldn't save user \"%s\" (%s)", user->name, user->id);
+			}
+		}
+	}
+
+	twitterdb_close_handle(handle);
+
+	return result;
 }
 
 static gboolean
@@ -1195,15 +1300,15 @@ _twitter_client_add_friend(TwitterClient *twitter_client, const gchar * restrict
 }
 
 static gboolean
-_twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err)
+_twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err)
 {
-	return _twitter_client_publish(twitter_client, account, text, FALSE, err);
+	return _twitter_client_publish(twitter_client, account, text, prev_status, FALSE, err);
 }
 
 static gboolean
 _twitter_client_retweet(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err)
 {
-	return _twitter_client_publish(twitter_client, account, text, TRUE, err);
+	return _twitter_client_publish(twitter_client, account, text, NULL, TRUE, err);
 }
 
 /*
@@ -1247,6 +1352,12 @@ twitter_client_process_list(TwitterClient *twitter_client, const gchar * restric
                             TwitterProcessStatusFunc func, gpointer user_data, GCancellable *cancellable, GError **err)
 {
 	return TWITTER_CLIENT_GET_CLASS(twitter_client)->process_list(twitter_client, username, list, func, user_data, cancellable, err);
+}
+
+gboolean
+twitter_client_get_status(TwitterClient *twitter_client, const gchar * restrict username, const gchar * restrict guid, TwitterStatus *status, TwitterUser *user, GError **err)
+{
+	return TWITTER_CLIENT_GET_CLASS(twitter_client)->get_status(twitter_client, username, guid, status, user, err);
 }
 
 gboolean
@@ -1305,9 +1416,9 @@ twitter_client_add_friend(TwitterClient *twitter_client, const gchar * restrict 
 }
 
 gboolean
-twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, GError **err)
+twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar *prev_status, GError **err)
 {
-	return TWITTER_CLIENT_GET_CLASS(twitter_client)->post(twitter_client, account, text, err);
+	return TWITTER_CLIENT_GET_CLASS(twitter_client)->post(twitter_client, account, text, prev_status, err);
 }
 
 gboolean
@@ -1364,6 +1475,7 @@ twitter_client_class_init(TwitterClientClass *klass)
 	klass->process_replies = _twitter_client_process_replies;
 	klass->process_usertimeline = _twitter_client_process_usertimeline;
 	klass->process_list = _twitter_client_process_list;
+	klass->get_status = _twitter_client_get_status;
 	klass->search = _twitter_client_search;
 	klass->add_user_to_list = _twitter_client_add_user_to_list;
 	klass->remove_user_from_list = _twitter_client_remove_user_from_list;

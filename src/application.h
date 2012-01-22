@@ -19,7 +19,7 @@
  * \brief Application information.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 2. January 2012
+ * \date 11. January 2012
  */
 
 #ifndef __APPLICATION_H__
@@ -80,7 +80,7 @@
 /*! Major version of the database model. */
 #define DATABASE_MODEL_MAJOR      0
 /*! Minor version of the database model. */
-#define DATABASE_MODEL_MINOR      1
+#define DATABASE_MODEL_MINOR      2
 
 /*! Gettext package name. */
 #define GETTEXT_PACKAGE_NAME      "jekyll"

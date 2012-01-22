@@ -19,7 +19,7 @@
  * \brief Tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 25. December 2011
+ * \date 22. January 2012
  */
 
 #ifndef __TABS_H__
@@ -143,6 +143,13 @@ gchar *tabbar_get_current_id(GtkWidget *widget);
 /**
  * \param widget the tabbar widget
  *
+ * Returns the current tab owner or NULL.
+ */
+gchar *tabbar_get_current_owner(GtkWidget *widget);
+
+/**
+ * \param widget the tabbar widget
+ *
  * Returns the current tab id or -1.
  */
 gint tabbar_get_current_type(GtkWidget *widget);
@@ -221,7 +228,7 @@ void tabbar_update_list(GtkWidget *widget, const gchar *user, const gchar *old_l
  *
  * Opens a search query.
  */
-void tabbar_open_search_query(GtkWidget *widget, const gchar *user, const gchar *query);
+void tabbar_open_search_query(GtkWidget *widget, const gchar *query);
 
 /**
  * \param widget the tabbar widget

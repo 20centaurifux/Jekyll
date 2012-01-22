@@ -19,7 +19,7 @@
  * \brief Startup functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 29. May 2011
+ * \date 11. January 2012
  */
 
 /**
@@ -30,6 +30,25 @@
 #include "database_init.h"
 #include "application.h"
 
+/*
+ *	database upgrade:
+ */
+gboolean
+_database_init_upgrade(TwitterDbHandle *handle, gint major, gint minor, GError **err)
+{
+	gboolean result = FALSE;
+
+	if(major == 0 && minor == 1)
+	{
+		result = twitterdb_upgrade_0_1_to_0_2(handle, err);
+	}
+
+	return result;
+}
+
+/*
+ *	public:
+ */
 DatabaseInitResult
 database_init(GError **err)
 {
@@ -42,7 +61,7 @@ database_init(GError **err)
 	g_debug("Connecting to database");
 	if((handle = twitterdb_get_handle(err)))
 	{
-		/* try to get database version */
+		/* check if version table does exist */
 		g_debug("Searching for version table");
 		if(!twitterdb_table_exists(handle, "version", err))
 		{
@@ -62,7 +81,7 @@ database_init(GError **err)
 		}
 		else
 		{
-			/* get database version */
+			/* table does exist => get database version */
 			g_debug("Getting database version");
 			if(twitterdb_get_version(handle, &major, &minor, err))
 			{
@@ -82,6 +101,13 @@ database_init(GError **err)
 			if(major > DATABASE_MODEL_MAJOR || (major == DATABASE_MODEL_MAJOR && minor > DATABASE_MODEL_MINOR))
 			{
 				result = DATABASE_INIT_APPLICATION_OUTDATED;
+			}
+			if(major < DATABASE_MODEL_MAJOR || (major == DATABASE_MODEL_MAJOR && minor < DATABASE_MODEL_MINOR))
+			{
+				if(!_database_init_upgrade(handle, major, minor, err))
+				{
+					result = DATABASE_INIT_FAILURE;
+				}
 			}
 			else if(major != DATABASE_MODEL_MAJOR || minor != DATABASE_MODEL_MINOR)
 			{
