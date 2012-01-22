@@ -1850,6 +1850,7 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 
 			/* update accounts */
 			_mainwindow_send_sync_message(menu->window, MAINWINDOW_SYNC_EVENT_UPDATE_GUI);
+			_mainwindow_send_sync_message(menu->window, MAINWINDOW_SYNC_EVENT_UPDATE_TIMELINES);
 			break;
 
 		default:
