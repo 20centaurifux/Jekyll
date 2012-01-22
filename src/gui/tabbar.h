@@ -172,6 +172,14 @@ void tabbar_close_tab(GtkWidget *widget, TabTypeId type_id, const gchar *id);
 
 /**
  * \param widget the tabbar widget
+ * \param user tab owner
+ *
+ * Closes all tabs assigned to the given user.
+ */
+void tabbar_close_tabs_from_user(GtkWidget *widget, const gchar *user);
+
+/**
+ * \param widget the tabbar widget
  * \param account name of an account
  *
  * Opens public timeline of an account.

@@ -208,6 +208,29 @@ _tabbar_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 /*
  *	helpers:
  */
+static gboolean
+_tabbar_is_statustab(GtkWidget *page)
+{
+	Tab *tab;
+
+	g_assert(GTK_IS_WIDGET(page));
+
+	if((tab = (Tab *)g_object_get_data(G_OBJECT(page), "meta")))
+	{
+		if(tab->type_id == TAB_TYPE_ID_PUBLIC_TIMELINE ||
+		   tab->type_id == TAB_TYPE_ID_DIRECT_MESSAGES ||
+		   tab->type_id == TAB_TYPE_ID_REPLIES ||
+		   tab->type_id == TAB_TYPE_ID_USER_TIMELINE ||
+		   tab->type_id == TAB_TYPE_ID_LIST ||
+		   tab->type_id == TAB_TYPE_ID_SEARCH)
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 static Tab *
 _tabbar_get_current_tab(GtkWidget *widget)
 {
@@ -691,6 +714,47 @@ tabbar_close_tab(GtkWidget *widget, TabTypeId type_id, const gchar *id)
 	if((index = _tabbar_find_page(GTK_NOTEBOOK(widget), type_id, id)) != -1)
 	{
 		_tabbar_destroy_page(GTK_NOTEBOOK(widget), index);
+	}
+}
+
+void
+tabbar_close_tabs_from_user(GtkWidget *widget, const gchar *user)
+{
+	gint count;
+	gint i = 0;
+	GtkWidget *page;
+	gchar *owner;
+
+	g_assert(GTK_IS_NOTEBOOK(widget));
+
+	g_debug("Removing tabs from user \"%s\"", user);
+
+	count = gtk_notebook_get_n_pages(GTK_NOTEBOOK(widget));
+
+	while(i < count)
+	{
+		g_debug("Testing page %d", i);
+		page = gtk_notebook_get_nth_page(GTK_NOTEBOOK(widget), i);
+
+		if(_tabbar_is_statustab(page) && (owner = status_tab_get_owner(page)))
+		{
+			if(!g_strcasecmp(owner, user))
+			{
+				g_debug("Removing tab %d", i);
+				_tabbar_destroy_page(GTK_NOTEBOOK(widget), i);
+				--count;
+			}
+			else
+			{
+				++i;
+			}
+
+			g_free(owner);
+		}
+		else
+		{
+			++i;
+		}
 	}
 }
 
