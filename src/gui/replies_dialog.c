@@ -19,13 +19,12 @@
  * \brief A dialog displaying tweets.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 17. January 2012
+ * \date 22. January 2012
  */
 
 #include <glib/gi18n.h>
 #include "gtkdeletabledialog.h"
 #include "replies_dialog.h"
-#include "gtktwitterstatus.h"
 #include "mainwindow.h"
 #include "gtk_helpers.h"
 #include "pixbuf_helpers.h"
@@ -59,7 +58,40 @@ typedef struct
 	GMutex *mutex;
 	/*! Unique pixbuf group. */
 	gchar pixbuf_group[32];
+	/*! Function to call when an user has been activated. */
+	RepliesDialogEventHandler user_callback;
+	/*!* Data passed to user callback. */
+	gpointer user_data;
+	/*! Function to call when an url has been activated. */
+	RepliesDialogEventHandler url_callback;
+	/*!* Data passed to url callback. */
+	gpointer url_data;
 } _RepliesDialogPrivate;
+
+/*
+ *	events:
+ */
+static void
+_replies_dialog_url_activated(GtkWidget *status, const gchar *url, GtkWidget *widget)
+{
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+
+	if(private->url_callback)
+	{
+		private->url_callback(GTK_TWITTER_STATUS(status), url, private->url_data);
+	}
+}
+
+static void
+_replies_dialog_username_activated(GtkWidget *status, const gchar *user, GtkWidget *widget)
+{
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+
+	if(private->user_callback)
+	{
+		private->user_callback(GTK_TWITTER_STATUS(status), user, private->user_data);
+	}
+}
 
 /*
  *	helpers:
@@ -89,6 +121,11 @@ _replies_dialog_add_status(GtkWidget *widget, TwitterStatus status, TwitterUser 
 	gtk_box_pack_start(GTK_BOX(private->vbox), tweet, FALSE, FALSE, 2);
 	gtk_widget_show_all(tweet);
 	mainwindow_load_pixbuf(private->parent, private->pixbuf_group, user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, tweet, NULL);
+
+
+	g_signal_connect(G_OBJECT(tweet), "url-activated", (GCallback)_replies_dialog_url_activated, widget);
+	g_signal_connect(G_OBJECT(tweet), "username-activated", (GCallback)_replies_dialog_username_activated, widget);
+
 	gdk_threads_leave();
 }
 
@@ -336,6 +373,28 @@ replies_dialog_run(GtkWidget *widget)
 	g_assert(private->thread != NULL);
 
 	gtk_deletable_dialog_run(GTK_DELETABLE_DIALOG(widget));
+}
+
+void
+replies_dialog_set_user_handler(GtkWidget *widget, RepliesDialogEventHandler callback, gpointer user_data)
+{
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+
+	g_assert(GTK_IS_DELETABLE_DIALOG(widget));
+
+	private->user_callback = callback;
+	private->user_data = user_data;
+}
+
+void
+replies_dialog_set_url_handler(GtkWidget *widget, RepliesDialogEventHandler callback, gpointer user_data)
+{
+	_RepliesDialogPrivate *private = (_RepliesDialogPrivate *)g_object_get_data(G_OBJECT(widget), "private");
+
+	g_assert(GTK_IS_DELETABLE_DIALOG(widget));
+
+	private->url_callback = callback;
+	private->url_data = user_data;
 }
 
 /**

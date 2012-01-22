@@ -472,6 +472,8 @@ _status_tab_replies_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 	}
 
 	dialog = replies_dialog_create(tabbar_get_mainwindow(tab->tabbar), username, gtk_twitter_status_get_guid(status));
+	replies_dialog_set_user_handler(dialog, (RepliesDialogEventHandler)_status_tab_username_activated, tab);
+	replies_dialog_set_url_handler(dialog, (RepliesDialogEventHandler)_status_tab_url_activated, tab);
 	replies_dialog_run(dialog);
 
 	if(GTK_IS_WIDGET(dialog))
