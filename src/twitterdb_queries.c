@@ -19,7 +19,7 @@
  * \brief SQL Query collection.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 16. January 2012
+ * \date 22. January 2012
  */
 
 #include "twitterdb_queries.h"
@@ -114,13 +114,13 @@ const gchar *twitterdb_queries_create_tables[] =
 
 const gchar *twitterdb_queries_replace_version = "REPLACE INTO version (id, major, minor) VALUES (1, ?, ?)";
 
-const gchar *twitterdb_queries_count_table = "SELECT COUNT(name) FROM sqlite_master WHERE name=?";
+const gchar *twitterdb_queries_count_table = "SELECT COUNT(name) FROM sqlite_master WHERE name=? COLLATE NOCASE";
 
 const gchar *twitterdb_queries_get_version = "SELECT major, minor FROM version";
 
 const gchar *twitterdb_queries_get_user = "SELECT username, realname, image, location, website, description FROM user WHERE guid=?";
 
-const gchar *twitterdb_queries_map_username = "SELECT guid FROM user WHERE username=?";
+const gchar *twitterdb_queries_map_username = "SELECT guid FROM user WHERE username=? COLLATE NOCASE";
 
 const gchar *twitterdb_queries_user_exists = "SELECT COUNT(guid) FROM user WHERE guid=?";
 
@@ -152,7 +152,7 @@ const gchar *twitterdb_queries_remove_followers_from_user = "DELETE FROM followe
 
 const gchar *twitterdb_queries_is_follower = "SELECT COUNT(user1_guid) FROM follower "
                                              "INNER JOIN \"user\" AS user1 ON follower.user1_guid=user1.guid "
-                                             "INNER JOIN \"user\" AS user2 ON follower.user2_guid=user2.guid WHERE user1.username=? AND user2.username=?";
+                                             "INNER JOIN \"user\" AS user2 ON follower.user2_guid=user2.guid WHERE user1.username=? COLLATE NOCASE AND user2.username=? COLLATE NOCASE";
 
 const gchar *twitterdb_queries_count_tweets_from_list = "SELECT COUNT(list_guid) FROM list_timeline WHERE list_guid=?";
 
@@ -168,7 +168,7 @@ const gchar *twitterdb_queries_list_exists = "SELECT COUNT(guid) FROM list WHERE
 
 const gchar *twitterdb_queries_delete_list = "DELETE FROM list WHERE guid=?";
 
-const gchar *twitterdb_queries_get_list_guid = "SELECT list.guid FROM list INNER JOIN \"user\" ON list.user_guid=\"user\".guid WHERE list.name=? AND \"user\".username=?";
+const gchar *twitterdb_queries_get_list_guid = "SELECT list.guid FROM list INNER JOIN \"user\" ON list.user_guid=\"user\".guid WHERE list.name=? COLLATE NOCASE AND \"user\".username=? COLLATE NOCASE";
 
 const gchar *twitterdb_queries_get_list_guids_from_user = "SELECT guid FROM list WHERE user_guid=? ORDER BY name";
 
@@ -190,7 +190,7 @@ const gchar *twitterdb_queries_get_list_members =
 	"INNER JOIN list ON list.guid=list_member.list_guid "
 	"INNER JOIN \"user\" AS member ON member.guid=list_member.user_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=list.user_guid "
-	"WHERE owner.username=? AND list.name=? ORDER BY member.username";
+	"WHERE owner.username=? COLLATE NOCASE AND list.name=? COLLATE NOCASE ORDER BY member.username";
 
 const gchar *twitterdb_queries_delete_user_from_list = "DELETE FROM list_member WHERE list_guid=? AND user_guid=?";
 
@@ -205,7 +205,7 @@ const gchar *twitterdb_queries_get_tweets_from_timeline =
 	"INNER JOIN status ON status.guid=timeline.status_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
 	"INNER JOIN \"user\" AS publisher ON publisher.guid=status.user_guid "
-	"WHERE type=? AND owner.username=? "
+	"WHERE type=? AND owner.username=? COLLATE NOCASE "
 	"ORDER BY \"timestamp\" DESC LIMIT 80";
 
 const gchar *twitterdb_queries_get_new_tweets_from_timeline =
@@ -215,7 +215,7 @@ const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 	"INNER JOIN status ON status.guid=timeline.status_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
 	"INNER JOIN \"user\" AS publisher ON publisher.guid=status.user_guid "
-	"WHERE type=? AND owner.username=? AND read=0 "
+	"WHERE type=? AND owner.username=? COLLATE NOCASE AND read=0 "
 	"ORDER BY \"timestamp\" DESC LIMIT 80";
 
 const gchar *twitterdb_queries_get_tweets_from_list =
@@ -226,7 +226,7 @@ const gchar *twitterdb_queries_get_tweets_from_list =
 	"INNER JOIN list ON list_timeline.list_guid=list.guid "
 	"INNER JOIN \"user\" AS publisher ON publisher.guid=status.user_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=list.user_guid "
-	"WHERE owner.username=? AND list.name=? "
+	"WHERE owner.username=? COLLATE NOCASE AND list.name=? COLLATE NOCASE "
 	"ORDER BY \"timestamp\" DESC LIMIT 80";
 
 const gchar *twitterdb_queries_get_list_membership =
@@ -234,7 +234,7 @@ const gchar *twitterdb_queries_get_list_membership =
 	"INNER JOIN \"user\" AS owner ON owner.guid=list.user_guid "
 	"INNER JOIN list_member ON list_member.list_guid=list.guid "
 	"INNER JOIN \"user\" ON \"user\".guid=list_member.user_guid "
-	"WHERE \"user\".username=? "
+	"WHERE \"user\".username=? COLLATE NOCASE "
 	"ORDER BY list.name";
 
 const gchar *twitterdb_queries_user_is_list_member =
@@ -242,7 +242,7 @@ const gchar *twitterdb_queries_user_is_list_member =
 	"INNER JOIN list_member ON list.guid=list_member.list_guid "
 	"INNER JOIN \"user\" AS member ON member.guid=list_member.user_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=list.user_guid "
-	"WHERE member.username=? AND list.name=? AND owner.username=?";
+	"WHERE member.username=? COLLATE NOCASE AND list.name=? COLLATE NOCASE AND owner.username=? COLLATE NOCASE";
 
 const gchar *twitterdb_queries_get_sync_seconds = "SELECT seconds FROM last_sync WHERE source=? AND user_guid=?";
 
