@@ -862,7 +862,7 @@ twitter_web_client_get_user_timeline(TwitterWebClient *twitterwebclient, const g
 }
 
 gboolean
-twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, gchar **buffer, gint *length)
+twitter_web_client_get_status(TwitterWebClient *twitterwebclient, const gchar *guid, char **buffer, gint *length)
 {
 	return TWITTER_WEB_CLIENT_GET_CLASS(twitterwebclient)->get_status(twitterwebclient, guid, buffer, length);
 }

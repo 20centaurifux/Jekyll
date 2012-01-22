@@ -1415,8 +1415,9 @@ twitter_client_add_friend(TwitterClient *twitter_client, const gchar * restrict 
 	return TWITTER_CLIENT_GET_CLASS(twitter_client)->add_friend(twitter_client, account, friend, err);
 }
 
+
 gboolean
-twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar *prev_status, GError **err)
+twitter_client_post(TwitterClient *twitter_client, const gchar * restrict account, const gchar * restrict text, const gchar * restrict prev_status, GError **err)
 {
 	return TWITTER_CLIENT_GET_CLASS(twitter_client)->post(twitter_client, account, text, prev_status, err);
 }

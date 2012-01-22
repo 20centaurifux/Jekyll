@@ -223,7 +223,6 @@ void tabbar_update_list(GtkWidget *widget, const gchar *user, const gchar *old_l
 
 /**
  * \param widget the tabbar widget
- * \param user name of an user
  * \param query the search query
  *
  * Opens a search query.

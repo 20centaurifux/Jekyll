@@ -43,7 +43,7 @@
 GtkWidget *status_tab_create(GtkWidget *tabbar, TabTypeId identifier, const gchar *id);
 
 /**
- * \param tab the tab page
+ * \param page the tab page
  * \return a new allocated string or NULL
  *
  * Gets the tab owner.

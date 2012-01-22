@@ -34,6 +34,7 @@
  * @{
  */
 
+/*! Replies dialog callback function. */
 typedef void (*RepliesDialogEventHandler)(GtkTwitterStatus *status, const gchar *arg, gpointer user_data);
 
 /**

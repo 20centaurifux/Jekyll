@@ -60,11 +60,11 @@ typedef struct
 	gchar pixbuf_group[32];
 	/*! Function to call when an user has been activated. */
 	RepliesDialogEventHandler user_callback;
-	/*!* Data passed to user callback. */
+	/*! Data passed to user callback. */
 	gpointer user_data;
 	/*! Function to call when an url has been activated. */
 	RepliesDialogEventHandler url_callback;
-	/*!* Data passed to url callback. */
+	/*! Data passed to url callback. */
 	gpointer url_data;
 } _RepliesDialogPrivate;
 

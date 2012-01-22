@@ -33,7 +33,7 @@
 /*
  *	database upgrade:
  */
-gboolean
+static gboolean
 _database_init_upgrade(TwitterDbHandle *handle, gint major, gint minor, GError **err)
 {
 	gboolean result = FALSE;

@@ -34,9 +34,12 @@
  * @{
  */
 
+/*! Account list columns. */
 enum
 {
+	/*! Column displaying an image. */
 	COMPOSER_DIALOG_TREEVIEW_COLUMN_PIXBUF,
+	/*! Column displaying an username. */
 	COMPOSER_DIALOG_TREEVIEW_COLUMN_USERNAME
 };
 
@@ -130,7 +133,7 @@ _composer_dialog_update_remaining_characters(GtkWidget *widget)
 /*
  *	events:
  */
-gboolean
+static gboolean
 _composer_dialog_apply_worker(GtkWidget *dialog)
 {
 	_ComposerWindowPrivate *private = (_ComposerWindowPrivate *)g_object_get_data(G_OBJECT(dialog), "private");

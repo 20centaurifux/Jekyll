@@ -38,7 +38,7 @@
 /**
  * \param parent the mainwindow
  * \param accounts account list
- * \param count length of account list
+ * \param length length of account list
  * \param title window title
  * \param text dialog text
  * \return a GTK dialog

@@ -34,7 +34,7 @@
  */
 
 /**
- * \param GdkPixbuf pixbuf to set
+ * \param pixbuf pixbuf to set
  * \param status a GtkTwitterStatus
  *
  * PixbufLoader callback function to set GtkTwitterStatus pixbuf;
