@@ -19,7 +19,7 @@
  * \brief Application information.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. January 2012
+ * \date 27. February 2012
  */
 
 #ifndef __APPLICATION_H__
@@ -46,7 +46,7 @@
 /*! Minor release number. */
 #define VERSION_MINOR             3
 /*! Patch level of the release. */
-#define VERSION_PATCH_LEVEL       0
+#define VERSION_PATCH_LEVEL       1
 
 /*! Name of the directory to store configuration data. */
 #define CONFIG_DIR                ".jekyll"
