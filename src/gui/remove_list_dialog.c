@@ -19,7 +19,7 @@
  * \brief Remove lists.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 30. September 2011
+ * \date 27. February 2012
  */
 
 #include <glib/gi18n.h>
@@ -90,7 +90,7 @@ _remove_list_dialog_apply_worker(GtkWidget *dialog)
 	if(success)
 	{
 		/* update GUI */
-		mainwindow_remove_list(parent, windata->owner, windata->listname);
+		mainwindow_notify_list_removed(parent, windata->owner, windata->listname);
 
 		/* close dialog */
 		gdk_threads_enter();

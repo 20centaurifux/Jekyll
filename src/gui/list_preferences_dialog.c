@@ -19,7 +19,7 @@
  * \brief Edit general list properties.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. December 2011
+ * \date 27. February 2012
  */
 
 #include <string.h>
@@ -262,11 +262,11 @@ _list_preferences_dialog_apply_worker(GtkDeletableDialog *dialog)
 					success = TRUE;
 
 					gdk_threads_enter();
-					mainwindow_update_list(windata->parent,
-							  windata->owner,
-							  windata->previous_listname,
-							  listname,
-							  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(windata->checkbox_protected)));
+					mainwindow_notify_list_updated(windata->parent,
+							               windata->owner,
+							               windata->previous_listname,
+							               listname,
+							               gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(windata->checkbox_protected)));
 					gdk_threads_leave();
 				}
 

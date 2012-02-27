@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. Fedrau 2012
+ * \date 27. February 2012
  */
 
 #ifndef __MAINWINDOW_H__
@@ -208,7 +208,7 @@ void mainwindow_sync_gui(GtkWidget *widget);
  *
  * Updates a listname.
  */
-void mainwindow_update_list(GtkWidget *widget, const gchar *owner, const gchar *old_name, const gchar *new_name, gboolean protected); // TODO: rename
+void mainwindow_notify_list_updated(GtkWidget *widget, const gchar *owner, const gchar *old_name, const gchar *new_name, gboolean protected); // TODO: rename
 
 /**
  * \param widget the mainwindow widget
@@ -217,7 +217,7 @@ void mainwindow_update_list(GtkWidget *widget, const gchar *owner, const gchar *
  *
  * Removes a list.
  */
-void mainwindow_remove_list(GtkWidget *widget, const gchar *owner, const gchar *listname); // TODO: rename
+void mainwindow_notify_list_removed(GtkWidget *widget, const gchar *owner, const gchar *listname); // TODO: rename
 
 /**
  * \param widget the mainwindow widget

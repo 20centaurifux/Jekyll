@@ -2995,7 +2995,7 @@ mainwindow_sync_gui(GtkWidget *widget)
 }
 
 void
-mainwindow_update_list(GtkWidget *widget, const gchar *owner, const gchar *old_name, const gchar *new_name, gboolean protected)
+mainwindow_notify_list_updated(GtkWidget *widget, const gchar *owner, const gchar *old_name, const gchar *new_name, gboolean protected)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
@@ -3014,7 +3014,7 @@ mainwindow_update_list(GtkWidget *widget, const gchar *owner, const gchar *old_n
 }
 
 void
-mainwindow_remove_list(GtkWidget *widget, const gchar *owner, const gchar *listname)
+mainwindow_notify_list_removed(GtkWidget *widget, const gchar *owner, const gchar *listname)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 	gchar id[192];
