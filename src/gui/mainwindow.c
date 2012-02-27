@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. January 2012
+ * \date 27. February 2012
  */
 
 #include <gtk/gtk.h>
@@ -2804,12 +2804,12 @@ mainwindow_account_node_activated(GtkWidget *widget, const gchar *account, Accou
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_REPLIES:
-			g_debug("Opening replies: (\"%s\")", account);
+			g_debug("Opening replies (\"%s\")", account);
 			tabbar_open_replies(private->tabbar, account);
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_USER_TIMELINE:
-			g_debug("Opening user timeline: (\"%s\")", account);
+			g_debug("Opening user timeline (\"%s\")", account);
 			tabbar_open_user_timeline(private->tabbar, account);
 			break;
 
@@ -2820,11 +2820,18 @@ mainwindow_account_node_activated(GtkWidget *widget, const gchar *account, Accou
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_FRIENDS:
+			g_debug("Editing friends (\"%s\"", account);
 			_mainwindow_edit_followers(widget, account, TRUE);
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_FOLLOWERS:
+			g_debug("Editing followers (\"%s\"", account);
 			_mainwindow_edit_followers(widget, account, FALSE);
+			break;
+
+		case ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY:
+			g_debug("Opening search query (\"%s\"", text);
+			tabbar_open_search_query(private->tabbar, text);
 			break;
 
 		default:
@@ -3024,6 +3031,22 @@ mainwindow_remove_list(GtkWidget *widget, const gchar *owner, const gchar *listn
 	/* close open tab */
 	g_debug("Removing list from tabbar");
 	tabbar_close_tab(private->tabbar, TAB_TYPE_ID_LIST, id);
+}
+
+void
+mainwindow_notify_search_opened(GtkWidget *widget, const gchar *query)
+{
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
+
+	accountbrowser_append_search_query(private->accountbrowser, query);
+}
+
+void
+mainwindow_notify_search_closed(GtkWidget *widget, const gchar *query)
+{
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
+
+	accountbrowser_remove_search_query(private->accountbrowser, query);
 }
 
 void

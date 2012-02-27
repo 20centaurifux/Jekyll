@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. January 2012
+ * \date 27. January 2012
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -130,6 +130,14 @@ _tabbar_destroy_page_widget_worker(_Tabbar *tabbar)
 		g_debug("%s: calling assigned destroy handler", __func__);
 		if((meta = g_object_get_data(G_OBJECT(page), "meta")))
 		{
+			/* notify mainwindow */
+			if(meta->type_id == TAB_TYPE_ID_SEARCH)
+			{
+				g_mutex_lock(meta->id.mutex);
+				mainwindow_notify_search_closed(tabbar->mainwindow, meta->id.id);
+				g_mutex_unlock(meta->id.mutex);
+			}
+
 			if(meta->funcs->destroy)
 			{
 				meta->funcs->destroy(GTK_WIDGET(page));
@@ -855,6 +863,7 @@ void
 tabbar_open_search_query(GtkWidget *widget, const gchar *query)
 {
 	_tabbar_open_status_page(GTK_NOTEBOOK(widget), TAB_TYPE_ID_SEARCH, query);
+	mainwindow_notify_search_opened(tabbar_get_mainwindow(widget), query);
 }
 
 void
