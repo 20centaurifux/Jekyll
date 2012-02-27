@@ -19,7 +19,7 @@
  * \brief A tree containing accounts.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. December 2011
+ * \date 27. February 2012
  */
 
 #include <gdk/gdk.h>
@@ -43,6 +43,8 @@ typedef struct
 {
 	/*! The accountbrowser treeview. */
 	GtkWidget *tree;
+	/*! TRUE if search node has been created. */
+	gboolean search_node;
 } _AccountBrowserPrivate;
 
 enum
@@ -204,6 +206,54 @@ _accountbrowser_get_lists(GtkWidget *widget, const gchar *username)
 	return lists;
 }
 
+static void
+_accountbrowser_update_search_node(GtkWidget *widget)
+{
+	GtkTreeView *tree;
+	GtkTreeStore *store;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GdkPixbuf *pixbuf;
+	_AccountBrowserPrivate *browser;
+
+	g_assert(GTK_IS_VBOX(widget));
+
+
+	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
+	tree = GTK_TREE_VIEW(browser->tree);
+	model = gtk_tree_view_get_model(tree);
+	store = GTK_TREE_STORE(model);
+
+	if(browser->search_node)
+	{
+		g_debug("Updating search node");
+
+		if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &iter))
+		{
+			gtk_tree_store_move_before(store, &iter, NULL);
+		}
+	}
+	else
+	{
+		g_debug("Appending search node");
+
+		pixbuf = _accountbrowser_load_pixbuf("icon_search_16"),
+		gtk_tree_store_append(store, &iter, NULL);
+		gtk_tree_store_set(store,
+				   &iter,
+				   ACCOUNTBROWSER_TREEVIEW_COLUMN_PIXBUF,
+				   pixbuf,
+				   ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT,
+				   _("Search"),
+				   ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE,
+				   ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH,
+				   -1);
+		g_object_unref(pixbuf);
+
+		browser->search_node = TRUE;
+	}
+}
+
 /*
  *	events:
  */
@@ -232,7 +282,18 @@ _accountbrowser_treeview_node_activated(GtkTreeView *tree, GtkTreePath *path, Gt
 	{
 		gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &type, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
 
-		if(type != ACCOUNTBROWSER_TREEVIEW_NODE_ACCOUNT)
+		if(type == ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH || type == ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY)
+		{
+			mainwindow_account_node_activated(mainwindow, NULL, type, text);
+			g_free(text);
+		}
+		else if(type == ACCOUNTBROWSER_TREEVIEW_NODE_ACCOUNT)
+		{
+			/* call mainwindow handler & free memory */
+			mainwindow_account_node_activated(mainwindow, text, type, text);
+			g_free(text);
+		}
+		else
 		{
 			g_debug("Searching for related account node");
 
@@ -250,12 +311,6 @@ _accountbrowser_treeview_node_activated(GtkTreeView *tree, GtkTreePath *path, Gt
 			/* call mainwindow handler & free memory */
 			mainwindow_account_node_activated(mainwindow, account, type, text);
 			g_free(account);
-			g_free(text);
-		}
-		else
-		{
-			/* call mainwindow handler & free memory */
-			mainwindow_account_node_activated(mainwindow, text, type, text);
 			g_free(text);
 		}
 	}
@@ -397,6 +452,7 @@ accountbrowser_create(GtkWidget *parent)
 	/* create accountbrowser structure */
 	browser = (_AccountBrowserPrivate *)g_malloc(sizeof(_AccountBrowserPrivate));
 	browser->tree = tree;
+	browser->search_node = FALSE;
 	g_object_set_data(G_OBJECT(vbox), "browser", browser);
 
 	/* build paths */
@@ -445,6 +501,7 @@ accountbrowser_append_account(GtkWidget *widget, const gchar *username)
 	GdkPixbuf *pixbuf;
 	_AccountBrowserPrivate *browser;
 
+	/* insert search node */
 	g_assert(GTK_IS_VBOX(widget));
 	g_assert(username != NULL);
 
@@ -570,6 +627,9 @@ accountbrowser_append_account(GtkWidget *widget, const gchar *username)
 		path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &parent);
 		gtk_tree_view_expand_row(GTK_TREE_VIEW(browser->tree), path, TRUE);
 		gtk_tree_path_free(path);
+
+		/* update search node */
+		_accountbrowser_update_search_node(widget);
 	}
 }
 
@@ -797,6 +857,139 @@ accountbrowser_set_lists(GtkWidget *widget, const gchar *username, GList *lists)
 		list = (TwitterList *)el1->data;
 		accountbrowser_append_list(widget, username, list->name, list->protected);
 		el1 = el1->next;
+	}
+}
+
+void
+accountbrowser_append_search_query(GtkWidget *widget, const gchar *query)
+{
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreeStore *store;
+	GtkTreeIter parent;
+	GtkTreeIter iter;
+	GtkTreeIter query_iter;
+	gboolean inserted = FALSE;
+	gboolean found = FALSE;
+	gchar *text;
+	gboolean valid;
+	gint result;
+	GdkPixbuf *pixbuf;
+	GtkTreePath *path;
+	_AccountBrowserPrivate *browser;
+
+	g_assert(GTK_IS_VBOX(widget));
+	g_assert(query != NULL);
+
+	g_debug("Appending search query: \"%s\"", query);
+
+	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
+	tree = GTK_TREE_VIEW(browser->tree);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
+	store = GTK_TREE_STORE(model);
+
+	/* find search node */
+	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
+	{
+		valid = gtk_tree_model_iter_children(model, &iter, &parent);
+
+		/* try to find existing search query node or node position */
+		while(valid && !inserted && !found)
+		{
+			gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
+		
+			if((result = g_ascii_strcasecmp(query, text)) < 0)
+			{
+				gtk_tree_store_insert_before(store, &query_iter, &parent, &iter);
+				inserted = TRUE;
+			}
+			else if(!result)
+			{
+				found = TRUE;
+			}
+			else
+			{
+				valid = gtk_tree_model_iter_next(model, &iter);
+			}
+
+			g_free(text);
+		}
+
+		/* create node */
+		if(!inserted && !found)
+		{
+			gtk_tree_store_append(store, &iter, &parent);
+		}
+
+		if(!found)
+		{
+			pixbuf = _accountbrowser_load_pixbuf("icon_search_16");
+
+			gtk_tree_store_set(store,
+					   inserted ? &query_iter : &iter,
+					   ACCOUNTBROWSER_TREEVIEW_COLUMN_PIXBUF,
+					   pixbuf,
+					   ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT,
+					   query,
+					   ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE,
+					   ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY,
+					   -1);
+
+			g_object_unref(pixbuf);
+
+			/* expand parent node */
+			path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &parent);
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(tree), path, TRUE);
+			gtk_tree_path_free(path);
+		}
+	}
+}
+
+void
+accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query)
+{
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreeStore *store;
+	GtkTreeIter parent;
+	GtkTreeIter iter;
+	gboolean found = FALSE;
+	gchar *text;
+	gboolean valid;
+	_AccountBrowserPrivate *browser;
+
+	g_assert(GTK_IS_VBOX(widget));
+	g_assert(query != NULL);
+
+	g_debug("Removing search query: \"%s\"", query);
+
+	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
+	tree = GTK_TREE_VIEW(browser->tree);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
+	store = GTK_TREE_STORE(model);
+
+	/* find search node */
+	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
+	{
+		valid = gtk_tree_model_iter_children(model, &iter, &parent);
+
+		/* try to find existing search query node or node position */
+		while(valid && !found)
+		{
+			gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
+		
+			if(!g_ascii_strcasecmp(text, query))
+			{
+				gtk_tree_store_remove(store, &iter);
+				found = TRUE;
+			}
+			else
+			{
+				valid = gtk_tree_model_iter_next(model, &iter);
+			}
+
+			g_free(text);
+		}
 	}
 }
 
