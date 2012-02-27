@@ -19,7 +19,7 @@
  * \brief Gtk helper functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. April 2011
+ * \date 27. February 2012
  */
 
 #include "gtk_helpers.h"
@@ -29,6 +29,18 @@
  * @{
  */
 
+/*
+ *	helpers:
+ */
+static gboolean
+_gtk_helpers_int_equal(gconstpointer a, gconstpointer b)
+{
+	return GPOINTER_TO_INT(a) == GPOINTER_TO_INT(b);
+}
+
+/*
+ *	public:
+ */
 void
 gtk_helpers_set_widget_busy(GtkWidget *widget, gboolean busy)
 {
@@ -91,7 +103,7 @@ gtk_helpers_tree_model_find_iter_by_string(GtkTreeModel *model, const gchar *tex
 gboolean
 gtk_helpers_tree_model_find_iter_by_integer(GtkTreeModel *model, gint integer, gint column, GtkTreeIter *iter)
 {
-	return gtk_helpers_tree_model_find_iter(model, GINT_TO_POINTER(integer), g_int_equal, NULL, column, iter);
+	return gtk_helpers_tree_model_find_iter(model, GINT_TO_POINTER(integer), _gtk_helpers_int_equal, NULL, column, iter);
 }
 
 gint
