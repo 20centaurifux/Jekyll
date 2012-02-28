@@ -208,7 +208,7 @@ void mainwindow_sync_gui(GtkWidget *widget);
  *
  * Updates a listname.
  */
-void mainwindow_notify_list_updated(GtkWidget *widget, const gchar *owner, const gchar *old_name, const gchar *new_name, gboolean protected); // TODO: rename
+void mainwindow_notify_list_updated(GtkWidget *widget, const gchar *owner, const gchar *old_name, const gchar *new_name, gboolean protected);
 
 /**
  * \param widget the mainwindow widget
@@ -217,7 +217,7 @@ void mainwindow_notify_list_updated(GtkWidget *widget, const gchar *owner, const
  *
  * Removes a list.
  */
-void mainwindow_notify_list_removed(GtkWidget *widget, const gchar *owner, const gchar *listname); // TODO: rename
+void mainwindow_notify_list_removed(GtkWidget *widget, const gchar *owner, const gchar *listname);
 
 /**
  * \param widget the mainwindow widget
