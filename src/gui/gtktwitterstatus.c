@@ -19,7 +19,7 @@
  * \brief A GTK widget displaying a twitter status.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 17. January 2012
+ * \date 28. February 2012
  */
 
 #include <string.h>
@@ -376,7 +376,7 @@ _gtk_twitter_status_append_hashtag_to_buffer(GString *buffer, const gchar *text,
 		buffer = g_string_append(buffer, "<a href=\"http://twitter.com/#!/search?q=%23");
 		buffer = g_string_append_uri_escaped(buffer, hash + 1, NULL, length - 1);
 		buffer = g_string_append(buffer, "\">");
-		buffer = g_string_append_len(buffer, hash, length);
+		buffer = g_string_append(buffer, hash);
 		buffer = g_string_append(buffer, "</a>");
 		g_free(hash);
 	}
@@ -567,7 +567,8 @@ _gtk_twitter_status_set_status_text(GtkWidget *label, const gchar *text)
 			/* check if we've found the end of the link/hashtag at the current position */
 			if(type != POS_ANCHOR && (text[offy] == ' ' ||
 			   (type == POS_USER && (text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.')) ||
-			   (type == POS_HASHTAG && (g_unichar_iscntrl(g_utf8_get_char_validated(text+ offy, 1)) || text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.'))))
+			   (type == POS_HASHTAG && (g_unichar_iscntrl(g_utf8_get_char_validated(text+ offy, 1)) |
+			    text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.' || text[offy] == '\"' || text[offy] == '\''))))
 			{
 				/* append link/hashtag to buffer */
 				switch(type)
