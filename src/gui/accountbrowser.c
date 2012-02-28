@@ -92,11 +92,37 @@ _accountbrowser_load_pixbuf(const gchar *key)
 static gboolean
 _accountbrowser_find_account_node(GtkTreeView *tree, GtkTreeIter *iter, const gchar *username)
 {
+	GtkTreeModel *model;
+	gboolean found = FALSE;
+	gboolean valid;
+	gchar *text;
+	AccountBrowserTreeViewNodeType type;
+
 	g_assert(GTK_IS_TREE_VIEW(tree));
 	g_assert(iter != NULL);
 	g_assert(username != NULL);
 
-	return gtk_helpers_tree_model_find_iter_by_string(gtk_tree_view_get_model(tree), username, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, iter);
+	model = gtk_tree_view_get_model(tree);
+
+	valid = gtk_tree_model_get_iter_first(model, iter);
+
+	while(valid && !found)
+	{
+		gtk_tree_model_get(model, iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &type, -1);
+
+		if(type == ACCOUNTBROWSER_TREEVIEW_NODE_ACCOUNT && !g_strcmp0(text, username))
+		{
+			found = TRUE;
+		}
+		else
+		{
+			valid = gtk_tree_model_iter_next(model, iter);
+		}
+
+		g_free(text);
+	}
+
+	return found;
 }
 
 static gboolean
@@ -764,6 +790,7 @@ accountbrowser_get_accounts(GtkWidget *widget)
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gchar *account;
+	AccountBrowserTreeViewNodeType type;
 	gboolean valid;
 	GList *accounts = NULL;
 
@@ -777,8 +804,17 @@ accountbrowser_get_accounts(GtkWidget *widget)
 
 	while(valid)
 	{
-		gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &account, -1);
-		accounts = g_list_append(accounts, account);
+		gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &account, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &type, -1);
+
+		if(type == ACCOUNTBROWSER_TREEVIEW_NODE_ACCOUNT)
+		{
+			accounts = g_list_append(accounts, account);
+		}
+		else
+		{
+			g_free(account);
+		}
+
 		valid = gtk_tree_model_iter_next(model, &iter);
 	}
 
