@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. February 2012
+ * \date 28. February 2012
  */
 
 #include <gtk/gtk.h>
@@ -2331,22 +2331,26 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	{
 		g_debug("Destroying systray");
 		systray_destroy(private->systray);
+		private->systray = NULL;
 	}
 
 	g_debug("Destroying accountbrowser");
 	accountbrowser_destroy(private->accountbrowser);
+	private->accountbrowser = NULL;
 
 	g_debug("Destroying statusbar");
 	statusbar_destroy(private->statusbar);
 
 	g_debug("Destroying notification area");
 	notification_area_destroy(private->notification_area);
+	private->notification_area = NULL;
 
 	gdk_threads_leave(); /* tabbar_destroy() joins a thread which locks the GDK mutex
 	                      * and so we have to unlock it to avoid a deadlock. */
 
 	g_debug("Destroying tabbar");
 	tabbar_destroy(private->tabbar);
+	private->tabbar = NULL;
 
 	g_debug("Destroying synchronization data");
 	g_async_queue_unref(private->sync.queue);
@@ -2355,10 +2359,12 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	g_debug("Stopping pixbuf loader...");
 	pixbuf_loader_stop(private->pixbuf_loader);
 	g_object_unref(private->pixbuf_loader);
+	private->pixbuf_loader = NULL;
 
 	/* cancellable */
 	g_debug("Destroying cancellable");
 	g_object_unref(private->cancellable);
+	private->cancellable = NULL;
 
 	/* free memory */
 	g_debug("Freeing memory");
@@ -3038,7 +3044,10 @@ mainwindow_notify_search_opened(GtkWidget *widget, const gchar *query)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
-	accountbrowser_append_search_query(private->accountbrowser, query);
+	if(private->accountbrowser)
+	{
+		accountbrowser_append_search_query(private->accountbrowser, query);
+	}
 }
 
 void
@@ -3046,7 +3055,10 @@ mainwindow_notify_search_closed(GtkWidget *widget, const gchar *query)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
-	accountbrowser_remove_search_query(private->accountbrowser, query);
+	if(private->accountbrowser)
+	{
+		accountbrowser_remove_search_query(private->accountbrowser, query);
+	}
 }
 
 void
@@ -3058,7 +3070,7 @@ mainwindow_notify(GtkWidget *widget, NotificationLevel level, const gchar *messa
 
 	g_object_get(G_OBJECT(private->notification_area), "visible", &visible, NULL);
 
-	if(visible)
+	if(visible && private->notification_area)
 	{
 		notification_area_notify(private->notification_area, level, message);
 	}
