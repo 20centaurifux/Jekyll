@@ -19,7 +19,7 @@
  * \brief A tree containing accounts.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. February 2012
+ * \date 28. February 2012
  */
 
 #include <gdk/gdk.h>
@@ -131,6 +131,108 @@ _accountbrowser_find_account_child_node(GtkTreeView *tree, GtkTreeIter *parent, 
 	}
 
 	return found;
+}
+
+static void
+_accountbrowser_remove_child_node(GtkTreeModel *model, GtkTreeIter *parent, const gchar *node_text)
+{
+	GtkTreeIter iter;
+	gboolean found = FALSE;
+	gboolean valid;
+	gchar *text;
+
+	valid = gtk_tree_model_iter_children(model, &iter, parent);
+
+	while(valid && !found)
+	{
+		gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
+	
+		if(!g_ascii_strcasecmp(text, node_text))
+		{
+			gtk_tree_store_remove(GTK_TREE_STORE(model), &iter);
+			found = TRUE;
+		}
+		else
+		{
+			valid = gtk_tree_model_iter_next(model, &iter);
+		}
+
+		g_free(text);
+	}
+}
+
+static void
+_accountbrowser_insert_node_sorted(GtkTreeView *tree, GtkTreeIter *parent, AccountBrowserTreeViewNodeType node_type, const gchar *node_text, const gchar *node_icon, gboolean expand_parent)
+{
+	GtkTreeModel *model;
+	GtkTreeStore *store;
+	GtkTreeIter iter1;
+	GtkTreeIter iter2;
+	gchar *text;
+	gboolean inserted = FALSE;
+	gboolean found = FALSE;
+	gboolean valid;
+	gint result;
+	GdkPixbuf *pixbuf;
+	GtkTreePath *path;
+
+	model = gtk_tree_view_get_model(tree);
+	store = GTK_TREE_STORE(model);
+	valid = gtk_tree_model_iter_children(model, &iter1, parent);
+
+	/* try to find existing search query node or node position */
+	while(valid && !inserted && !found)
+	{
+		gtk_tree_model_get(model, &iter1, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
+	
+		if((result = g_ascii_strcasecmp(node_text, text)) < 0)
+		{
+			/* insert node */
+			gtk_tree_store_insert_before(store, &iter2, parent, &iter1);
+			inserted = TRUE;
+		}
+		else if(!result)
+		{
+			found = TRUE;
+		}
+		else
+		{
+			valid = gtk_tree_model_iter_next(model, &iter1);
+		}
+
+		g_free(text);
+	}
+
+	/* create node */
+	if(!inserted && !found)
+	{
+		gtk_tree_store_append(store, &iter2, parent);
+	}
+
+	if(!found)
+	{
+		pixbuf = _accountbrowser_load_pixbuf(node_icon);
+
+		gtk_tree_store_set(store,
+				   &iter2,
+				   ACCOUNTBROWSER_TREEVIEW_COLUMN_PIXBUF,
+				   pixbuf,
+				   ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT,
+				   node_text,
+				   ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE,
+				   node_type,
+				   -1);
+
+		g_object_unref(pixbuf);
+
+		/* expand parent node */
+		if(expand_parent)
+		{
+			path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), parent);
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(tree), path, TRUE);
+			gtk_tree_path_free(path);
+		}
+	}
 }
 
 static gboolean
@@ -865,17 +967,7 @@ accountbrowser_append_search_query(GtkWidget *widget, const gchar *query)
 {
 	GtkTreeView *tree;
 	GtkTreeModel *model;
-	GtkTreeStore *store;
 	GtkTreeIter parent;
-	GtkTreeIter iter;
-	GtkTreeIter query_iter;
-	gboolean inserted = FALSE;
-	gboolean found = FALSE;
-	gchar *text;
-	gboolean valid;
-	gint result;
-	GdkPixbuf *pixbuf;
-	GtkTreePath *path;
 	_AccountBrowserPrivate *browser;
 
 	g_assert(GTK_IS_VBOX(widget));
@@ -886,62 +978,10 @@ accountbrowser_append_search_query(GtkWidget *widget, const gchar *query)
 	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
 	tree = GTK_TREE_VIEW(browser->tree);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
-	store = GTK_TREE_STORE(model);
 
-	/* find search node */
 	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
 	{
-		valid = gtk_tree_model_iter_children(model, &iter, &parent);
-
-		/* try to find existing search query node or node position */
-		while(valid && !inserted && !found)
-		{
-			gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
-		
-			if((result = g_ascii_strcasecmp(query, text)) < 0)
-			{
-				gtk_tree_store_insert_before(store, &query_iter, &parent, &iter);
-				inserted = TRUE;
-			}
-			else if(!result)
-			{
-				found = TRUE;
-			}
-			else
-			{
-				valid = gtk_tree_model_iter_next(model, &iter);
-			}
-
-			g_free(text);
-		}
-
-		/* create node */
-		if(!inserted && !found)
-		{
-			gtk_tree_store_append(store, &iter, &parent);
-		}
-
-		if(!found)
-		{
-			pixbuf = _accountbrowser_load_pixbuf("icon_search_16");
-
-			gtk_tree_store_set(store,
-					   inserted ? &query_iter : &iter,
-					   ACCOUNTBROWSER_TREEVIEW_COLUMN_PIXBUF,
-					   pixbuf,
-					   ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT,
-					   query,
-					   ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE,
-					   ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY,
-					   -1);
-
-			g_object_unref(pixbuf);
-
-			/* expand parent node */
-			path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &parent);
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(tree), path, TRUE);
-			gtk_tree_path_free(path);
-		}
+		_accountbrowser_insert_node_sorted(tree, &parent, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY, query, "icon_search_16", TRUE);
 	}
 }
 
@@ -950,12 +990,7 @@ accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query)
 {
 	GtkTreeView *tree;
 	GtkTreeModel *model;
-	GtkTreeStore *store;
 	GtkTreeIter parent;
-	GtkTreeIter iter;
-	gboolean found = FALSE;
-	gchar *text;
-	gboolean valid;
 	_AccountBrowserPrivate *browser;
 
 	g_assert(GTK_IS_VBOX(widget));
@@ -966,30 +1001,11 @@ accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query)
 	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
 	tree = GTK_TREE_VIEW(browser->tree);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
-	store = GTK_TREE_STORE(model);
 
 	/* find search node */
 	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
 	{
-		valid = gtk_tree_model_iter_children(model, &iter, &parent);
-
-		/* try to find existing search query node or node position */
-		while(valid && !found)
-		{
-			gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
-		
-			if(!g_ascii_strcasecmp(text, query))
-			{
-				gtk_tree_store_remove(store, &iter);
-				found = TRUE;
-			}
-			else
-			{
-				valid = gtk_tree_model_iter_next(model, &iter);
-			}
-
-			g_free(text);
-		}
+		_accountbrowser_remove_child_node(model, &parent, query);
 	}
 }
 
