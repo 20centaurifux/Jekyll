@@ -390,7 +390,7 @@ _accountbrowser_update_global_node(GtkWidget *widget, AccountBrowserTreeViewNode
 static void
 _accountbrowser_update_timelines_node(GtkWidget *widget)
 {
-	_accountbrowser_update_global_node(widget, ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_TIMELINES, _("Timelines"), "icon_lists_16", ACCOUNTBROWSER_FLAG_TIMELINES_NODE_CREATED); // TODO: icon
+	_accountbrowser_update_global_node(widget, ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_TIMELINES, _("Timelines"), "icon_timelines_16", ACCOUNTBROWSER_FLAG_TIMELINES_NODE_CREATED);
 }
 
 static void
@@ -614,6 +614,8 @@ accountbrowser_create(GtkWidget *parent)
 	pathbuilder_save_path("icon_list_16", pathbuilder_build_icon_path("16x16", "list.png"));
 	pathbuilder_save_path("icon_list_protected_16", pathbuilder_build_icon_path("16x16", "list_protected.png"));
 	pathbuilder_save_path("icon_search_16", pathbuilder_build_icon_path("16x16", "search.png"));
+	pathbuilder_save_path("icon_search_query_16", pathbuilder_build_icon_path("16x16", "search_query.png"));
+	pathbuilder_save_path("icon_timelines_16", pathbuilder_build_icon_path("16x16", "timelines.png"));
 
 	/* signals */
 	g_signal_connect(G_OBJECT(tree), "row-activated", G_CALLBACK(_accountbrowser_treeview_node_activated), (gpointer)parent);
@@ -1036,7 +1038,7 @@ accountbrowser_append_search_query(GtkWidget *widget, const gchar *query)
 
 	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
 	{
-		_accountbrowser_insert_node_sorted(tree, &parent, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY, query, "icon_search_16", TRUE);
+		_accountbrowser_insert_node_sorted(tree, &parent, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY, query, "icon_search_query_16", TRUE);
 	}
 }
 
