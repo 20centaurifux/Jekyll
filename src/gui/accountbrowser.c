@@ -427,7 +427,8 @@ _accountbrowser_treeview_node_activated(GtkTreeView *tree, GtkTreePath *path, Gt
 	{
 		gtk_tree_model_get(model, &iter, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &type, ACCOUNTBROWSER_TREEVIEW_COLUMN_TEXT, &text, -1);
 
-		if(type == ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH || type == ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY)
+		if(type == ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH || type == ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY ||
+		   type == ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_TIMELINES || type == ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_USER_TIMELINE)
 		{
 			mainwindow_account_node_activated(mainwindow, NULL, type, text);
 			g_free(text);
