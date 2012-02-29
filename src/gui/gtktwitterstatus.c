@@ -567,7 +567,7 @@ _gtk_twitter_status_set_status_text(GtkWidget *label, const gchar *text)
 			/* check if we've found the end of the link/hashtag at the current position */
 			if(type != POS_ANCHOR && (text[offy] == ' ' ||
 			   (type == POS_USER && (text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.')) ||
-			   (type == POS_HASHTAG && (g_unichar_iscntrl(g_utf8_get_char_validated(text+ offy, 1)) |
+			   (type == POS_HASHTAG && (g_unichar_iscntrl(g_utf8_get_char_validated(text+ offy, 1)) ||
 			    text[offy] == ':' || text[offy] == ',' || text[offy] == ';' || text[offy] == '.' || text[offy] == '\"' || text[offy] == '\''))))
 			{
 				/* append link/hashtag to buffer */
