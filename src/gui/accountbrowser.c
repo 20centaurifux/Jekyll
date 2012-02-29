@@ -1056,7 +1056,6 @@ accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query)
 	tree = GTK_TREE_VIEW(browser->tree);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
 
-	/* find search node */
 	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
 	{
 		_accountbrowser_remove_child_node(model, &parent, query);
@@ -1066,11 +1065,47 @@ accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query)
 void
 accountbrowser_append_user_timeline(GtkWidget *widget, const gchar *user)
 {
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreeIter parent;
+	_AccountBrowserPrivate *browser;
+
+	g_assert(GTK_IS_VBOX(widget));
+	g_assert(user != NULL);
+
+	g_debug("Appending user timeline: \"%s\"", user);
+
+	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
+	tree = GTK_TREE_VIEW(browser->tree);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
+
+	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_TIMELINES, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
+	{
+		_accountbrowser_insert_node_sorted(tree, &parent, ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_USER_TIMELINE, user, "icon_usertimeline_16", TRUE);
+	}
 }
 
 void
 accountbrowser_remove_user_timeline(GtkWidget *widget, const gchar *user)
 {
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreeIter parent;
+	_AccountBrowserPrivate *browser;
+
+	g_assert(GTK_IS_VBOX(widget));
+	g_assert(user != NULL);
+
+	g_debug("Removing user timeline: \"%s\"", user);
+
+	browser = (_AccountBrowserPrivate *)g_object_get_data(G_OBJECT(widget), "browser");
+	tree = GTK_TREE_VIEW(browser->tree);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->tree));
+
+	if(gtk_helpers_tree_model_find_iter_by_integer(model, ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_TIMELINES, ACCOUNTBROWSER_TREEVIEW_COLUMN_TYPE, &parent))
+	{
+		_accountbrowser_remove_child_node(model, &parent, user);
+	}
 }
 
 /**
