@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. January 2012
+ * \date 29. January 2012
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -79,6 +79,48 @@ typedef struct
 } _Tabbar;
 
 /*
+ *	configuration helpers:
+ */
+static gboolean
+_tabbar_user_is_account(_Tabbar *tabbar, const gchar *user)
+{
+	Config *config;
+	Section *section;
+	Section *child;
+	Value *value;
+	gint count;
+	gboolean result = FALSE;
+
+	config = mainwindow_lock_config(tabbar->mainwindow);
+	section = config_get_root(config);
+
+	if((section = section_find_first_child(section, "Twitter")) && (section = section_find_first_child(section, "Accounts")))
+	{
+		count = section_n_children(section);
+
+		for(gint i = 0; i < count && !result; ++i)
+		{
+			child = section_nth_child(section, i);
+
+			if(!g_ascii_strcasecmp(section_get_name(child), "Account"))
+			{
+				if((value = section_find_first_value(child, "username")) && VALUE_IS_STRING(value))
+				{
+					if(!g_strcmp0(value_get_string(value), user))
+					{
+						result = TRUE;
+					}
+				}
+			}
+		}
+	}
+
+	mainwindow_unlock_config(tabbar->mainwindow);
+
+	return result;
+}
+
+/*
  *	close tabs:
  */
 
@@ -130,13 +172,6 @@ _tabbar_destroy_page_widget_worker(_Tabbar *tabbar)
 		g_debug("%s: calling assigned destroy handler", __func__);
 		if((meta = g_object_get_data(G_OBJECT(page), "meta")))
 		{
-			/* notify mainwindow */
-			if(meta->type_id == TAB_TYPE_ID_SEARCH)
-			{
-				g_mutex_lock(meta->id.mutex);
-				mainwindow_notify_search_closed(tabbar->mainwindow, meta->id.id);
-				g_mutex_unlock(meta->id.mutex);
-			}
 
 			if(meta->funcs->destroy)
 			{
@@ -375,16 +410,36 @@ static void
 _tabbar_destroy_page(GtkNotebook *notebook, gint index)
 {
 	_Tabbar *meta;
+	Tab *tab;
 	GtkWidget *child;
+	gchar *id = NULL;
 
 	g_debug("Destroying tab(%d)", index);
+
+	meta = (_Tabbar *)g_object_get_data(G_OBJECT(notebook), "meta");
 
 	/* create object reference & remove page from notebook */
 	child = g_object_ref(gtk_notebook_get_nth_page(notebook, index));
 	gtk_notebook_remove_page(notebook, index);
 
+	/* notify mainwindow */
+	if((tab = g_object_get_data(G_OBJECT(child), "meta")))
+	{
+		id = tab_get_id(tab);
+
+		if(tab->type_id == TAB_TYPE_ID_SEARCH)
+		{
+			mainwindow_notify_search_closed(meta->mainwindow, id);
+		}
+		else if(tab->type_id == TAB_TYPE_ID_USER_TIMELINE && !_tabbar_user_is_account(meta, id))
+		{
+			mainwindow_notify_user_timeline_closed(meta->mainwindow, id);
+		}
+
+		g_free(id);
+	}
+
 	/* push page object into remove queue */
-	meta = (_Tabbar *)g_object_get_data(G_OBJECT(notebook), "meta");
 	g_async_queue_push(meta->queue, child);
 
 	/* update window title */
@@ -787,7 +842,16 @@ tabbar_open_replies(GtkWidget *widget, const gchar *id)
 void
 tabbar_open_user_timeline(GtkWidget *widget, const gchar *user)
 {
+	_Tabbar *meta;
+
 	_tabbar_open_status_page(GTK_NOTEBOOK(widget), TAB_TYPE_ID_USER_TIMELINE, user);
+
+	meta = (_Tabbar *)g_object_get_data(G_OBJECT(widget), "meta");
+
+	if(!_tabbar_user_is_account(meta, user))
+	{
+		mainwindow_notify_user_timeline_opened(meta->mainwindow, user);
+	}
 }
 
 void

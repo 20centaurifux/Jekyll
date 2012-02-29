@@ -19,7 +19,7 @@
  * \brief A tree containing accounts.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. February 2012
+ * \date 28. February 2012
  */
 
 #ifndef __ACCOUNTBROWSER_H__
@@ -46,7 +46,9 @@ typedef enum
 	ACCOUNTBROWSER_TREEVIEW_NODE_LIST,
 	ACCOUNTBROWSER_TREEVIEW_NODE_PROTECTED_LIST,
 	ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH,
-	ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY
+	ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY,
+	ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_TIMELINES,
+	ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_USER_TIMELINE
 } AccountBrowserTreeViewNodeType;
 
 
@@ -145,6 +147,22 @@ void accountbrowser_append_search_query(GtkWidget *widget, const gchar *query);
  * Removes a search query to the treeview.
  */
 void accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query);
+
+/**
+ * \param widget the accountbrowser widget
+ * \param user user timeline to append
+ *
+ * Appends an user to the treeview.
+ */
+void accountbrowser_append_user_timeline(GtkWidget *widget, const gchar *user);
+
+/**
+ * \param widget the accountbrowser widget
+ * \param user user timeline to append
+ *
+ * Removes a search query to the treeview.
+ */
+void accountbrowser_remove_user_timeline(GtkWidget *widget, const gchar *user);
 
 /**
  * @}

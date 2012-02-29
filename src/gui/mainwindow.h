@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. February 2012
+ * \date 29. February 2012
  */
 
 #ifndef __MAINWINDOW_H__
@@ -234,6 +234,22 @@ void mainwindow_notify_search_opened(GtkWidget *widget, const gchar *query);
  * Notify mainwindow that a search tab has been closed.
  */
 void mainwindow_notify_search_closed(GtkWidget *widget, const gchar *query);
+
+/**
+ * \param widget the mainwindow widget
+ * \param query search query
+ *
+ * Notify mainwindow that a user timeline tab has been opened.
+ */
+void mainwindow_notify_user_timeline_opened(GtkWidget *widget, const gchar *user);
+
+/**
+ * \param widget the mainwindow widget
+ * \param query search query
+ *
+ * Notify mainwindow that an user timeline tab has been closed.
+ */
+void mainwindow_notify_user_timeline_closed(GtkWidget *widget, const gchar *query);
 
 /**
  * \param widget the mainwindow widget
