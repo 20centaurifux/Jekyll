@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 28. February 2012
+ * \date 29. February 2012
  */
 
 #include <gtk/gtk.h>
@@ -3058,6 +3058,28 @@ mainwindow_notify_search_closed(GtkWidget *widget, const gchar *query)
 	if(private->accountbrowser)
 	{
 		accountbrowser_remove_search_query(private->accountbrowser, query);
+	}
+}
+
+void
+mainwindow_notify_user_timeline_opened(GtkWidget *widget, const gchar *user)
+{
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
+
+	if(private->accountbrowser)
+	{
+		accountbrowser_append_user_timeline(private->accountbrowser, user);
+	}
+}
+
+void
+mainwindow_notify_user_timeline_closed(GtkWidget *widget, const gchar *user)
+{
+	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
+
+	if(private->accountbrowser)
+	{
+		accountbrowser_remove_user_timeline(private->accountbrowser, user);
 	}
 }
 
