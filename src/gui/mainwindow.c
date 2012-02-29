@@ -2314,10 +2314,6 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	gdk_flush();
 	gdk_threads_leave();
 
-	/* free configuration mutex */
-	g_debug("Destroying configuration mutex");
-	g_mutex_free(private->config.mutex);
-
 	/* finish synchronization thread */
 	_mainwindow_send_sync_message(widget, MAINWINDOW_SYNC_EVENT_ABORT);
 	g_debug("Joining sync thread...");
@@ -2365,6 +2361,11 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	g_debug("Destroying cancellable");
 	g_object_unref(private->cancellable);
 	private->cancellable = NULL;
+
+	/* free configuration mutex */
+	g_debug("Destroying configuration mutex");
+	g_mutex_free(private->config.mutex);
+
 
 	/* free memory */
 	g_debug("Freeing memory");
@@ -2826,18 +2827,23 @@ mainwindow_account_node_activated(GtkWidget *widget, const gchar *account, Accou
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_FRIENDS:
-			g_debug("Editing friends (\"%s\"", account);
+			g_debug("Editing friends (\"%s\")", account);
 			_mainwindow_edit_followers(widget, account, TRUE);
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_FOLLOWERS:
-			g_debug("Editing followers (\"%s\"", account);
+			g_debug("Editing followers (\"%s\")", account);
 			_mainwindow_edit_followers(widget, account, FALSE);
 			break;
 
 		case ACCOUNTBROWSER_TREEVIEW_NODE_SEARCH_QUERY:
-			g_debug("Opening search query (\"%s\"", text);
+			g_debug("Opening search query (\"%s\")", text);
 			tabbar_open_search_query(private->tabbar, text);
+			break;
+
+		case ACCOUNTBROWSER_TREEVIEW_NODE_GLOBAL_USER_TIMELINE:
+			g_debug("Opening user timeline (\"%s\")", text);
+			tabbar_open_user_timeline(private->tabbar, text);
 			break;
 
 		default:
