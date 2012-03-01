@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. January 2012
+ * \date 1. March 2012
  */
 
 #include <gio/gio.h>
@@ -96,6 +96,11 @@ typedef struct
 		/*! Value of the signal. */
 		gint signal;
 	} worker;
+	/** TODO **/
+	struct _widget_worker
+	{
+		GAsyncQueue *queue;
+	} widget_worker;
 	/**
 	 * \struct _status
 	 * \brief Holds tab "waiting" flag and related mutex.
@@ -139,6 +144,14 @@ enum
 	/*! Do nothing. */
 	STATUS_TAB_SIGNAL_IDLE = 3
 };
+
+/** TODO **/
+typedef struct
+{
+	TwitterUser user;
+	TwitterStatus status;
+}
+_StatusTabWidgetQueueArg;
 
 /**
  * \struct _StatusTabListWorkerArg
@@ -1576,136 +1589,12 @@ _status_tab_grab_focus(GtkTwitterStatus *status, _StatusTab *tab)
 static void
 _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 {
-	GtkWidget *widget;
-	GList *children;
-	GList *iter;
-	gint position = 0;
-	gboolean exists = FALSE;
-	gchar group[128];
-	gboolean owner = FALSE;
-	TabTypeId type_id;
-	gboolean show_extra_buttons = TRUE;
+	_StatusTabWidgetQueueArg *arg = g_slice_alloc(sizeof(_StatusTabWidgetQueueArg));
 
-	gdk_threads_enter();
+	arg->user = user;
+	arg->status = status;
 
-	/* convert timestamp (if necessary) */
-	if(!status.timestamp && status.created_at[0])
-	{
-		status.timestamp = (gint)twitter_timestamp_to_unix_timestamp(status.created_at);
-	}
-		
-	/* check if status does exist */
-	if((iter = children = gtk_container_get_children(GTK_CONTAINER(tab->vbox))))
-	{
-		while(iter)
-		{
-
-			if(!strcmp(status.id, gtk_twitter_status_get_guid(GTK_TWITTER_STATUS(iter->data))))
-			{
-				exists = TRUE;
-				break;
-			}
-
-			iter = iter->next;
-		}
-	}
-
-	if(!exists)
-	{
-		/* find position */
-		if((iter = children))
-		{
-			while(iter)
-			{
-				if(status.timestamp > gtk_twitter_status_get_timestamp(GTK_TWITTER_STATUS(iter->data)))
-				{
-					break;
-				}
-
-				++position;
-				iter = iter->next;
-			}
-		}
-
-		/* insert status */
-		if(!exists)
-		{
-			/* create widget */
-			widget = gtk_twitter_status_new();
-
-			if(tab->owner && !g_strcasecmp(user.screen_name, tab->owner))
-			{
-				g_mutex_lock(tab->accountlist.mutex);
-
-				if((owner = _status_tab_account_list_contains(tab->accountlist.accounts, user.screen_name)))
-				{
-					show_extra_buttons = FALSE;
-
-					if((type_id = tabbar_get_current_type(tab->tabbar)) == TAB_TYPE_ID_SEARCH || type_id == TAB_TYPE_ID_USER_TIMELINE)
-					{
-						if(g_strv_length(tab->accountlist.accounts) > 1)
-						{
-							show_extra_buttons = TRUE;
-						}
-					}
-				}
-	
-				g_mutex_unlock(tab->accountlist.mutex);
-			}
-
-			g_object_set(G_OBJECT(widget),
-			             "guid", status.id,
-			             "username", user.screen_name,
-			             "realname", user.name,
-			             "timestamp", status.timestamp,
-			             "status", status.text,
-			             "show-reply-button", show_extra_buttons,
-				     "show-edit-lists-button", TRUE,
-			             "edit-lists-button-has-tooltip", TRUE,
-			             "show-edit-friendship-button", show_extra_buttons,
-			             "edit-friendship-button-has-tooltip", TRUE,
-				     "show-retweet_button", show_extra_buttons,
-				     "show-delete-button", FALSE,
-				     "show-replies-button", status.prev_status[0] ? TRUE : FALSE,
-				     "selectable", TRUE,
-				     "background-color", tab->background_color,
-				     NULL);
-
-			/* insert status */
-			gtk_box_pack_start(GTK_BOX(tab->vbox), widget, FALSE, FALSE, 2);
-			gtk_box_reorder_child(GTK_BOX(tab->vbox), widget, position);
-			gtk_widget_show_all(widget);
-
-			/* register signals */
-			g_signal_connect(G_OBJECT(widget), "url-activated", (GCallback)_status_tab_url_activated, tab);
-			g_signal_connect(G_OBJECT(widget), "username-activated", (GCallback)_status_tab_username_activated, tab);
-			g_signal_connect(G_OBJECT(widget), "edit-lists-button-query-tooltip", (GCallback)_status_tab_edit_lists_button_query_tooltip, tab);
-			g_signal_connect(G_OBJECT(widget), "edit-lists-button-clicked", (GCallback)_status_tab_edit_lists_button_clicked, tab);
-			g_signal_connect(G_OBJECT(widget), "edit-friendship-button-clicked", (GCallback)_status_tab_edit_friendship_button_clicked, tab);
-			g_signal_connect(G_OBJECT(widget), "edit-friendship-button-query-tooltip", (GCallback)_status_tab_edit_friendship_button_query_tooltip, tab);
-			g_signal_connect(G_OBJECT(widget), "reply-button-clicked", (GCallback)_status_tab_reply_button_clicked, tab);
-			g_signal_connect(G_OBJECT(widget), "retweet-button-clicked", (GCallback)_status_tab_retweet_button_clicked, tab);
-			g_signal_connect(G_OBJECT(widget), "replies-button-clicked", (GCallback)_status_tab_replies_button_clicked, tab);
-			g_signal_connect(G_OBJECT(widget), "grab-focus", (GCallback)_status_tab_grab_focus, tab);
-
-			/* load pixmap */
-			sprintf(group, "statustab-%d", tab->tab_id);
-			mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
-		}
-	}
-
-	gdk_flush();
-	gdk_threads_leave();
-
-	if(children)
-	{
-		g_list_free(children);
-	}
-
-	if(!exists)
-	{
-		g_usleep(50000);
-	}
+	g_async_queue_push(tab->widget_worker.queue, arg);
 }
 
 static void
@@ -1833,6 +1722,155 @@ _status_tab_populate(_StatusTab *tab)
 
 	g_free(tab_id);
 	g_object_unref(client);
+}
+
+/*
+ *	widget worker (GtkTwitterStatus widgets are created by a GSourceFunc)
+ */
+static void
+_status_tab_destroy_widget_worker_arg(_StatusTabWidgetQueueArg *arg)
+{
+	g_slice_free1(sizeof(_StatusTabWidgetQueueArg), arg);
+}
+
+static gboolean
+_status_tab_check_widget_queue(_StatusTab *tab)
+{
+	GtkWidget *widget;
+	GList *children;
+	GList *iter;
+	gint position = 0;
+	gboolean exists = FALSE;
+	gchar group[128];
+	gboolean owner = FALSE;
+	TabTypeId type_id;
+	gboolean show_extra_buttons = TRUE;
+	_StatusTabWidgetQueueArg *arg;
+
+	if(g_cancellable_is_cancelled(tab->cancellable))
+	{
+		return FALSE;
+	}
+
+	if((arg = g_async_queue_try_pop(tab->widget_worker.queue)))
+	{
+		/* convert timestamp (if necessary) */
+		if(!arg->status.timestamp && arg->status.created_at[0])
+		{
+			arg->status.timestamp = (gint)twitter_timestamp_to_unix_timestamp(arg->status.created_at);
+		}
+			
+		/* check if status does exist */
+		if((iter = children = gtk_container_get_children(GTK_CONTAINER(tab->vbox))))
+		{
+			while(iter)
+			{
+
+				if(!strcmp(arg->status.id, gtk_twitter_status_get_guid(GTK_TWITTER_STATUS(iter->data))))
+				{
+					exists = TRUE;
+					break;
+				}
+
+				iter = iter->next;
+			}
+		}
+
+		if(!exists)
+		{
+			/* find position */
+			if((iter = children))
+			{
+				while(iter)
+				{
+					if(arg->status.timestamp > gtk_twitter_status_get_timestamp(GTK_TWITTER_STATUS(iter->data)))
+					{
+						break;
+					}
+
+					++position;
+					iter = iter->next;
+				}
+			}
+
+			/* insert status */
+			if(!exists)
+			{
+				/* create widget */
+				widget = gtk_twitter_status_new();
+
+				if(tab->owner && !g_strcasecmp(arg->user.screen_name, tab->owner))
+				{
+					g_mutex_lock(tab->accountlist.mutex);
+
+					if((owner = _status_tab_account_list_contains(tab->accountlist.accounts, arg->user.screen_name)))
+					{
+						show_extra_buttons = FALSE;
+
+						if((type_id = tabbar_get_current_type(tab->tabbar)) == TAB_TYPE_ID_SEARCH || type_id == TAB_TYPE_ID_USER_TIMELINE)
+						{
+							if(g_strv_length(tab->accountlist.accounts) > 1)
+							{
+								show_extra_buttons = TRUE;
+							}
+						}
+					}
+		
+					g_mutex_unlock(tab->accountlist.mutex);
+				}
+
+				g_object_set(G_OBJECT(widget),
+					     "guid", arg->status.id,
+					     "username", arg->user.screen_name,
+					     "realname", arg->user.name,
+					     "timestamp", arg->status.timestamp,
+					     "status", arg->status.text,
+					     "show-reply-button", show_extra_buttons,
+					     "show-edit-lists-button", TRUE,
+					     "edit-lists-button-has-tooltip", TRUE,
+					     "show-edit-friendship-button", show_extra_buttons,
+					     "edit-friendship-button-has-tooltip", TRUE,
+					     "show-retweet_button", show_extra_buttons,
+					     "show-delete-button", FALSE,
+					     "show-replies-button", arg->status.prev_status[0] ? TRUE : FALSE,
+					     "selectable", TRUE,
+					     "background-color", tab->background_color,
+					     NULL);
+
+				/* insert status */
+				gtk_box_pack_start(GTK_BOX(tab->vbox), widget, FALSE, FALSE, 2);
+				gtk_box_reorder_child(GTK_BOX(tab->vbox), widget, position);
+				gtk_widget_show_all(widget);
+
+				/* register signals */
+				g_signal_connect(G_OBJECT(widget), "url-activated", (GCallback)_status_tab_url_activated, tab);
+				g_signal_connect(G_OBJECT(widget), "username-activated", (GCallback)_status_tab_username_activated, tab);
+				g_signal_connect(G_OBJECT(widget), "edit-lists-button-query-tooltip", (GCallback)_status_tab_edit_lists_button_query_tooltip, tab);
+				g_signal_connect(G_OBJECT(widget), "edit-lists-button-clicked", (GCallback)_status_tab_edit_lists_button_clicked, tab);
+				g_signal_connect(G_OBJECT(widget), "edit-friendship-button-clicked", (GCallback)_status_tab_edit_friendship_button_clicked, tab);
+				g_signal_connect(G_OBJECT(widget), "edit-friendship-button-query-tooltip", (GCallback)_status_tab_edit_friendship_button_query_tooltip, tab);
+				g_signal_connect(G_OBJECT(widget), "reply-button-clicked", (GCallback)_status_tab_reply_button_clicked, tab);
+				g_signal_connect(G_OBJECT(widget), "retweet-button-clicked", (GCallback)_status_tab_retweet_button_clicked, tab);
+				g_signal_connect(G_OBJECT(widget), "replies-button-clicked", (GCallback)_status_tab_replies_button_clicked, tab);
+				g_signal_connect(G_OBJECT(widget), "grab-focus", (GCallback)_status_tab_grab_focus, tab);
+
+				/* load pixmap */
+				sprintf(group, "statustab-%d", tab->tab_id);
+				mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, arg->user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
+			}
+
+			gtk_widget_show_all(widget);
+		}
+
+		if(children)
+		{
+			g_list_free(children);
+		}
+
+		_status_tab_destroy_widget_worker_arg(arg);
+	}
+
+	return TRUE;
 }
 
 /*
@@ -2079,6 +2117,8 @@ _status_tab_destroyed(GtkWidget *widget)
 	g_strfreev(meta->accountlist.accounts);
 	g_mutex_free(meta->accountlist.mutex);
 	g_free(meta->background_color);
+	g_debug("Freeing widget queue");
+	g_async_queue_unref(meta->widget_worker.queue);
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
@@ -2102,6 +2142,9 @@ _status_tab_refresh(GtkWidget *widget)
 	{
 		meta->initialized = TRUE;
 		_status_tab_init(widget);
+
+		/* start widget worker */
+		g_timeout_add(75, (GSourceFunc)_status_tab_check_widget_queue, meta);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
@@ -2322,6 +2365,9 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	{
 		g_error("%s", err->message);
 	}
+
+	/* initialize widget worker */
+	meta->widget_worker.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_worker_arg);
 
 	/* wait until worker thread is waiting for signals */
 	_status_tab_wait_for_worker(widget);
