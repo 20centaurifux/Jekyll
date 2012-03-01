@@ -96,11 +96,17 @@ typedef struct
 		/*! Value of the signal. */
 		gint signal;
 	} worker;
-	/** TODO **/
-	struct _widget_worker
+	/**
+	 * \struct _widget_factory
+	 * \brief Holds an asynchronous message queue.
+	 *
+	 * \var widget_factory
+	 * \brief An asynchronous message queue holding Twitter status data.
+	 */
+	struct _widget_factory
 	{
 		GAsyncQueue *queue;
-	} widget_worker;
+	} widget_factory;
 	/**
 	 * \struct _status
 	 * \brief Holds tab "waiting" flag and related mutex.
@@ -131,7 +137,7 @@ typedef struct
 	} accountlist;
 	/*! The background color. */
 	gchar *background_color;
-	/*! Indicates if background color has been changed. */
+	/*! Indicates if background color has changed. */
 	gboolean background_changed;
 } _StatusTab;
 
@@ -145,13 +151,18 @@ enum
 	STATUS_TAB_SIGNAL_IDLE = 3
 };
 
-/** TODO **/
+/**
+ * \struct _StatusTabTweetData
+ * \brief Holds a Twitter status and the related author.
+ */
 typedef struct
 {
+	/*! Author of the status. */
 	TwitterUser user;
+	/*! A Twitter status. */
 	TwitterStatus status;
 }
-_StatusTabWidgetQueueArg;
+_StatusTabTweetData;
 
 /**
  * \struct _StatusTabListWorkerArg
@@ -172,7 +183,7 @@ _StatusTabListWorkerArg;
 
 /**
  * \struct _StatusTabFriendshipWorkerArg
- * \brief Holds a tab, a dialog and a username.
+ * \brief Holds a tab, a dialog and an username.
  */
 typedef struct
 {
@@ -506,7 +517,7 @@ _status_tab_replies_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 
 
 /*
- *	reply:
+ *	reply status:
  */
 static gboolean
 _status_tab_compose_tweet_callback(const gchar *username, const gchar *text, const gchar *prev_status, _StatusTab *tab)
@@ -593,7 +604,7 @@ _status_tab_reply_button_clicked(GtkTwitterStatus *status, const gchar *guid, _S
 }
 
 /*
- *	retweet:
+ *	retweet status:
  */
 static gpointer
 _status_tab_retweet_worker(_RetweetArg *arg)
@@ -770,7 +781,7 @@ _status_tab_retweet_button_clicked(GtkTwitterStatus *status, const gchar *guid, 
 }
 
 /*
- *	friendship dialog:
+ *	edit friendship:
  */
 static gboolean
 _status_tab_update_friendship(GtkWidget *dialog, gboolean checked, TwitterDbHandle *handle, TwitterClient *client, const gchar *username, gint *count)
@@ -1589,12 +1600,12 @@ _status_tab_grab_focus(GtkTwitterStatus *status, _StatusTab *tab)
 static void
 _status_tab_add_tweet(TwitterStatus status, TwitterUser user, _StatusTab *tab)
 {
-	_StatusTabWidgetQueueArg *arg = g_slice_alloc(sizeof(_StatusTabWidgetQueueArg));
+	_StatusTabTweetData *arg = g_slice_alloc(sizeof(_StatusTabTweetData));
 
 	arg->user = user;
 	arg->status = status;
 
-	g_async_queue_push(tab->widget_worker.queue, arg);
+	g_async_queue_push(tab->widget_factory.queue, arg);
 }
 
 static void
@@ -1725,16 +1736,16 @@ _status_tab_populate(_StatusTab *tab)
 }
 
 /*
- *	widget worker (GtkTwitterStatus widgets are created by a GSourceFunc)
+ *	widget factory:
  */
 static void
-_status_tab_destroy_widget_worker_arg(_StatusTabWidgetQueueArg *arg)
+_status_tab_destroy_widget_factory_arg(_StatusTabTweetData *arg)
 {
-	g_slice_free1(sizeof(_StatusTabWidgetQueueArg), arg);
+	g_slice_free1(sizeof(_StatusTabTweetData), arg);
 }
 
 static gboolean
-_status_tab_check_widget_queue(_StatusTab *tab)
+_status_tab_widget_factory_worker(_StatusTab *tab)
 {
 	GtkWidget *widget;
 	GList *children;
@@ -1745,14 +1756,14 @@ _status_tab_check_widget_queue(_StatusTab *tab)
 	gboolean owner = FALSE;
 	TabTypeId type_id;
 	gboolean show_extra_buttons = TRUE;
-	_StatusTabWidgetQueueArg *arg;
+	_StatusTabTweetData *arg;
 
 	if(g_cancellable_is_cancelled(tab->cancellable))
 	{
 		return FALSE;
 	}
 
-	if((arg = g_async_queue_try_pop(tab->widget_worker.queue)))
+	if((arg = g_async_queue_try_pop(tab->widget_factory.queue)))
 	{
 		/* convert timestamp (if necessary) */
 		if(!arg->status.timestamp && arg->status.created_at[0])
@@ -1865,7 +1876,7 @@ _status_tab_check_widget_queue(_StatusTab *tab)
 			g_list_free(children);
 		}
 
-		_status_tab_destroy_widget_worker_arg(arg);
+		_status_tab_destroy_widget_factory_arg(arg);
 	}
 
 	return TRUE;
@@ -2072,7 +2083,7 @@ _status_tab_init(GtkWidget *widget)
 }
 
 /*
- *	interface:
+ *	tab "interface":
  */
 static void
 _status_tab_destroyed(GtkWidget *widget)
@@ -2116,7 +2127,7 @@ _status_tab_destroyed(GtkWidget *widget)
 	g_mutex_free(meta->accountlist.mutex);
 	g_free(meta->background_color);
 	g_debug("Freeing widget queue");
-	g_async_queue_unref(meta->widget_worker.queue);
+	g_async_queue_unref(meta->widget_factory.queue);
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
@@ -2138,11 +2149,13 @@ _status_tab_refresh(GtkWidget *widget)
 
 	if(!meta->initialized)
 	{
+		g_debug("Initialiting status tab");
 		meta->initialized = TRUE;
 		_status_tab_init(widget);
 
-		/* start widget worker */
-		g_timeout_add(75, (GSourceFunc)_status_tab_check_widget_queue, meta);
+		/* start widget factory worker */
+		g_debug("Starting widget factory worker");
+		g_timeout_add(15, (GSourceFunc)_status_tab_widget_factory_worker, meta);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
@@ -2275,6 +2288,9 @@ _status_tab_get_owner_from_id(const gchar *id, TabTypeId type_id, Config *config
 	return owner;
 }
 
+/*
+ *	public:
+ */
 GtkWidget *
 status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 {
@@ -2365,7 +2381,7 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	}
 
 	/* initialize widget worker */
-	meta->widget_worker.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_worker_arg);
+	meta->widget_factory.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_factory_arg);
 
 	/* wait until worker thread is waiting for signals */
 	_status_tab_wait_for_worker(widget);
