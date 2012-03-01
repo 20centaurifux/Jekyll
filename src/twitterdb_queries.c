@@ -206,7 +206,7 @@ const gchar *twitterdb_queries_get_tweets_from_timeline =
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
 	"INNER JOIN \"user\" AS publisher ON publisher.guid=status.user_guid "
 	"WHERE type=? AND owner.username=? COLLATE NOCASE "
-	"ORDER BY \"timestamp\" DESC LIMIT 80";
+	"ORDER BY \"timestamp\" DESC LIMIT 150";
 
 const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
@@ -216,7 +216,7 @@ const gchar *twitterdb_queries_get_new_tweets_from_timeline =
 	"INNER JOIN \"user\" AS owner ON owner.guid=timeline.user_guid "
 	"INNER JOIN \"user\" AS publisher ON publisher.guid=status.user_guid "
 	"WHERE type=? AND owner.username=? COLLATE NOCASE AND read=0 "
-	"ORDER BY \"timestamp\" DESC LIMIT 80";
+	"ORDER BY \"timestamp\" DESC LIMIT 150";
 
 const gchar *twitterdb_queries_get_tweets_from_list =
 	"SELECT status_guid, text, \"timestamp\", read, status.user_guid, "
@@ -227,7 +227,7 @@ const gchar *twitterdb_queries_get_tweets_from_list =
 	"INNER JOIN \"user\" AS publisher ON publisher.guid=status.user_guid "
 	"INNER JOIN \"user\" AS owner ON owner.guid=list.user_guid "
 	"WHERE owner.username=? COLLATE NOCASE AND list.name=? COLLATE NOCASE "
-	"ORDER BY \"timestamp\" DESC LIMIT 80";
+	"ORDER BY \"timestamp\" DESC LIMIT 150";
 
 const gchar *twitterdb_queries_get_list_membership =
 	"SELECT owner.username, list.name FROM list "
