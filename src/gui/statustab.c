@@ -1858,8 +1858,6 @@ _status_tab_check_widget_queue(_StatusTab *tab)
 				sprintf(group, "statustab-%d", tab->tab_id);
 				mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, arg->user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
 			}
-
-			gtk_widget_show_all(widget);
 		}
 
 		if(children)
