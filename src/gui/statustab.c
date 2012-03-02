@@ -105,7 +105,10 @@ typedef struct
 	 */
 	struct _widget_factory
 	{
+		/*! An asynchronous queue. */
 		GAsyncQueue *queue;
+		/*! Id of the source. */
+		guint id;
 	} widget_factory;
 	/**
 	 * \struct _status
@@ -1677,7 +1680,7 @@ _status_tab_populate(_StatusTab *tab)
 	TwitterClient *client;
 	GError *err = NULL;
 
-	//g_static_mutex_lock(&mutex);
+	g_static_mutex_lock(&mutex);
 
 	/* get id & type from tab */
 	tab_id = tab_get_id((Tab *)tab);
@@ -1737,7 +1740,7 @@ _status_tab_populate(_StatusTab *tab)
 	g_free(tab_id);
 	g_object_unref(client);
 
-	//g_static_mutex_unlock(&mutex);
+	g_static_mutex_unlock(&mutex);
 }
 
 /*
@@ -2096,6 +2099,9 @@ _status_tab_destroyed(GtkWidget *widget)
 	_StatusTab *meta = g_object_get_data(G_OBJECT(widget), "meta");
 	gchar group[128];
 
+	/* stop widget factory */
+	g_source_remove(meta->widget_factory.id);
+
 	/* remove callbacks from pixbuf loader */
 	sprintf(group, "statustab-%d", meta->tab_id);
 	g_debug("Removing callbacks from pixbuf loader (group=\"%s\")", group);
@@ -2160,7 +2166,7 @@ _status_tab_refresh(GtkWidget *widget)
 
 		/* start widget factory worker */
 		g_debug("Starting widget factory worker");
-		g_timeout_add(100, (GSourceFunc)_status_tab_widget_factory_worker, meta);
+		meta->widget_factory.id = g_timeout_add(100, (GSourceFunc)_status_tab_widget_factory_worker, meta);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
