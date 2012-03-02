@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 1. March 2012
+ * \date 2. March 2012
  */
 
 #include <gio/gio.h>
@@ -1671,10 +1671,13 @@ _status_tab_update_color(_StatusTab *tab)
 static void
 _status_tab_populate(_StatusTab *tab)
 {
+	static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
 	gchar *tab_id;
 	TabTypeId type;
 	TwitterClient *client;
 	GError *err = NULL;
+
+	//g_static_mutex_lock(&mutex);
 
 	/* get id & type from tab */
 	tab_id = tab_get_id((Tab *)tab);
@@ -1733,6 +1736,8 @@ _status_tab_populate(_StatusTab *tab)
 
 	g_free(tab_id);
 	g_object_unref(client);
+
+	//g_static_mutex_unlock(&mutex);
 }
 
 /*
@@ -2155,7 +2160,7 @@ _status_tab_refresh(GtkWidget *widget)
 
 		/* start widget factory worker */
 		g_debug("Starting widget factory worker");
-		g_timeout_add(15, (GSourceFunc)_status_tab_widget_factory_worker, meta);
+		g_timeout_add(100, (GSourceFunc)_status_tab_widget_factory_worker, meta);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
