@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 29. January 2012
+ * \date 2. March 2012
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -422,6 +422,12 @@ _tabbar_destroy_page(GtkNotebook *notebook, gint index)
 	child = g_object_ref(gtk_notebook_get_nth_page(notebook, index));
 	gtk_notebook_remove_page(notebook, index);
 
+	/* update window title */
+	if(!gtk_notebook_get_n_pages(notebook))
+	{
+		_tabbar_page_changed(notebook, -1);
+	}
+
 	/* notify mainwindow */
 	if((tab = g_object_get_data(G_OBJECT(child), "meta")))
 	{
@@ -441,9 +447,6 @@ _tabbar_destroy_page(GtkNotebook *notebook, gint index)
 
 	/* push page object into remove queue */
 	g_async_queue_push(meta->queue, child);
-
-	/* update window title */
-	_tabbar_page_changed(notebook, -1);
 }
 
 static gint
