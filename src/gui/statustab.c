@@ -1660,7 +1660,7 @@ _status_tab_update_color(_StatusTab *tab)
 			g_object_set(G_OBJECT(widget), "background-color", tab->background_color, NULL);
 			gdk_threads_leave();
 
-			g_usleep(75000);
+			g_usleep(250000);
 			iter = iter->next;
 		}
 	}
@@ -1911,7 +1911,7 @@ _status_tab_wait_for_worker(GtkWidget *widget)
 {
 	while(!_status_tab_is_waiting(widget))
 	{
-		g_usleep(100);
+		g_usleep(15);
 	}
 }
 

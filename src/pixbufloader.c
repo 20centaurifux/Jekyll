@@ -19,7 +19,7 @@
  * \brief An asynchronous pixbuf loader.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 25. May 2011
+ * \date 2. March 2012
  */
 
 #include <gio/gio.h>
@@ -345,7 +345,7 @@ _pixbuf_loader_worker(PixbufLoader *pixbuf_loader)
 	while(!g_cancellable_is_cancelled(priv->cancellable))
 	{
 		g_get_current_time(&tv);
-		g_time_val_add(&tv, 1000000);
+		g_time_val_add(&tv, 2500000);
 
 		/* reveive message/url */
 		url = g_async_queue_timed_pop(priv->queue, &tv);
@@ -368,8 +368,6 @@ _pixbuf_loader_worker(PixbufLoader *pixbuf_loader)
 
 			if(callbacks)
 			{
-				//g_debug("Loading image: \"%s\", registered callback(s): %d", url, g_list_length(callbacks));
-
 				/* try to load image from table */
 				if(!(pixbuf = g_hash_table_lookup(pixbufs, url)))
 				{
@@ -422,8 +420,10 @@ _pixbuf_loader_worker(PixbufLoader *pixbuf_loader)
 					}
 
 					g_mutex_unlock(priv->mutex_callbacks);
+
+					g_usleep(25000);
 				}
-			
+
 				g_list_free(callbacks);
 			}
 
