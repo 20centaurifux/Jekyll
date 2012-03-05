@@ -109,7 +109,7 @@ typedef struct
 		GAsyncQueue *queue;
 		/*! Source of the widget factory worker. */
 		GSource *source;
-		/*! TRUE of worker is running. */
+		/*! TRUE if worker is running. */
 		gboolean running;
 		/*! Mutex protecting worker status. */
 		GMutex *mutex;
