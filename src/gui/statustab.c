@@ -107,8 +107,12 @@ typedef struct
 	{
 		/*! An asynchronous queue. */
 		GAsyncQueue *queue;
-		/*! Id of the source. */
-		guint id;
+		/*! Source of the widget factory worker. */
+		GSource *source;
+		/*! TRUE of worker is running. */
+		gboolean running;
+		/*! Mutex protecting worker status. */
+		GMutex *mutex;
 	} widget_factory;
 	/**
 	 * \struct _status
@@ -1747,6 +1751,24 @@ _status_tab_populate(_StatusTab *tab)
  *	widget factory:
  */
 static void
+_status_tab_wait_for_widget_factory(_StatusTab *tab)
+{
+	gboolean running = TRUE;
+
+	while(running)
+	{
+		g_mutex_lock(tab->widget_factory.mutex);
+		running = tab->widget_factory.running;
+		g_mutex_unlock(tab->widget_factory.mutex);
+
+		if(running)
+		{
+			g_usleep(15);
+		}
+	}
+}
+
+static void
 _status_tab_destroy_widget_factory_arg(_StatusTabTweetData *arg)
 {
 	g_slice_free1(sizeof(_StatusTabTweetData), arg);
@@ -1767,10 +1789,9 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 	gint count = 0;
 	_StatusTabTweetData *arg;
 
-	if(g_cancellable_is_cancelled(tab->cancellable))
-	{
-		return FALSE;
-	}
+	g_mutex_lock(tab->widget_factory.mutex);
+	tab->widget_factory.running = TRUE;
+	g_mutex_unlock(tab->widget_factory.mutex);
 
 	while((arg = g_async_queue_try_pop(tab->widget_factory.queue)) && count < 4)
 	{
@@ -1785,8 +1806,7 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		{
 			while(iter)
 			{
-
-				if(!strcmp(arg->status.id, gtk_twitter_status_get_guid(GTK_TWITTER_STATUS(iter->data))))
+				if(!g_strcmp0(arg->status.id, gtk_twitter_status_get_guid(GTK_TWITTER_STATUS(iter->data))))
 				{
 					exists = TRUE;
 					break;
@@ -1888,6 +1908,10 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		_status_tab_destroy_widget_factory_arg(arg);
 		++count;
 	}
+
+	g_mutex_lock(tab->widget_factory.mutex);
+	tab->widget_factory.running = FALSE;
+	g_mutex_unlock(tab->widget_factory.mutex);
 
 	return TRUE;
 }
@@ -2102,16 +2126,17 @@ _status_tab_destroyed(GtkWidget *widget)
 	gchar group[128];
 
 	/* stop widget factory */
-	g_source_remove(meta->widget_factory.id);
+	g_source_destroy(meta->widget_factory.source);
+	_status_tab_wait_for_widget_factory(meta);
+
+	/* cancel running operations */
+	g_debug("Cancelling operations");
+	g_cancellable_cancel(meta->cancellable);
 
 	/* remove callbacks from pixbuf loader */
 	sprintf(group, "statustab-%d", meta->tab_id);
 	g_debug("Removing callbacks from pixbuf loader (group=\"%s\")", group);
 	mainwindow_remove_pixbuf_group(tabbar_get_mainwindow(meta->tabbar), group);
-
-	/* cancel running operations */
-	g_debug("Cancelling operations");
-	g_cancellable_cancel(meta->cancellable);
 
 	/* wait until worker thread is waiting for condition again */
 	_status_tab_wait_for_worker(widget);
@@ -2139,6 +2164,8 @@ _status_tab_destroyed(GtkWidget *widget)
 	g_strfreev(meta->accountlist.accounts);
 	g_mutex_free(meta->accountlist.mutex);
 	g_free(meta->background_color);
+	g_debug("Freeing widget factroy mutex");
+	g_mutex_free(meta->widget_factory.mutex);
 	g_debug("Freeing widget queue");
 	g_async_queue_unref(meta->widget_factory.queue);
 
@@ -2168,7 +2195,10 @@ _status_tab_refresh(GtkWidget *widget)
 
 		/* start widget factory worker */
 		g_debug("Starting widget factory worker");
-		meta->widget_factory.id = g_timeout_add(750, (GSourceFunc)_status_tab_widget_factory_worker, meta);
+		meta->widget_factory.source = g_timeout_source_new(750);
+		g_source_set_callback(meta->widget_factory.source, (GSourceFunc)_status_tab_widget_factory_worker, meta, NULL);
+		g_source_attach(meta->widget_factory.source, NULL);
+		//meta->widget_factory.id = g_timeout_add(750, (GSourceFunc)_status_tab_widget_factory_worker, meta);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
@@ -2374,6 +2404,9 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->accountlist.mutex = g_mutex_new();
 	meta->background_color = NULL;
 	meta->background_changed = FALSE;
+	meta->widget_factory.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_factory_arg);
+	meta->widget_factory.running = FALSE;
+	meta->widget_factory.mutex = g_mutex_new();
 
 	mainwindow = tabbar_get_mainwindow(tabbar);
 	config = mainwindow_lock_config(mainwindow);
@@ -2392,9 +2425,6 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	{
 		g_error("%s", err->message);
 	}
-
-	/* initialize widget worker */
-	meta->widget_factory.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_factory_arg);
 
 	/* wait until worker thread is waiting for signals */
 	_status_tab_wait_for_worker(widget);
