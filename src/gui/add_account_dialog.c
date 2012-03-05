@@ -39,7 +39,7 @@
  */
 typedef struct
 {
-	/*! An entry holding an username. */
+	/*! An entry holding a username. */
 	GtkWidget *entry_username;
 	/*! Label used to display failure messages. */
 	GtkWidget *label_failure;
@@ -97,7 +97,7 @@ _add_account_dialog_button_add_clicked(GtkWidget *widget, GtkWidget *dialog)
 	/* check if string is empty */
 	if(!strlen(username))
 	{
-		message = _("Please enter an username.");
+		message = _("Please enter a username.");
 	}
 	else
 	{

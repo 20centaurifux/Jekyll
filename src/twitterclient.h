@@ -85,7 +85,7 @@ struct _TwitterClientClass
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param acceess_key an access key
 	 * \param acceess_secret an access secret
 	 *
@@ -102,7 +102,7 @@ struct _TwitterClientClass
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param func callback function
 	 * \param user_data  user data
 	 * \param cancellable a GCancellable to abort the operation
@@ -116,7 +116,7 @@ struct _TwitterClientClass
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param func callback function
 	 * \param user_data  user data
 	 * \param cancellable a GCancellable to abort the operation
@@ -130,21 +130,21 @@ struct _TwitterClientClass
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param func callback function
 	 * \param user_data  user data
 	 * \param cancellable a GCancellable to abort the operation
 	 * \param err structure to store failure messages
 	 * \return TRUE on success
 	 
-	 * Gets tweets from an usertimline.
+	 * Gets tweets from a usertimline.
 	 */
 	gboolean (* process_usertimeline)(TwitterClient *twitterclient, const gchar *username, TwitterProcessStatusFunc func,
 	                                  gpointer user_data, GCancellable *cancellable, GError **err);
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param list a list
 	 * \param func callback function
 	 * \param user_data  user data
@@ -159,7 +159,7 @@ struct _TwitterClientClass
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param guid guid of the status
 	 * \param status location to store status information
 	 * \param user location to store user information
@@ -172,7 +172,7 @@ struct _TwitterClientClass
 
 	/**
 	 * \param twitterclient TwitterClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param query search query
 	 * \param func callback function
 	 * \param user_data  user data
@@ -193,7 +193,7 @@ struct _TwitterClientClass
 	 * \param err structure to store failure messages
 	 * \return TRUE on success
 	 *
-	 * Adds an user to a list.
+	 * Adds a user to a list.
 	 */
 	gboolean (* add_user_to_list)(TwitterClient *twitterclient, const gchar * restrict owner, const gchar * restrict listname, const gchar *username, GError **err);
 
@@ -205,7 +205,7 @@ struct _TwitterClientClass
 	 * \param err structure to store failure messages
 	 * \return TRUE on success
 	 *
-	 * Removes an user from a list.
+	 * Removes a user from a list.
 	 */
 	gboolean (* remove_user_from_list)(TwitterClient *twitterclient, const gchar * restrict owner, const gchar * restrict listname, const gchar * restrict username, GError **err);
 

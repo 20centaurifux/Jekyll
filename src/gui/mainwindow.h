@@ -237,7 +237,7 @@ void mainwindow_notify_search_closed(GtkWidget *widget, const gchar *query);
 
 /**
  * \param widget the mainwindow widget
- * \param query search query
+ * \param user a username
  *
  * Notify mainwindow that a user timeline tab has been opened.
  */
@@ -247,7 +247,7 @@ void mainwindow_notify_user_timeline_opened(GtkWidget *widget, const gchar *user
  * \param widget the mainwindow widget
  * \param query search query
  *
- * Notify mainwindow that an user timeline tab has been closed.
+ * Notify mainwindow that a user timeline tab has been closed.
  */
 void mainwindow_notify_user_timeline_closed(GtkWidget *widget, const gchar *query);
 

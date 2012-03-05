@@ -39,7 +39,7 @@ enum
 {
 	/*! Column displaying an image. */
 	COMPOSER_DIALOG_TREEVIEW_COLUMN_PIXBUF,
-	/*! Column displaying an username. */
+	/*! Column displaying a username. */
 	COMPOSER_DIALOG_TREEVIEW_COLUMN_USERNAME
 };
 
@@ -71,13 +71,13 @@ typedef struct
 
 /**
  * \struct _ComposerWindowPixbufArg
- * \brief Holds an username and a GdkPixbuf to set.
+ * \brief Holds a username and a GdkPixbuf to set.
  */
 typedef struct
 {
 	/*! A dialog. */
 	GtkWidget *dialog;
-	/*! An username. */
+	/*! A username. */
 	gchar username[64];
 	/*! A pixbuf. */
 	GdkPixbuf *pixbuf;

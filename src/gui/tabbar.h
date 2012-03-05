@@ -204,15 +204,15 @@ void tabbar_open_replies(GtkWidget *widget, const gchar *account);
 
 /**
  * \param widget the tabbar widget
- * \param user name of an user
+ * \param user name of a user
  *
- * Opens an user timeline.
+ * Opens a user timeline.
  */
 void tabbar_open_user_timeline(GtkWidget *widget, const gchar *user);
 
 /**
  * \param widget the tabbar widget
- * \param user name of an user
+ * \param user name of a user
  * \param list name of a list
  *
  * Opens a list.
@@ -221,7 +221,7 @@ void tabbar_open_list(GtkWidget *widget, const gchar *user, const gchar *list);
 
 /**
  * \param widget the tabbar widget
- * \param user name of an user
+ * \param user name of a user
  * \param old_listname old name of a list
  * \param new_listname new name of a list
  *

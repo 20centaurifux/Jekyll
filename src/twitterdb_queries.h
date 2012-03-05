@@ -42,15 +42,15 @@ extern const gchar *twitterdb_queries_replace_version;
 extern const gchar *twitterdb_queries_count_table;
 /*! Gets database model version. */
 extern const gchar *twitterdb_queries_get_version;
-/*! Gets an user filtered by guid. */
+/*! Gets a user filtered by guid. */
 extern const gchar *twitterdb_queries_get_user;
-/*! Gets the guid of an user filterered by username. */
+/*! Gets the guid of a user filterered by username. */
 extern const gchar *twitterdb_queries_map_username;
 /*! Counts users filterered by guid. */
 extern const gchar *twitterdb_queries_user_exists;
 /*! Creates a new user. */
 extern const gchar *twitterdb_queries_insert_user;
-/*! Updates an user. */
+/*! Updates a user. */
 extern const gchar *twitterdb_queries_update_user;
 /*! Marks all statuses read. */
 extern const gchar *twitterdb_queries_mark_statuses_read;
@@ -66,15 +66,15 @@ extern const gchar *twitterdb_queries_get_status;
 extern const gchar *twitterdb_queries_replace_follower;
 /*! Removes a follower. */
 extern const gchar *twitterdb_queries_delete_follower;
-/*! Gets all friends of an user. */
+/*! Gets all friends of a user. */
 extern const gchar *twitterdb_queries_get_friends;
-/*! Gets all followers of an user. */
+/*! Gets all followers of a user. */
 extern const gchar *twitterdb_queries_get_followers;
-/*! Removes all followers from an user. */
+/*! Removes all followers from a user. */
 extern const gchar *twitterdb_queries_remove_followers_from_user;
 /*! Tests if one user is following another user. */
 extern const gchar *twitterdb_queries_is_follower;
-/*! Removes all friends of an user. */
+/*! Removes all friends of a user. */
 extern const gchar *twitterdb_queries_remove_friends_from_user;
 /*! Gets a list filtered by its guid. */
 extern const gchar *twitterdb_queries_get_list;
@@ -92,7 +92,7 @@ extern const gchar *twitterdb_queries_list_exists;
 extern const gchar *twitterdb_queries_delete_list;
 /*! Gets a guid of a list. */
 extern const gchar *twitterdb_queries_get_list_guid;
-/*! Gets the guids of all lists assigned to an user. */
+/*! Gets the guids of all lists assigned to a user. */
 extern const gchar *twitterdb_queries_get_list_guids_from_user;
 /*! Removes all obsolete statuses from a list. */
 extern const gchar *twitterdb_queries_remove_obsolete_statuses_from_list;
@@ -102,7 +102,7 @@ extern const gchar *twitterdb_queries_replace_status_into_timeline;
 extern const gchar *twitterdb_queries_replace_into_list_timeline;
 /*! Deletes all members of a list. */
 extern const gchar *twitterdb_queries_delete_list_members;
-/*! Assignes an user as list member. */
+/*! Assignes a user as list member. */
 extern const gchar *twitterdb_queries_replace_into_list_member;
 /*! Gets all list members. */
 extern const gchar *twitterdb_queries_get_list_members;
@@ -118,9 +118,9 @@ extern const gchar *twitterdb_queries_get_tweets_from_timeline;
 extern const gchar *twitterdb_queries_get_new_tweets_from_timeline;
 /*! Gets all statuses from a list. */
 extern const gchar *twitterdb_queries_get_tweets_from_list;
-/*! Gets the lists of an user. */
+/*! Gets the lists of a user. */
 extern const gchar *twitterdb_queries_get_list_membership;
-/*! Checks of an user is assigned to a list. */
+/*! Checks of a user is assigned to a list. */
 extern const gchar *twitterdb_queries_user_is_list_member;
 /*! Get synchronization timestamp. */
 extern const gchar *twitterdb_queries_get_sync_seconds;

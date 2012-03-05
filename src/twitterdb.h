@@ -125,7 +125,7 @@ gboolean twitterdb_map_username(TwitterDbHandle *handle, const gchar *username, 
  * \param err structure for storing error messages
  * \return TRUE on success
  *
- * Saves an user in the database.
+ * Saves a user in the database.
  */
 gboolean twitterdb_save_user(TwitterDbHandle *handle, const gchar * restrict guid, const gchar * restrict username, const gchar * restrict realname, 
                              const gchar * restrict image, const gchar * restrict location, const gchar * restrict website, const gchar * restrict description,
@@ -138,17 +138,17 @@ gboolean twitterdb_save_user(TwitterDbHandle *handle, const gchar * restrict gui
  * \param err structure for storing error messages
  * \return TRUE on success
  *
- * Gets an user from the database.
+ * Gets a user from the database.
  */
 gboolean twitterdb_get_user_by_name(TwitterDbHandle *handle, const gchar *username, TwitterUser *user, GError **err);
 
 /**
  * \param handle a database handle
- * \param user_guid guid of an user
+ * \param user_guid guid of a user
  * \param err structure for storing error messages
  * \return TRUE if given user does exist
  *
- * Checks if an user does exist.
+ * Checks if a user does exist.
  */
 gboolean twitterdb_user_exists(TwitterDbHandle *handle, const gchar *user_guid, GError **err);
 
@@ -190,17 +190,17 @@ gboolean twitterdb_mark_statuses_read(TwitterDbHandle *handle, GError **err);
 
 /**
  * \param handle a database handle
- * \param user_guid guid of an user
+ * \param user_guid guid of a user
  * \param err structure for storing error messages
  * \return a doubly-linked list or NULL
  *
- * Gets all friends of an user.
+ * Gets all friends of a user.
  */
 GList *twitterdb_get_friends(TwitterDbHandle *handle, const gchar *user_guid, GError **err);
 
 /**
  * \param handle a database handle
- * \param user_guid guid of an user
+ * \param user_guid guid of a user
  * \param err structure for storing error messages
  * \return a doubly-linked list or NULL
  *
@@ -210,7 +210,7 @@ GList *twitterdb_get_followers(TwitterDbHandle *handle, const gchar *user_guid, 
 
 /**
  * \param handle a database handle
- * \param user_guid guid of an user
+ * \param user_guid guid of a user
  * \param get_friends TRUE to get friends
  * \param func function invoked for each found follower
  * \param user_data data passed to the given callback function
@@ -223,7 +223,7 @@ gboolean twitterdb_foreach_follower(TwitterDbHandle *handle, const gchar *user_g
 
 /**
  * \param handle a database handle
- * \param user1_guid guid of an user
+ * \param user1_guid guid of a user
  * \param user2_guid guid of the user who follows user1
  * \param err structure for storing error messages
  * \return TRUE on success
@@ -234,7 +234,7 @@ gboolean twitterdb_add_follower(TwitterDbHandle *handle, const gchar * restrict 
 
 /**
  * \param handle a database handle
- * \param user1_guid guid of an user
+ * \param user1_guid guid of a user
  * \param user2_guid guid of the user who follows user1
  * \param err structure for storing error messages
  * \return TRUE on success
@@ -245,7 +245,7 @@ gboolean twitterdb_remove_follower(TwitterDbHandle *handle, const gchar * restri
 
 /**
  * \param handle a database handle
- * \param user_guid guid of an user
+ * \param user_guid guid of a user
  * \param err structure for storing error messages
  * \return TRUE on success
  *
@@ -255,7 +255,7 @@ gboolean twitterdb_remove_friends(TwitterDbHandle *handle, const gchar *user_gui
 
 /**
  * \param handle a database handle
- * \param user_guid guid of an user
+ * \param user_guid guid of a user
  * \param err structure for storing error messages
  * \return TRUE on success
  *
@@ -265,12 +265,12 @@ gboolean twitterdb_remove_followers(TwitterDbHandle *handle, const gchar *user_g
 
 /**
  * \param handle a database handle
- * \param user1 name of an user
- * \param user2 name of an user
+ * \param user1 name of a user
+ * \param user2 name of a user
  * \param err structure for storing error messages
  * \return TRUE if user1 followers user2
  *
- * Checks if an user1 follows user2.
+ * Checks if a user1 follows user2.
  */
 gboolean twitterdb_is_follower(TwitterDbHandle *handle, const gchar * restrict user1, const gchar * restrict user2, GError **err);
 
@@ -349,7 +349,7 @@ void twitterdb_free_get_lists_result(GList *list);
 
 /**
  * \param handle a database handle
- * \param username an username
+ * \param username a username
  * \param accounts location to account names
  * \param lists location to list names
  * \param err structure for storing error messages
@@ -363,11 +363,11 @@ gint twitterdb_get_list_membership(TwitterDbHandle *handle, const gchar *usernam
  * \param handle a database handle
  * \param owner a list owner
  * \param listname a list name
- * \param username an username
+ * \param username a username
  * \param err structure for storing error messages
- * \return TRUE if an user is assigned to the given list
+ * \return TRUE if a user is assigned to the given list
  *
- * Checks if an user is assigned to a list.
+ * Checks if a user is assigned to a list.
  */
 gboolean twitterdb_user_is_list_member(TwitterDbHandle *handle, const gchar * restrict owner, const gchar * restrict listname, const gchar * restrict username, GError **err);
 
@@ -421,7 +421,7 @@ gboolean twitterdb_append_status_to_replies(TwitterDbHandle *handle, const gchar
  * \param err structure for storing error messages
  * \return TRUE on success
  *
- * Appends a status to an user timeline.
+ * Appends a status to a user timeline.
  */
 gboolean twitterdb_append_status_to_user_timeline(TwitterDbHandle *handle, const gchar * restrict user_guid, const gchar * restrict status_guid, GError **err);
 
@@ -465,7 +465,7 @@ gboolean twitterdb_get_status(TwitterDbHandle *handle, const gchar *guid, Twitte
  * \param err structure for storing error messages
  * \return TRUE on success
  *
- * Appends an user to a list.
+ * Appends a user to a list.
  */
 gboolean twitterdb_append_user_to_list(TwitterDbHandle *handle, const gchar * restrict list_guid, const gchar * restrict user_guid, GError **err);
 
@@ -476,7 +476,7 @@ gboolean twitterdb_append_user_to_list(TwitterDbHandle *handle, const gchar * re
  * \param err structure for storing error messages
  * \return TRUE on success
  *
- * Removes an user from a list.
+ * Removes a user from a list.
  */
 gboolean twitterdb_remove_user_from_list(TwitterDbHandle *handle, const gchar * restrict list_guid, const gchar * restrict user_guid, GError **err);
 

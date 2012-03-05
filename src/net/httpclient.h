@@ -107,7 +107,7 @@ struct _HttpClientClass
 
 	/**
 	 * \param client HttpClient instance
-	 * \param username an username
+	 * \param username a username
 	 * \param password a password related to the specified username
 	 *
 	 * Sets the Authorization header.

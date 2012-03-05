@@ -152,7 +152,7 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
@@ -174,7 +174,7 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param listname name of a list or its guid
 	 * \param buffer a buffer
 	 * \param length length of the buffer
@@ -186,7 +186,7 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
@@ -197,7 +197,7 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param listname name of the list or its guid
 	 * \param cursor breaks the result into pages
 	 * \param buffer a buffer
@@ -248,24 +248,24 @@ struct _TwitterWebClientClass
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
 	 * \param listname name of a list or guid
-	 * \param username an username
+	 * \param username a username
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Adds an user to a list.
+	 * Adds a user to a list.
 	 */
 	gboolean (* add_user_to_list)(TwitterWebClient *twitterwebclient, const gchar * restrict listname, const gchar * restrict username, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
 	 * \param listname name of a list or guid
-	 * \param username an username
+	 * \param username a username
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Removes an user from a list.
+	 * Removes a user from a list.
 	 */
 	gboolean (* remove_user_from_list)(TwitterWebClient *twitterwebclient, const gchar * restrict listname, const gchar * restrict username, gchar **buffer, gint *length);
 
@@ -282,7 +282,7 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param cursor breaks the result into pages
 	 * \param buffer a buffer
 	 * \param length length of the buffer
@@ -294,7 +294,7 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param cursor breaks the result into pages
 	 * \param buffer a buffer
 	 * \param length length of the buffer
@@ -306,56 +306,56 @@ struct _TwitterWebClientClass
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param friend an username
+	 * \param friend a username
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Adds an user to the list of friends.
+	 * Adds a user to the list of friends.
 	 */
 	gboolean (* add_friend)(TwitterWebClient *twitterwebclient, const gchar *friend, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param friend an username
+	 * \param friend a username
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Removes an user from the list of friends.
+	 * Removes a user from the list of friends.
 	 */
 	gboolean (* remove_friend)(TwitterWebClient *twitterwebclient, const gchar *friend, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param user an username or guid
+	 * \param user a username or guid
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Blocks an user.
+	 * Blocks a user.
 	 */
 	gboolean (* block_user)(TwitterWebClient *twitterwebclient, const gchar *user, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param username an username or guid
+	 * \param username a username or guid
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Gets details of an user.
+	 * Gets details of a user.
 	 */
 	gboolean (* get_user_details)(TwitterWebClient *twitterwebclient, const gchar *username, gchar **buffer, gint *length);
 
 	/**
 	 * \param twitterwebclient TwitterWebClient instance
-	 * \param id guid of an user
+	 * \param id guid of a user
 	 * \param buffer a buffer
 	 * \param length length of the buffer
 	 * \return TRUE on success
 	 *
-	 * Gets details of an user.
+	 * Gets details of a user.
 	 */
 	gboolean (* get_user_details_by_id)(TwitterWebClient *twitterwebclient, const gchar *id, gchar **buffer, gint *length);
 

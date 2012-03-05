@@ -16,7 +16,7 @@
  ***************************************************************************/
 /*!
  * \file gtkuserlistdialog.h
- * \brief A dialog containing an user list.
+ * \brief A dialog containing a user list.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
  * \date 18. January 2012
@@ -82,13 +82,13 @@ struct _GtkUserListDialogClass
 	 * \param pixbuf an image
 	 * \param checked checkbox status
 	 *
-	 * Adds an user to the list.
+	 * Adds a user to the list.
 	 */
 	void (* append_user)(GtkUserListDialog *dialog, const gchar *username, GdkPixbuf *pixbuf, gboolean checked);
 
 	/**
 	 * \param dialog GtkUserListDialog instance
-	 * \param username name of an user
+	 * \param username name of a user
 	 * \param pixbuf an image
 	 *
 	 * Sets a pixbuf.

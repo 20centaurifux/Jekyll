@@ -152,7 +152,7 @@ void accountbrowser_remove_search_query(GtkWidget *widget, const gchar *query);
  * \param widget the accountbrowser widget
  * \param user user timeline to append
  *
- * Appends an user to the treeview.
+ * Appends a user to the treeview.
  */
 void accountbrowser_append_user_timeline(GtkWidget *widget, const gchar *user);
 

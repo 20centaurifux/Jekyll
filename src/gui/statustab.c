@@ -190,7 +190,7 @@ _StatusTabListWorkerArg;
 
 /**
  * \struct _StatusTabFriendshipWorkerArg
- * \brief Holds a tab, a dialog and an username.
+ * \brief Holds a tab, a dialog and a username.
  */
 typedef struct
 {
@@ -215,7 +215,7 @@ typedef struct
 	GtkWidget *mainwindow;
 	/*! Guid of the status to retweet. */
 	gchar guid[32];
-	/*! An user account. */
+	/*! A user account. */
 	gchar *account;
 } _RetweetArg;
 
@@ -688,7 +688,7 @@ _status_tab_retweet_multiple_account(GtkWidget *mainwindow, gchar **accounts, gi
 	_RetweetArg *arg = (_RetweetArg *)g_slice_alloc(sizeof(_RetweetArg));
 
 	/* let user select an account to retweet the status */
-	dialog = select_account_dialog_create(mainwindow, accounts, length, _("Retweet"), _("Please specify an user account to retweet the selected status:"));
+	dialog = select_account_dialog_create(mainwindow, accounts, length, _("Retweet"), _("Please specify a user account to retweet the selected status:"));
 
 	arg->dialog = dialog;
 	arg->mainwindow = mainwindow;

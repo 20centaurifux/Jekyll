@@ -16,7 +16,7 @@
  ***************************************************************************/
 /*!
  * \file gtkuserlistdialog.c
- * \brief A dialog containing an user list.
+ * \brief A dialog containing a user list.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
  * \date 19. January 2012

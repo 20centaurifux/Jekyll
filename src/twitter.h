@@ -151,7 +151,7 @@ typedef void (* TwitterProcessStatusFunc)(TwitterStatus status, TwitterUser user
 typedef void (* TwitterProcessListFunc)(TwitterList list, TwitterUser user, gpointer user_data);
 /*! Specifies the type of function which is called when a list member is parsed. */
 typedef void (* TwitterProcessListMemberFunc)(TwitterUser user, gpointer user_data);
-/*! Specifies the type of function which is called when an user is parsed. */
+/*! Specifies the type of function which is called when a user is parsed. */
 typedef void (* TwitterProcessUserFunc)(TwitterUser user, gpointer user_data);
 /*! Specifies the type of function which is called when a direct message is parsed. */
 typedef void (* TwitterProcessDirectMessageFunc)(TwitterDirectMessage message, TwitterUser sender, TwitterUser receiver, gpointer user_data);

@@ -57,7 +57,7 @@ void edit_members_dialog_destroy(GtkWidget *dialog);
  * \param user user to add
  * \param checked state of the checkbox
  *
- * Adds an user to the dialog.
+ * Adds a user to the dialog.
  */
 void edit_members_dialog_add_user(GtkWidget *dialog, TwitterUser user, gboolean checked);
 

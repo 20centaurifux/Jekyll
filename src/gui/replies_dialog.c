@@ -59,7 +59,7 @@ typedef struct
 	GMutex *mutex;
 	/*! Unique pixbuf group. */
 	gchar pixbuf_group[32];
-	/*! Function to call when an user has been activated. */
+	/*! Function to call when a user has been activated. */
 	RepliesDialogEventHandler user_callback;
 	/*! Data passed to user callback. */
 	gpointer user_data;

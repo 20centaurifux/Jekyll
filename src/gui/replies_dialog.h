@@ -39,7 +39,7 @@ typedef void (*RepliesDialogEventHandler)(GtkTwitterStatus *status, const gchar 
 
 /**
  * \param parent parent window
- * \param account name of an user account
+ * \param account name of a user account
  * \param first_status first status to append
  * \return a GTK dialog
  *
@@ -60,7 +60,7 @@ void replies_dialog_run(GtkWidget *widget);
  * \param user_data data passed to callback function
  * \return a GTK dialog
  *
- * Sets function to call when an user has been activated.
+ * Sets function to call when a user has been activated.
  */
 void replies_dialog_set_user_handler(GtkWidget *widget, RepliesDialogEventHandler callback, gpointer user_data);
 

@@ -47,13 +47,13 @@ typedef struct
 
 /**
  * \struct _EditMembersDialogPixbufArg
- * \brief Holds an username and a GdkPixbuf to set.
+ * \brief Holds a username and a GdkPixbuf to set.
  */
 typedef struct
 {
 	/*! A dialog. */
 	GtkWidget *dialog;
-	/*! An username. */
+	/*! A username. */
 	gchar username[64];
 	/*! A GdkPixbuf to set. */
 	GdkPixbuf *pixbuf;

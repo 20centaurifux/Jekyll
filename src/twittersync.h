@@ -60,7 +60,7 @@ gboolean twittersync_update_lists(TwitterDbHandle *handle, TwitterWebClient *cli
  * \return TRUE on success.
  *
  *
- * Updates the home timeline, user timeline and replies of an user account.
+ * Updates the home timeline, user timeline and replies of a user account.
  */
 gboolean twittersync_update_timelines(TwitterDbHandle *handle, TwitterWebClient *client, gint *status_count, GCancellable *cancellable, GError **err);
 

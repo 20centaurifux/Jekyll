@@ -293,7 +293,7 @@ msgid "Couldn't retweet status, please try again later."
 msgstr "Status konnte nicht retweetet werden, bitte versuchen Sie es später noch einmal."
 
 #: /home/lordkefir/git/Jekyll/src/gui/statustab.c:660
-msgid "Please specify an user account to retweet the selected status:"
+msgid "Please specify a user account to retweet the selected status:"
 msgstr "Bitte geben Sie das Benutzerkonto an, mit welchem Sie retweeten möchten."
 
 #: /home/lordkefir/git/Jekyll/src/gui/statustab.c:869
@@ -463,7 +463,7 @@ msgid "Please enter the PIN provided by Twitter to authorize %s for <b>%s</b>."
 msgstr "Bitte geben Sie die PIN ein, um %s für das Konto <b>%s</b> zu authorisieren."
 
 #: /home/lordkefir/git/Jekyll/src/gui/add_account_dialog.c:100
-msgid "Please enter an username."
+msgid "Please enter a username."
 msgstr "Bitte geben Sie einen Benuternamen ein."
 
 #: /home/lordkefir/git/Jekyll/src/gui/add_account_dialog.c:107
