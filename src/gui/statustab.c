@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 2. March 2012
+ * \date 5. March 2012
  */
 
 #include <gio/gio.h>
@@ -1764,6 +1764,7 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 	gboolean owner = FALSE;
 	TabTypeId type_id;
 	gboolean show_extra_buttons = TRUE;
+	gint count = 0;
 	_StatusTabTweetData *arg;
 
 	if(g_cancellable_is_cancelled(tab->cancellable))
@@ -1771,7 +1772,7 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		return FALSE;
 	}
 
-	if((arg = g_async_queue_try_pop(tab->widget_factory.queue)))
+	while((arg = g_async_queue_try_pop(tab->widget_factory.queue)) && count < 4)
 	{
 		/* convert timestamp (if necessary) */
 		if(!arg->status.timestamp && arg->status.created_at[0])
@@ -1885,6 +1886,7 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		}
 
 		_status_tab_destroy_widget_factory_arg(arg);
+		++count;
 	}
 
 	return TRUE;
@@ -2166,7 +2168,7 @@ _status_tab_refresh(GtkWidget *widget)
 
 		/* start widget factory worker */
 		g_debug("Starting widget factory worker");
-		meta->widget_factory.id = g_timeout_add(100, (GSourceFunc)_status_tab_widget_factory_worker, meta);
+		meta->widget_factory.id = g_timeout_add(750, (GSourceFunc)_status_tab_widget_factory_worker, meta);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
