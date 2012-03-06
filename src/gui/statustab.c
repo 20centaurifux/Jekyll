@@ -66,6 +66,10 @@ typedef struct
 	gchar *owner;
 	/*! TRUE if tab has been initialized. */
 	gboolean initialized;
+	/*! FALSE until content is set to visible. */
+	gboolean visible;
+	/*! Timer to check how long tab does exist. */
+	GTimer *timer;
 	/*! The page widget. */
 	GtkWidget *page;
 	/*! Box containing tweets. */
@@ -1909,6 +1913,18 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		++count;
 	}
 
+	/* show tab content */
+	if(!tab->visible)
+	{
+		if(g_timer_elapsed(tab->timer, NULL) > 1.8)
+		{
+			gtk_widget_set_visible(tab->vbox, TRUE);
+			gtk_helpers_set_widget_busy(tab->vbox, FALSE);
+			tab->visible = TRUE;
+			g_timer_start(tab->timer);
+		}
+	}
+
 	g_mutex_lock(tab->widget_factory.mutex);
 	tab->widget_factory.running = FALSE;
 	g_mutex_unlock(tab->widget_factory.mutex);
@@ -2114,6 +2130,7 @@ _status_tab_init(GtkWidget *widget)
 	}
 
 	_status_tab_show_action_area(widget, visible);
+	gtk_widget_set_visible(tab->vbox, FALSE);
 }
 
 /*
@@ -2168,6 +2185,8 @@ _status_tab_destroyed(GtkWidget *widget)
 	g_mutex_free(meta->widget_factory.mutex);
 	g_debug("Freeing widget queue");
 	g_async_queue_unref(meta->widget_factory.queue);
+	g_debug("Freeing timer");
+	g_timer_destroy(meta->timer);
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
@@ -2186,6 +2205,7 @@ _status_tab_refresh(GtkWidget *widget)
 	Section *section;
 	Value *value;
 	const gchar *spec;
+	GTimeVal now;
 
 	if(!meta->initialized)
 	{
@@ -2198,6 +2218,13 @@ _status_tab_refresh(GtkWidget *widget)
 		meta->widget_factory.source = g_timeout_source_new(600);
 		g_source_set_callback(meta->widget_factory.source, (GSourceFunc)_status_tab_widget_factory_worker, meta, NULL);
 		g_source_attach(meta->widget_factory.source, NULL);
+
+		/* set timestamp */
+		g_get_current_time(&now);
+		g_timer_start(meta->timer);
+
+		/* update mouse cursor */
+		gtk_helpers_set_widget_busy(meta->vbox, TRUE);
 	}
 
 	tab_id = tab_get_id((Tab *)meta);
@@ -2406,6 +2433,8 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->widget_factory.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_factory_arg);
 	meta->widget_factory.running = FALSE;
 	meta->widget_factory.mutex = g_mutex_new();
+	meta->timer = g_timer_new();
+	meta->visible = FALSE;
 
 	mainwindow = tabbar_get_mainwindow(tabbar);
 	config = mainwindow_lock_config(mainwindow);
