@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 29. February 2012
+ * \date 6. March 2012
  */
 
 #include <gtk/gtk.h>
@@ -323,9 +323,7 @@ static void _mainwindow_search(GtkWidget *mainwindow);
 static gboolean
 _mainwindow_notification_worker(_MainWindowNotification *notification)
 {
-	gdk_threads_enter();
 	mainwindow_notify(notification->window, notification->level, notification->message);
-	gdk_threads_leave();
 
 	g_free(notification->message);
 	g_slice_free1(sizeof(_MainWindowNotification), notification);
@@ -406,9 +404,7 @@ _mainwindow_set_log_handler(GtkWidget *mainwindow)
 static gboolean
 _mainwindow_show_worker(GtkWidget *mainwindow)
 {
-	gdk_threads_enter();
 	mainwindow_show(mainwindow);
-	gdk_threads_leave();
 
 	return FALSE;
 }
@@ -1388,9 +1384,7 @@ _mainwindow_restore_paned_positions(GtkWidget *widget)
 static gboolean
 _mainwindow_restore_paned_positions_worker(GtkWidget *widget)
 {
-	gdk_threads_enter();
 	_mainwindow_restore_paned_positions(widget);
-	gdk_threads_leave();
 
 	return FALSE;
 }
@@ -2309,18 +2303,14 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(widget);
 
 	/* hide window */
-	gdk_threads_enter();
 	gtk_widget_set_visible(widget, FALSE);
 	gdk_flush();
-	gdk_threads_leave();
 
 	/* finish synchronization thread */
 	_mainwindow_send_sync_message(widget, MAINWINDOW_SYNC_EVENT_ABORT);
 	g_debug("Joining sync thread...");
 	g_thread_join(private->sync.thread);
 	g_debug("Thread has been finished");
-
-	gdk_threads_enter();
 
 	/* destroy children */
 	if(private->systray)
@@ -2340,9 +2330,6 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	g_debug("Destroying notification area");
 	notification_area_destroy(private->notification_area);
 	private->notification_area = NULL;
-
-	gdk_threads_leave(); /* tabbar_destroy() joins a thread which locks the GDK mutex
-	                      * and so we have to unlock it to avoid a deadlock. */
 
 	g_debug("Destroying tabbar");
 	tabbar_destroy(private->tabbar);
@@ -2375,9 +2362,7 @@ _mainwindows_destroy_worker(GtkWidget *widget)
 	g_free(private);
 
 	/* destroy window widget */
-	gdk_threads_enter();
 	gtk_widget_destroy(widget);
-	gdk_threads_leave();
 
 	return FALSE;
 }

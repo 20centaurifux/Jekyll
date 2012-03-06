@@ -19,7 +19,7 @@
  * \brief tab functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 2. March 2012
+ * \date 6. March 2012
  */
 
 #include <gdk/gdkkeysyms.h>
@@ -651,12 +651,10 @@ tabbar_destroy(GtkWidget *widget)
 
 	/* close tabs */
 	g_debug("Closing tabs...");
-	gdk_threads_enter();
 	while(gtk_notebook_get_n_pages(notebook))
 	{
 		_tabbar_destroy_page(notebook, 0);
 	}
-	gdk_threads_leave();
 
 	/* get meta information */
 	meta = (_Tabbar *)g_object_get_data(G_OBJECT(widget), "meta");
