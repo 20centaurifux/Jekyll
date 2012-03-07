@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 6. March 2012
+ * \date 7. March 2012
  */
 
 #include <gio/gio.h>
@@ -1913,16 +1913,16 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		++count;
 	}
 
-	/* show tab content */
-	if(!tab->visible)
+	if(!tab->visible && g_timer_elapsed(tab->timer, NULL) > 2.0)
 	{
-		if(g_timer_elapsed(tab->timer, NULL) > 1.8)
-		{
-			gtk_widget_set_visible(tab->vbox, TRUE);
-			gtk_helpers_set_widget_busy(tab->vbox, FALSE);
-			tab->visible = TRUE;
-			g_timer_start(tab->timer);
-		}
+		/* show tab content & update mouse cursor */
+		gtk_widget_set_visible(tab->vbox, TRUE);
+		gtk_helpers_set_widget_busy(tab->vbox, FALSE);
+		tab->visible = TRUE;
+		g_timer_stop(tab->timer);
+
+		/* notify tabbar that page isn't busy anymore */
+		tabbar_set_page_busy(tab->tabbar, ((Tab *)tab)->widget, FALSE);
 	}
 
 	g_mutex_lock(tab->widget_factory.mutex);
@@ -2014,17 +2014,10 @@ _status_tab_worker(gpointer data)
 			/* set busy status */
 			gdk_threads_enter();
 			tabbar_set_page_busy(meta->tabbar, ((Tab *)meta)->widget, TRUE);
-			gtk_widget_set_sensitive(meta->vbox, FALSE);
 			gdk_threads_leave();
 
 			/* populate data */
 			_status_tab_populate(meta);
-
-			/* unset busy status */
-			gdk_threads_enter();
-			gtk_widget_set_sensitive(meta->vbox, TRUE);
-			tabbar_set_page_busy(meta->tabbar, ((Tab *)meta)->widget, FALSE);
-			gdk_threads_leave();
 		}
 		else if(signal == STATUS_TAB_SIGNAL_DESTROY)
 		{
@@ -2215,7 +2208,7 @@ _status_tab_refresh(GtkWidget *widget)
 
 		/* start widget factory worker */
 		g_debug("Starting widget factory worker");
-		meta->widget_factory.source = g_timeout_source_new(600);
+		meta->widget_factory.source = g_timeout_source_new(500);
 		g_source_set_callback(meta->widget_factory.source, (GSourceFunc)_status_tab_widget_factory_worker, meta, NULL);
 		g_source_attach(meta->widget_factory.source, NULL);
 
