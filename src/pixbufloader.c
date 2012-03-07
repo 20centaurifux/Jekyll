@@ -420,8 +420,6 @@ _pixbuf_loader_worker(PixbufLoader *pixbuf_loader)
 					}
 
 					g_mutex_unlock(priv->mutex_callbacks);
-
-					g_usleep(25000);
 				}
 
 				g_list_free(callbacks);
