@@ -1916,7 +1916,7 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		++count;
 	}
 
-	if(!tab->visible && (tab->count > 16 || !arg))
+	if((!tab->visible && tab->count > 16) || !arg)
 	{
 		/* show tab content & update mouse cursor */
 		gtk_widget_set_visible(tab->vbox, TRUE);
