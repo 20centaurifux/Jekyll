@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 7. March 2012
+ * \date 8. March 2012
  */
 
 #include <gio/gio.h>
@@ -68,8 +68,8 @@ typedef struct
 	gboolean initialized;
 	/*! FALSE until content is set to visible. */
 	gboolean visible;
-	/*! Timer to check how long tab does exist. */
-	GTimer *timer;
+	/*! Number of inserted tweets. */
+	gint count;
 	/*! The page widget. */
 	GtkWidget *page;
 	/*! Box containing tweets. */
@@ -1901,6 +1901,9 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 				/* load pixmap */
 				sprintf(group, "statustab-%d", tab->tab_id);
 				mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, arg->user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
+
+				/* increment widget counter */
+				++tab->count;
 			}
 		}
 
@@ -1913,13 +1916,12 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 		++count;
 	}
 
-	if(!tab->visible && g_timer_elapsed(tab->timer, NULL) > 2.0)
+	if(!tab->visible && (tab->count > 16 || !arg))
 	{
 		/* show tab content & update mouse cursor */
 		gtk_widget_set_visible(tab->vbox, TRUE);
 		gtk_helpers_set_widget_busy(tab->vbox, FALSE);
 		tab->visible = TRUE;
-		g_timer_stop(tab->timer);
 
 		/* notify tabbar that page isn't busy anymore */
 		tabbar_set_page_busy(tab->tabbar, ((Tab *)tab)->widget, FALSE);
@@ -2178,8 +2180,6 @@ _status_tab_destroyed(GtkWidget *widget)
 	g_mutex_free(meta->widget_factory.mutex);
 	g_debug("Freeing widget queue");
 	g_async_queue_unref(meta->widget_factory.queue);
-	g_debug("Freeing timer");
-	g_timer_destroy(meta->timer);
 
 	g_free(((Tab *)meta)->id.id);
 	g_mutex_free(((Tab *)meta)->id.mutex);
@@ -2198,7 +2198,6 @@ _status_tab_refresh(GtkWidget *widget)
 	Section *section;
 	Value *value;
 	const gchar *spec;
-	GTimeVal now;
 
 	if(!meta->initialized)
 	{
@@ -2211,10 +2210,6 @@ _status_tab_refresh(GtkWidget *widget)
 		meta->widget_factory.source = g_timeout_source_new(500);
 		g_source_set_callback(meta->widget_factory.source, (GSourceFunc)_status_tab_widget_factory_worker, meta, NULL);
 		g_source_attach(meta->widget_factory.source, NULL);
-
-		/* set timestamp */
-		g_get_current_time(&now);
-		g_timer_start(meta->timer);
 
 		/* update mouse cursor */
 		gtk_helpers_set_widget_busy(meta->vbox, TRUE);
@@ -2426,7 +2421,7 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->widget_factory.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_factory_arg);
 	meta->widget_factory.running = FALSE;
 	meta->widget_factory.mutex = g_mutex_new();
-	meta->timer = g_timer_new();
+	meta->count = 0;
 	meta->visible = FALSE;
 
 	mainwindow = tabbar_get_mainwindow(tabbar);
