@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 8. March 2012
+ * \date 9. March 2012
  */
 
 #include <gio/gio.h>
@@ -1902,8 +1902,14 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 				sprintf(group, "statustab-%d", tab->tab_id);
 				mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, arg->user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
 
-				/* increment widget counter */
 				++tab->count;
+
+				if(!tab->visible)
+				{
+					gtk_helpers_set_widget_busy(tab->vbox, FALSE);
+					tabbar_set_page_busy(tab->tabbar, ((Tab *)tab)->widget, FALSE);
+					tab->visible = TRUE;
+				}
 			}
 		}
 
@@ -1914,17 +1920,6 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 
 		_status_tab_destroy_widget_factory_arg(arg);
 		++count;
-	}
-
-	if((!tab->visible && tab->count > 16) || !arg)
-	{
-		/* show tab content & update mouse cursor */
-		gtk_widget_set_visible(tab->vbox, TRUE);
-		gtk_helpers_set_widget_busy(tab->vbox, FALSE);
-		tab->visible = TRUE;
-
-		/* notify tabbar that page isn't busy anymore */
-		tabbar_set_page_busy(tab->tabbar, ((Tab *)tab)->widget, FALSE);
 	}
 
 	g_mutex_lock(tab->widget_factory.mutex);
@@ -2125,7 +2120,6 @@ _status_tab_init(GtkWidget *widget)
 	}
 
 	_status_tab_show_action_area(widget, visible);
-	gtk_widget_set_visible(tab->vbox, FALSE);
 }
 
 /*
