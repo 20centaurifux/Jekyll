@@ -19,7 +19,7 @@
  * \brief Opening urls.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 18. February 2011
+ * \date 25. April 2012
  */
 
 #include <glib.h>
@@ -255,63 +255,23 @@ url_opener_new_executable(const gchar *executable, const gchar *arguments)
  *	UrlOpenerWin32
  */
 #ifdef G_OS_WIN32
-typedef HINSTANCE (*_ShellExecuteFunc)(HWND hwnd, LPCTSTR lpOperation, LPCTSTR lpFile, LPCTSTR lpParameters, LPCTSTR lpDirectory, INT nShowCmd);
-
-typedef struct
-{
-	UrlOpener padding;
-	HMODULE hmodule;
-	_ShellExecuteFunc shell_execute;
-} _UrlOpenerWin32;
-
 static gboolean
 _url_opener_win32_open(UrlOpener *opener, const gchar *url)
 {
-	_UrlOpenerWin32 *opener_win32 = (_UrlOpenerWin32 *)opener;
-	return opener_win32->shell_execute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL | SW_MAXIMIZE) ? TRUE : FALSE;
-}
-
-static void
-_url_opener_win32_free(UrlOpener *opener)
-{
-	_UrlOpenerWin32 *opener_win32 = (_UrlOpenerWin32 *)opener;
-
-	g_debug("Freeing library \"shell32.dll\"");
-	FreeLibrary(opener_win32->hmodule);
-
-	g_debug("Freeing _UrlOpenerWin32 structure");
-	g_slice_free1(sizeof(_UrlOpenerWin32), opener_win32);
+	return ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL | SW_MAXIMIZE) ? TRUE : FALSE;
 }
 
 UrlOpener *
 url_opener_new_win32(void)
 {
-	static UrlOpenerFuncs funcs = { _url_opener_win32_open, _url_opener_win32_free };
-	_UrlOpenerWin32 *opener_win32;
+	static UrlOpenerFuncs funcs = { _url_opener_win32_open, NULL };
+	UrlOpener *opener;
 
-	opener_win32 = (_UrlOpenerWin32 *)g_slice_alloc(sizeof(_UrlOpenerWin32));
-	memset(opener_win32, 0, sizeof(_UrlOpenerWin32));
+	opener= (UrlOpener *)g_slice_alloc(sizeof(UrlOpener));
+	memset(opener, 0, sizeof(UrlOpener));
+	opener->funcs = &funcs;
 
-	g_debug("Loading library \"shell32.dll\"");
-	if((opener_win32->hmodule = LoadLibrary("shell32.dll")))
-	{
-			if((opener_win32->shell_execute = (_ShellExecuteFunc)GetProcAddress(opener_win32->hmodule, "ShellExecuteA")))
-			{
-				g_debug("Loading function \"ShellExecuteA\"");
-				((UrlOpener *)opener_win32)->funcs = &funcs;
-			}
-			else
-			{
-				FreeLibrary(opener_win32->hmodule);
-				g_warning("Couldn't load function: \"ShellExecuteA\"");
-			}
-	}
-	else
-	{
-		g_warning("Couldn't load library: \"shell32.dll\"");
-	}
-
-	return (UrlOpener *)opener_win32;
+	return opener;
 }
 #endif
 
