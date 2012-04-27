@@ -19,7 +19,7 @@
  * \brief A tab containing twitter statuses.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 9. March 2012
+ * \date 27. April 2012
  */
 
 #include <gio/gio.h>
@@ -68,8 +68,6 @@ typedef struct
 	gboolean initialized;
 	/*! FALSE until content is set to visible. */
 	gboolean visible;
-	/*! Number of inserted tweets. */
-	gint count;
 	/*! The page widget. */
 	GtkWidget *page;
 	/*! Box containing tweets. */
@@ -1902,17 +1900,17 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 				sprintf(group, "statustab-%d", tab->tab_id);
 				mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, arg->user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
 
-				++tab->count;
-
-				if(!tab->visible)
-				{
-					gtk_helpers_set_widget_busy(tab->vbox, FALSE);
-					tabbar_set_page_busy(tab->tabbar, ((Tab *)tab)->widget, FALSE);
-					tab->visible = TRUE;
-				}
 			}
 		}
 
+		/* show tab */
+		if(!tab->visible)
+		{
+			gtk_helpers_set_widget_busy(tab->vbox, FALSE);
+			tab->visible = TRUE;
+		}
+
+		/* clean up & increment counter */
 		if(children)
 		{
 			g_list_free(children);
@@ -1925,6 +1923,9 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 	g_mutex_lock(tab->widget_factory.mutex);
 	tab->widget_factory.running = FALSE;
 	g_mutex_unlock(tab->widget_factory.mutex);
+
+	/* update tabbar status */
+	tabbar_set_page_busy(tab->tabbar, ((Tab *)tab)->widget, FALSE);
 
 	return TRUE;
 }
@@ -2415,7 +2416,6 @@ status_tab_create(GtkWidget *tabbar, TabTypeId type_id, const gchar *id)
 	meta->widget_factory.queue = g_async_queue_new_full((GDestroyNotify)_status_tab_destroy_widget_factory_arg);
 	meta->widget_factory.running = FALSE;
 	meta->widget_factory.mutex = g_mutex_new();
-	meta->count = 0;
 	meta->visible = FALSE;
 
 	mainwindow = tabbar_get_mainwindow(tabbar);
