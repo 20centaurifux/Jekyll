@@ -19,7 +19,7 @@
  * \brief A listener allow only one instance of the program.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 12. March 2011
+ * \date 27. April 2011
  */
 
 #include <gio/gio.h>
@@ -379,7 +379,7 @@ static ListenerInitResult
 _listener_win32_init(void)
 {
 	HANDLE pipe;
-	DWORD pipe_err;
+	DWORD pipe_err = 0;
 	GError *err = NULL;
 	ListenerInitResult result = LISTENER_RESULT_ABORT;
 
