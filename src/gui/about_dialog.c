@@ -19,7 +19,7 @@
  * \brief An about dialog.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 2. January 2012
+ * \date 17. August 2012
  */
 
 #include <string.h>
@@ -164,7 +164,7 @@ about_dialog_create(GtkWidget *parent)
 	if(pixbuf)
 	{
 		gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), pixbuf);
-		gdk_pixbuf_unref(pixbuf);
+		g_object_unref(G_OBJECT(pixbuf));
 	}
 
 	if(license)
