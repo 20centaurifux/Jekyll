@@ -46,7 +46,7 @@
 /*! Minor release number. */
 #define VERSION_MINOR             3
 /*! Patch level of the release. */
-#define VERSION_PATCH_LEVEL       1
+#define VERSION_PATCH_LEVEL       2
 
 /*! Name of the directory to store configuration data. */
 #define CONFIG_DIR                ".jekyll"
