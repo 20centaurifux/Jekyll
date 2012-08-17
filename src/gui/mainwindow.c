@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 6. March 2012
+ * \date 17. August 2012
  */
 
 #include <gtk/gtk.h>
@@ -1677,6 +1677,7 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, con
 	GtkWidget *dialog;
 	GError *err = NULL;
 	gboolean result = FALSE;
+	_MainWindowPrivate *private;
 
 	g_assert(GTK_IS_WINDOW(mainwindow));
 
@@ -1684,7 +1685,8 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, con
 	{
 		if((result = twitter_client_post(client, username, text, NULL, &err)))
 		{
-			mainwindow_sync_gui(mainwindow);
+			private = MAINWINDOW_GET_DATA(mainwindow);
+			tabbar_refresh(private->tabbar);
 		}
 		else
 		{

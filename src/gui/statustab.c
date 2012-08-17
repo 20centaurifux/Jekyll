@@ -1899,7 +1899,6 @@ _status_tab_widget_factory_worker(_StatusTab *tab)
 				/* load pixmap */
 				sprintf(group, "statustab-%d", tab->tab_id);
 				mainwindow_load_pixbuf(tabbar_get_mainwindow(tab->tabbar), group, arg->user.image, (PixbufLoaderCallback)pixbuf_helpers_set_gtktwitterstatus_callback, widget, NULL);
-
 			}
 		}
 
