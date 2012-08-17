@@ -37,6 +37,10 @@ are required to build/compile Jekyll:
   dependencies like GObject, Pango, GDK, ...)
 * OpenSSL development files and shared libraries
 
+You need also your own OAuth consumer key and secret. Having a key
+and secret please update the related settings in the Makefile.build
+file ("TWITTER_CONSUMER_KEY" and "TWITTER_CONSUMER_SECRET").
+
 If all required components are installed properly on your machine you
 can build Jekyll using the GNU Make utility:
 

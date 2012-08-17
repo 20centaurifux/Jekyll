@@ -19,7 +19,7 @@
  * \brief Application information.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. February 2012
+ * \date 17. August 2012
  */
 
 #ifndef __APPLICATION_H__
@@ -69,9 +69,9 @@
 #define TWITTER_ACCESS_TOKEN_URL  "http://twitter.com/oauth/access_token"
 
 /*! OAuth consumer key of the application. */
-#define OAUTH_CONSUMER_KEY        "ohqjjRvAdGoZ2b9Sli4g"
+#define OAUTH_CONSUMER_KEY        TWITTER_CONSUMER_KEY
 /*! OAuth consumer secret of the application. */
-#define OAUTH_CONSUMER_SECRET     "RBKbtgCwi1PfN1h4ajGagNVBHEUELYFLc0iVvJEoTc"
+#define OAUTH_CONSUMER_SECRET     TWITTER_CONSUMER_SECRET
 
 /*! Directory of the Twitter database file. */
 #define TWTTER_DATABASE_FOLDER    ".database"
