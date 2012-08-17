@@ -38,7 +38,7 @@ network_util_create_tcp_socket(const gchar *hostname, guint port, GError **err)
 	GSocket *socket = NULL;
 	GError *failure = NULL;
 
-	g_debug("Resolving hostnane: %s", hostname);
+	g_debug("Resolving hostname: %s", hostname);
 	if((addr = g_network_address_parse(hostname, port, err)))
 	{
 		enumerator = g_socket_connectable_enumerate(addr);
