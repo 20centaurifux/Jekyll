@@ -19,7 +19,7 @@
  * \brief A dialog for editing (list) members.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 19. January 2012
+ * \date 17. August 2012
  */
 
 #include "edit_members_dialog.h"
@@ -80,7 +80,7 @@ _edit_members_dialog_destroy_pixbuf_arg(_EditMembersDialogPixbufArg *arg)
 {
 	if(arg->pixbuf)
 	{
-		gdk_pixbuf_unref(arg->pixbuf);
+		g_object_unref(G_OBJECT(arg->pixbuf));
 	}
 
 	g_slice_free1(sizeof(_EditMembersDialogPixbufArg), arg);
@@ -104,7 +104,7 @@ _edit_members_dialog_set_image(GdkPixbuf *pixbuf, _EditMembersDialogPixbufArg *a
 	g_assert(pixbuf != NULL);
 	g_assert(GTK_IS_DELETABLE_DIALOG(arg->dialog));
 
-	gdk_pixbuf_ref(pixbuf);
+	g_object_ref(G_OBJECT(pixbuf));
 	g_idle_add((GSourceFunc)_edit_members_dialog_set_image_worker, _edit_members_dialog_create_pixbuf_arg(arg->dialog, arg->username, pixbuf));
 }
 
@@ -194,7 +194,7 @@ edit_members_dialog_destroy(GtkWidget *dialog)
 	/* free default user image */
 	if(private->pixbuf)
 	{
-		gdk_pixbuf_unref(private->pixbuf);
+		g_object_unref(G_OBJECT(private->pixbuf));
 	}
 
 	/* destroy the widget in a worker (otherwise an image worker might access the destroyed dialog) */

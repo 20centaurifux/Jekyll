@@ -19,7 +19,7 @@
  * \brief A dialog for selecting an account.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 22. January 2012
+ * \date 17. August 2012
  */
 
 #include <glib/gi18n.h>
@@ -97,7 +97,7 @@ _select_account_dialog_destroy_pixbuf_arg(_SelectUserDialogPixbufArg *arg)
 {
 	if(arg->pixbuf)
 	{
-		gdk_pixbuf_unref(arg->pixbuf);
+		g_object_unref(G_OBJECT(arg->pixbuf));
 	}
 
 	g_slice_free1(sizeof(_SelectUserDialogPixbufArg), arg);
@@ -121,7 +121,7 @@ _select_account_dialog_set_image(GdkPixbuf *pixbuf, _SelectUserDialogPixbufArg *
 	g_assert(pixbuf != NULL);
 	g_assert(GTK_IS_DELETABLE_DIALOG(arg->dialog));
 
-	gdk_pixbuf_ref(pixbuf);
+	g_object_ref(G_OBJECT(pixbuf));
 	g_idle_add((GSourceFunc)_select_account_dialog_set_image_worker, _select_account_dialog_create_pixbuf_arg(arg->dialog, arg->username, pixbuf));
 }
 

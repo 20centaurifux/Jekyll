@@ -19,7 +19,7 @@
  * \brief A dialog for editing accounts.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 30. September 2011
+ * \date 17. August 2012
  */
 
 #include <glib/gi18n.h>
@@ -334,7 +334,7 @@ _accounts_dialog_populate_accounts_tree(GtkWidget *dialog, GtkWidget *tree)
 	/* free pixbuf */
 	if(pixbuf)
 	{
-		gdk_pixbuf_unref(pixbuf);
+		g_object_unref(G_OBJECT(pixbuf));
 	}
 
 	/* set cursor */
@@ -591,7 +591,7 @@ _accounts_dialog_add_account(GtkWidget *dialog)
 
 			if(pixbuf)
 			{
-				gdk_pixbuf_unref(pixbuf);
+				g_object_unref(G_OBJECT(pixbuf));
 			}
 		}
 		else
