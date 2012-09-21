@@ -19,7 +19,7 @@
  * \brief Startup wizard.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 30. September 2011
+ * \date 21. September 2012
  */
 
 #include <gtk/gtk.h>
@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "wizard.h"
+#include "gtk_helpers.h"
 #include "../application.h"
 #include "../pathbuilder.h"
 #include "../urlopener.h"
@@ -786,6 +787,7 @@ wizard_start(Config *config)
 
 	/* create & start assistant */
 	assistant = _wizard_assistant_create();
+	gtk_helpers_set_window_icon_from_image_folder(assistant, "wizard.png");
 	gtk_main();
 
 	/* get result */

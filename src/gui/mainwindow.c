@@ -1853,7 +1853,7 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 			break;
 
 		default:
-			g_warning("Invalid menu id");
+			g_warning("Invalid menu id: %d", menu->action);
 	}
 
 	/* destroy dialog */
@@ -2545,10 +2545,12 @@ _mainwindow_create(Config *config, Cache *cache)
 	GdkModifierType mods;
 	GtkWidget *align;
 	GtkWidget *button_close;
+	GError *err = NULL;
 
 	/* create window */
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_widget_set_size_request(window, MAINWINDOW_MINIMUM_WIDTH, MAINWINDOW_MINIMUM_HEIGHT);
+	gtk_helpers_set_window_icon_from_image_folder(window, "icon.png");
 
 	/* window data  */
 	private = (_MainWindowPrivate *)g_malloc(sizeof(_MainWindowPrivate));

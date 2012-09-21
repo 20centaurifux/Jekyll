@@ -19,13 +19,14 @@
  * \brief Dialog shown when doing the initial synchronization.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 20. September 2011
+ * \date 21. September 2012
  */
 
 #include <glib/gi18n.h>
 #include <string.h>
 
 #include "first_sync_dialog.h"
+#include "gtk_helpers.h"
 #include "../pathbuilder.h"
 #include "../application.h"
 #include "../twittersync.h"
@@ -266,6 +267,8 @@ first_sync_dialog_run(GtkWidget *parent, const gchar *username, const gchar *acc
 	gtk_window_set_deletable(GTK_WINDOW(window), FALSE);
 	gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+
+	gtk_helpers_set_window_icon_from_image_folder(window, "wizard.png");
 
 	if(parent)
 	{

@@ -19,10 +19,11 @@
  * \brief Gtk helper functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. February 2012
+ * \date 21. September 2012
  */
 
 #include "gtk_helpers.h"
+#include "../pathbuilder.h"
 
 /**
  * @addtogroup Gui
@@ -137,6 +138,37 @@ gtk_helpers_run_and_destroy_dialog_worker(GtkWidget *dialog)
 	gdk_threads_leave();
 
 	return FALSE;
+}
+
+static void
+_gtk_helpers_set_window_icon(GtkWidget *window, const char *path)
+{
+	GdkPixbuf *icon;
+	GError *err = NULL;
+
+	icon = gdk_pixbuf_new_from_file(path, &err);
+
+	if(GDK_IS_PIXBUF(icon))
+	{
+		gtk_window_set_icon(GTK_WINDOW(window), icon);
+		g_object_unref(G_OBJECT(icon));
+	}
+
+	if(err)
+	{
+		g_warning("%s\n", err->message);
+		g_error_free(err);
+	}
+}
+
+void
+gtk_helpers_set_window_icon_from_image_folder(GtkWidget *window, const gchar *name)
+{
+	gchar *filename;
+
+	filename = pathbuilder_build_image_path(name);
+	_gtk_helpers_set_window_icon(window, filename);
+	g_free(filename);
 }
 
 /**

@@ -19,7 +19,7 @@
  * \brief Gtk helper functions.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 21. April 2011
+ * \date 21. September 2012
  */
 
 #ifndef __GTK_HELPERS_H__
@@ -90,6 +90,14 @@ gint gtk_helpers_tree_view_count_nodes(GtkWidget *tree);
  * Worker to run and destroy a GtkDialog.
  */
 gboolean gtk_helpers_run_and_destroy_dialog_worker(GtkWidget *dialog);
+
+/**
+ * \param window a GtkWindow
+ * \param name name of the image to set
+ *
+ * Sets the icon of the specified window.
+ */
+void gtk_helpers_set_window_icon_from_image_folder(GtkWidget *window, const gchar *name);
 
 /**
  * @}
