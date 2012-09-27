@@ -58,7 +58,7 @@ completion_load_file(const char *filename)
 
 			while((line = g_data_input_stream_read_line(stream, NULL, NULL, NULL)))
 			{
-				strings = g_list_append(strings, g_strdup(line + sizeof(gint)));
+				strings = g_list_append(strings, g_strdup(line + sizeof(gint32)));
 				g_free(line);
 			}
 
@@ -83,18 +83,18 @@ _completion_create_initial_file(GFile *file, const char * restrict path, const c
 	gchar *buffer;
 	gint len;
 	gint size;
-	gint zero = 0;
+	gint32 zero = 0;
 
 	g_debug("Creating file: \"%s\"", path);
 
 	if((file_stream = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, NULL)))
 	{
 		len = strlen(text);
-		size = len + sizeof(gint) + 1;
+		size = len + sizeof(gint32) + 1;
 		buffer = g_malloc(size);
 
-		memcpy(buffer, &zero, sizeof(gint));
-		memcpy(buffer + sizeof(gint), text, len);
+		memcpy(buffer, &zero, sizeof(gint32));
+		memcpy(buffer + sizeof(gint32), text, len);
 		buffer[size - 1] = '\n';
 
 		stream = G_OUTPUT_STREAM(file_stream);
