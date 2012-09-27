@@ -22,7 +22,7 @@
  * \date 26. September 2012
  */
 
-#include <glib.h>
+#include <gtk/gtk.h>
 
 #ifndef __COMPLETION_H__
 #define __COMPLETION_H__
@@ -38,7 +38,15 @@
  *
  * Load strings from a file.
  */
-GList *completion_load_file(const char *filename);
+GList *completion_load_file(const gchar *filename);
+
+/**
+ * \param filename file to load
+ * \return completion GtkEntryCompletion to populate
+ *
+ * Load strings from a file and populates a GtkEntryCompletion widget.
+ */
+void completion_populate_entry_completion(const gchar *filename, GtkEntryCompletion *completion);
 
 /**
  * \param filename file containing stored strings
@@ -46,7 +54,7 @@ GList *completion_load_file(const char *filename);
  *
  * Add text to specified file.
  */
-void completion_append_string(const char *filename, const char *text);
+void completion_append_string(const gchar *filename, const gchar *text);
 
 /**
  * @}

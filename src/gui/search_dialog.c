@@ -54,29 +54,6 @@ _search_dialog_get_text(GtkWidget *dialog)
 	return gtk_entry_get_text(GTK_ENTRY(((_SearchWindowPrivate *)g_object_get_data(G_OBJECT(dialog), "private"))->entry_query));
 }
 
-static void
-_search_dialog_load_strings(GtkListStore *store)
-{
-	GList *strings;
-	GList *head;
-	GtkTreeIter iter;
-
-	g_debug("Loading search autocompletion strings");
-
-	head = strings = completion_load_file(".autocomplete_search");
-
-	while(head)
-	{
-		g_debug("Adding string: \"%s\"", (gchar *)head->data);
-		gtk_list_store_append(store, &iter);
-		gtk_list_store_set(store, &iter, 0, (gchar *)head->data, -1);
-		g_free(head->data);
-		head = head->next;
-	}
-
-	g_list_free(strings);
-}
-
 /*
  *	events:
  */
@@ -179,7 +156,7 @@ search_dialog_create(GtkWidget *parent)
 	gtk_entry_set_completion(GTK_ENTRY(private->entry_query), GTK_ENTRY_COMPLETION(completion));
 
 	/* load autocompletion strings */
-	_search_dialog_load_strings(store);
+	completion_populate_entry_completion(".autocomplete_search", completion);
 
 	/* unref liststore */
 	g_object_unref(store);

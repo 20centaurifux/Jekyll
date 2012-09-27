@@ -22,6 +22,7 @@
  * \date 27. September 2012
  */
 
+#include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <string.h>
 
@@ -34,7 +35,7 @@
  */
 
 GList *
-completion_load_file(const char *filename)
+completion_load_completion(const gchar *filename)
 {
 	char *path;
 	GFile *file;
@@ -77,8 +78,57 @@ completion_load_file(const char *filename)
 	return strings;
 }
 
+void
+completion_populate_entry_completion(const gchar *filename, GtkEntryCompletion *completion)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	char *path;
+	GFile *file;
+	GFileInputStream *file_stream;
+	GDataInputStream *stream;
+	gchar *line;
+	gint column;
+
+	g_assert(filename != NULL);
+	g_assert(GTK_IS_ENTRY_COMPLETION(completion));
+
+	model = gtk_entry_completion_get_model(GTK_ENTRY_COMPLETION(completion));
+	column = gtk_entry_completion_get_text_column(GTK_ENTRY_COMPLETION(completion));
+
+	path = g_build_filename(pathbuilder_get_user_application_directory(), G_DIR_SEPARATOR_S, filename, NULL);
+	file = g_file_new_for_path(path);
+
+	g_debug("Trying to load string list from: \"%s\"", path);
+
+	if(g_file_query_exists(file, NULL))
+	{
+		g_debug("Found file, reading content...");
+
+		if((file_stream = g_file_read(file, NULL, NULL)))
+		{
+			stream = g_data_input_stream_new(G_INPUT_STREAM(file_stream));
+
+			while((line = g_data_input_stream_read_line(stream, NULL, NULL, NULL)))
+			{
+				gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+				gtk_list_store_set(GTK_LIST_STORE(model), &iter, column, line + sizeof(gint32), -1);
+				g_free(line);
+			}
+
+			g_debug("Closing file");
+			g_input_stream_close(G_INPUT_STREAM(stream), NULL, NULL);
+			g_object_unref(stream);
+			g_object_unref(file_stream);
+		}
+	}
+
+	g_object_unref(file);
+	g_free(path);
+}
+
 static void
-_completion_create_initial_file(GFile *file, const char *text)
+_completion_create_initial_file(GFile *file, const gchar *text)
 {
 	gchar *path;
 	GFileOutputStream *file_stream;
@@ -131,7 +181,7 @@ _completion_update_text(GFile *file, const gchar *text)
 	GOutputStream *out_stream;
 	GError *err = NULL;
 	gchar *line;
-	const char *ptr;
+	const gchar *ptr;
 	gboolean found = FALSE;
 	gint32 counter = 0;
 
@@ -208,7 +258,7 @@ _completion_update_text(GFile *file, const gchar *text)
 }
 
 void
-completion_append_string(const char *filename, const char *text)
+completion_append_string(const gchar *filename, const gchar *text)
 {
 	char *path;
 	GFile *file;
