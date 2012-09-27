@@ -19,13 +19,14 @@
  * \brief A dialog for entering search queries.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 25. December 2011
+ * \date 27. December 2011
  */
 
 #include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h> 
 
 #include "search_dialog.h"
+#include "../completion.h"
 
 /**
  * @addtogroup Gui
@@ -51,6 +52,29 @@ static const gchar *
 _search_dialog_get_text(GtkWidget *dialog)
 {
 	return gtk_entry_get_text(GTK_ENTRY(((_SearchWindowPrivate *)g_object_get_data(G_OBJECT(dialog), "private"))->entry_query));
+}
+
+static void
+_search_dialog_load_strings(GtkListStore *store)
+{
+	GList *strings;
+	GList *head;
+	GtkTreeIter iter;
+
+	g_debug("Loading search autocompletion strings");
+
+	head = strings = completion_load_file(".autocomplete_search");
+
+	while(head)
+	{
+		g_debug("Adding string: \"%s\"", (gchar *)head->data);
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, (gchar *)head->data, -1);
+		g_free(head->data);
+		head = head->next;
+	}
+
+	g_list_free(strings);
 }
 
 /*
@@ -90,6 +114,8 @@ search_dialog_create(GtkWidget *parent)
 	GtkWidget *frame;
 	GtkWidget *table;
 	GtkWidget *align;
+	GtkEntryCompletion *completion;
+	GtkListStore *store;
 
 	g_debug("Opening \"search\" dialog");
 
@@ -139,6 +165,24 @@ search_dialog_create(GtkWidget *parent)
 
 	gtk_table_attach_defaults(GTK_TABLE(table), align, 0, 1, 0, 1);
 	gtk_table_attach_defaults(GTK_TABLE(table), private->entry_query, 1, 2, 0, 1);
+
+	/* completion */
+	completion = gtk_entry_completion_new();
+	gtk_entry_completion_set_minimum_key_length(GTK_ENTRY_COMPLETION(completion), 1);
+	gtk_entry_completion_set_inline_completion(GTK_ENTRY_COMPLETION(completion), TRUE);
+	gtk_entry_completion_set_popup_completion(GTK_ENTRY_COMPLETION(completion), FALSE);
+
+	store = gtk_list_store_new(1, G_TYPE_STRING);
+	gtk_entry_completion_set_model(GTK_ENTRY_COMPLETION(completion), GTK_TREE_MODEL(store));
+	gtk_entry_completion_set_text_column(GTK_ENTRY_COMPLETION(completion), 0);
+
+	gtk_entry_set_completion(GTK_ENTRY(private->entry_query), GTK_ENTRY_COMPLETION(completion));
+
+	/* load autocompletion strings */
+	_search_dialog_load_strings(store);
+
+	/* unref liststore */
+	g_object_unref(store);
 
 	/* insert buttons */
 	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), gtk_button_new_from_stock(GTK_STOCK_FIND), GTK_RESPONSE_OK);

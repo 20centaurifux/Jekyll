@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 17. August 2012
+ * \date 27. September 2012
  */
 
 #include <gtk/gtk.h>
@@ -49,6 +49,7 @@
 #include "../twitterclient_factory.h"
 #include "../net/twitterwebclient.h"
 #include "../twitterxmlparser.h"
+#include "../completion.h"
 
 /**
  * @addtogroup Gui
@@ -1784,6 +1785,7 @@ _mainwindow_search(GtkWidget *mainwindow)
 		{
 			account = _mainwindow_get_selected_account(mainwindow, TRUE);
 			tabbar_open_search_query(private->tabbar, query);
+			completion_append_string(".autocomplete_search", query);
 		}
 	}
 
@@ -2545,7 +2547,6 @@ _mainwindow_create(Config *config, Cache *cache)
 	GdkModifierType mods;
 	GtkWidget *align;
 	GtkWidget *button_close;
-	GError *err = NULL;
 
 	/* create window */
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
