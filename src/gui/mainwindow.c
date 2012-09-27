@@ -316,7 +316,7 @@ typedef struct
 /*
  *	forward declarations:
  */
-static void _mainwindow_search(GtkWidget *mainwindow);
+static gboolean _mainwindow_search(GtkWidget *mainwindow);
 
 /*
  *	log handler:
@@ -1274,7 +1274,7 @@ _mainwindow_close_tab_closure(GtkWidget *widget)
 static void
 _mainwindow_search_closure(GtkWidget *widget)
 {
-	_mainwindow_search(widget);
+	g_idle_add((GSourceFunc)_mainwindow_search, widget);
 }
 
 /*
@@ -1711,7 +1711,7 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, con
 	return result;
 }
 
-static void
+static gboolean
 _mainwindow_compose_tweet(GtkWidget *widget)
 {
 	GtkWidget *dialog;
@@ -1764,12 +1764,14 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 	}
 
 	g_free(usernames);
+
+	return FALSE;
 }
 
 /*
  *	search:
  */
-static void
+static gboolean
 _mainwindow_search(GtkWidget *mainwindow)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(mainwindow);
@@ -1796,6 +1798,8 @@ _mainwindow_search(GtkWidget *mainwindow)
 
 	g_free(query);
 	g_free(account);
+
+	return FALSE;
 }
 
 /*
@@ -1826,11 +1830,11 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 			break;
 
 		case MAINMENU_ACTION_COMPOSE_TWEET:
-			_mainwindow_compose_tweet(menu->window);
+			g_idle_add((GSourceFunc)_mainwindow_compose_tweet, menu->window);
 			break;
 
 		case MAINMENU_ACTION_SEARCH:
-			_mainwindow_search(menu->window);
+			g_idle_add((GSourceFunc)_mainwindow_search, menu->window);
 			break;
 
 		case MAINMENU_ACTION_PREFERENCES:
