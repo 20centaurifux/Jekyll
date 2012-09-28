@@ -19,7 +19,7 @@
  * \brief The mainwindow.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. September 2012
+ * \date 28. September 2012
  */
 
 #include <gtk/gtk.h>
@@ -316,7 +316,7 @@ typedef struct
 /*
  *	forward declarations:
  */
-static gboolean _mainwindow_search(GtkWidget *mainwindow);
+static void _mainwindow_search(GtkWidget *mainwindow);
 
 /*
  *	log handler:
@@ -1274,7 +1274,7 @@ _mainwindow_close_tab_closure(GtkWidget *widget)
 static void
 _mainwindow_search_closure(GtkWidget *widget)
 {
-	g_idle_add((GSourceFunc)_mainwindow_search, widget);
+	_mainwindow_search(widget);
 }
 
 /*
@@ -1711,7 +1711,7 @@ _mainwindow_compose_tweet_callback(const gchar *username, const gchar *text, con
 	return result;
 }
 
-static gboolean
+static void
 _mainwindow_compose_tweet(GtkWidget *widget)
 {
 	GtkWidget *dialog;
@@ -1764,14 +1764,12 @@ _mainwindow_compose_tweet(GtkWidget *widget)
 	}
 
 	g_free(usernames);
-
-	return FALSE;
 }
 
 /*
  *	search:
  */
-static gboolean
+static void
 _mainwindow_search(GtkWidget *mainwindow)
 {
 	_MainWindowPrivate *private = MAINWINDOW_GET_DATA(mainwindow);
@@ -1798,8 +1796,6 @@ _mainwindow_search(GtkWidget *mainwindow)
 
 	g_free(query);
 	g_free(account);
-
-	return FALSE;
 }
 
 /*
@@ -1830,11 +1826,11 @@ _mainwindow_menu_item_activated(GtkWidget *widget, gpointer user_data)
 			break;
 
 		case MAINMENU_ACTION_COMPOSE_TWEET:
-			g_idle_add((GSourceFunc)_mainwindow_compose_tweet, menu->window);
+			_mainwindow_compose_tweet(menu->window);
 			break;
 
 		case MAINMENU_ACTION_SEARCH:
-			g_idle_add((GSourceFunc)_mainwindow_search, menu->window);
+			_mainwindow_search(menu->window);
 			break;
 
 		case MAINMENU_ACTION_PREFERENCES:
