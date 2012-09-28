@@ -19,7 +19,7 @@
  * \brief A dialog for entering search queries.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 27. December 2011
+ * \date 28. December 2011
  */
 
 #include <glib/gi18n.h>
@@ -145,6 +145,7 @@ search_dialog_create(GtkWidget *parent)
 
 	/* completion */
 	completion = gtk_entry_completion_new();
+	gtk_entry_set_completion(GTK_ENTRY(private->entry_query), GTK_ENTRY_COMPLETION(completion));
 	gtk_entry_completion_set_minimum_key_length(GTK_ENTRY_COMPLETION(completion), 1);
 	gtk_entry_completion_set_inline_completion(GTK_ENTRY_COMPLETION(completion), TRUE);
 	gtk_entry_completion_set_popup_completion(GTK_ENTRY_COMPLETION(completion), FALSE);
@@ -152,14 +153,10 @@ search_dialog_create(GtkWidget *parent)
 	store = gtk_list_store_new(1, G_TYPE_STRING);
 	gtk_entry_completion_set_model(GTK_ENTRY_COMPLETION(completion), GTK_TREE_MODEL(store));
 	gtk_entry_completion_set_text_column(GTK_ENTRY_COMPLETION(completion), 0);
-
-	gtk_entry_set_completion(GTK_ENTRY(private->entry_query), GTK_ENTRY_COMPLETION(completion));
+	g_object_unref(store);
 
 	/* load autocompletion strings */
 	completion_populate_entry_completion(".autocomplete_search", completion);
-
-	/* unref liststore */
-	g_object_unref(store);
 
 	/* insert buttons */
 	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), gtk_button_new_from_stock(GTK_STOCK_FIND), GTK_RESPONSE_OK);

@@ -34,49 +34,11 @@
  * @{
  */
 
-GList *
-completion_load_completion(const gchar *filename)
-{
-	char *path;
-	GFile *file;
-	GFileInputStream *file_stream;
-	GDataInputStream *stream;
-	gchar *line;
-	GList *strings = NULL;
+/*! Comletion counter size. */
+#define COMPLETION_COUNTER_SIZE sizeof(gint32)
 
-	g_assert(filename != NULL);
-
-	path = g_build_filename(pathbuilder_get_user_application_directory(), G_DIR_SEPARATOR_S, filename, NULL);
-	file = g_file_new_for_path(path);
-
-	g_debug("Trying to load string list from: \"%s\"", path);
-
-	if(g_file_query_exists(file, NULL))
-	{
-		g_debug("Found file, reading content...");
-
-		if((file_stream = g_file_read(file, NULL, NULL)))
-		{
-			stream = g_data_input_stream_new(G_INPUT_STREAM(file_stream));
-
-			while((line = g_data_input_stream_read_line(stream, NULL, NULL, NULL)))
-			{
-				strings = g_list_append(strings, g_strdup(line + sizeof(gint32)));
-				g_free(line);
-			}
-
-			g_debug("Closing file");
-			g_input_stream_close(G_INPUT_STREAM(stream), NULL, NULL);
-			g_object_unref(stream);
-			g_object_unref(file_stream);
-		}
-	}
-
-	g_object_unref(file);
-	g_free(path);
-
-	return strings;
-}
+/*! Size of each stored block (string length + counter size). */
+static const gint block_size = COMPLETION_STRING_SIZE + COMPLETION_COUNTER_SIZE;
 
 void
 completion_populate_entry_completion(const gchar *filename, GtkEntryCompletion *completion)
@@ -85,10 +47,12 @@ completion_populate_entry_completion(const gchar *filename, GtkEntryCompletion *
 	GtkTreeIter iter;
 	char *path;
 	GFile *file;
-	GFileInputStream *file_stream;
-	GDataInputStream *stream;
-	gchar *line;
+	GFileInputStream *stream;
 	gint column;
+	GError *err = NULL;
+	gchar buffer[block_size];
+	const gchar *ptr;
+	gssize size;
 
 	g_assert(filename != NULL);
 	g_assert(GTK_IS_ENTRY_COMPLETION(completion));
@@ -99,28 +63,59 @@ completion_populate_entry_completion(const gchar *filename, GtkEntryCompletion *
 	path = g_build_filename(pathbuilder_get_user_application_directory(), G_DIR_SEPARATOR_S, filename, NULL);
 	file = g_file_new_for_path(path);
 
-	g_debug("Trying to load string list from: \"%s\"", path);
+	/* load strings from file & append entries to GtkEntryCompletion's model */
+	g_debug("Trying to load strings list from: \"%s\"", path);
 
 	if(g_file_query_exists(file, NULL))
 	{
 		g_debug("Found file, reading content...");
 
-		if((file_stream = g_file_read(file, NULL, NULL)))
+		if((stream = g_file_read(file, NULL, &err)))
 		{
-			stream = g_data_input_stream_new(G_INPUT_STREAM(file_stream));
+			model = gtk_entry_completion_get_model(GTK_ENTRY_COMPLETION(completion));
 
-			while((line = g_data_input_stream_read_line(stream, NULL, NULL, NULL)))
+			do
 			{
-				gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-				gtk_list_store_set(GTK_LIST_STORE(model), &iter, column, line + sizeof(gint32), -1);
-				g_free(line);
-			}
+				if((size = g_input_stream_read(G_INPUT_STREAM(stream), buffer, block_size, NULL, &err)) == block_size)
+				{
+					ptr = buffer + COMPLETION_COUNTER_SIZE;
+					g_debug("Found text: \"%s\"", ptr);
 
-			g_debug("Closing file");
-			g_input_stream_close(G_INPUT_STREAM(stream), NULL, NULL);
+					if(GTK_IS_LIST_STORE(model))
+					{
+						gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+						gtk_list_store_set(GTK_LIST_STORE(model), &iter, column, ptr, -1);
+					}
+					else
+					{
+						g_warning("gtk_entry_completion_get_model() is not GTK_LIST_STORE");
+					}
+				}
+				else
+				{
+					if(size)
+					{
+						g_warning("Invalid block size: %d", size);
+					}
+
+					break;
+				}
+			} while(!err && size);
+
+			g_debug("Closing file: \"%s\"", path);
+			g_input_stream_close(G_INPUT_STREAM(stream), NULL, &err);
 			g_object_unref(stream);
-			g_object_unref(file_stream);
 		}
+		else
+		{
+			g_warning("Couldn't read file: \"%s\"", path);
+		}
+	}
+
+	if(err)
+	{
+		g_warning("%s", err->message);
+		g_error_free(err);
 	}
 
 	g_object_unref(file);
@@ -131,38 +126,32 @@ static void
 _completion_create_initial_file(GFile *file, const gchar *text)
 {
 	gchar *path;
-	GFileOutputStream *file_stream;
-	GOutputStream *stream;
-	gchar *buffer;
 	gint len;
-	gint size;
-	gint32 zero = 0;
+	GFileOutputStream *stream;
+	gchar buffer[block_size];
 
 	g_assert(file != NULL);
 	g_assert(text != NULL);
+
+	len = strlen(text);
+
+	g_return_if_fail(len <= COMPLETION_STRING_SIZE);
 
 	path = g_file_get_path(file);
 
 	g_debug("Creating file: \"%s\"", path);
 
-	if((file_stream = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, NULL)))
+	if((stream = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, NULL)))
 	{
-		len = strlen(text);
-		size = len + sizeof(gint32) + 1;
-		buffer = g_malloc(size);
+		memset(buffer, 0, block_size);
+		memcpy(buffer + COMPLETION_COUNTER_SIZE, text, len);
 
-		memcpy(buffer, &zero, sizeof(gint32));
-		memcpy(buffer + sizeof(gint32), text, len);
-		buffer[size - 1] = '\n';
+		g_debug("Appending new text: \"%s\"", text);
+		g_output_stream_write(G_OUTPUT_STREAM(stream), buffer, block_size, NULL, NULL);
+		g_output_stream_flush(G_OUTPUT_STREAM(stream), NULL, NULL);
 
-		stream = G_OUTPUT_STREAM(file_stream);
-		g_output_stream_write(stream, buffer, size, NULL, NULL);
-
-		g_output_stream_flush(stream, NULL, NULL);
-		g_output_stream_close(stream, NULL, NULL);
-		g_object_unref(file_stream);
-
-		g_free(buffer);
+		g_output_stream_close(G_OUTPUT_STREAM(stream), NULL, NULL);
+		g_object_unref(stream);
 	}
 	else
 	{
@@ -177,13 +166,14 @@ _completion_update_text(GFile *file, const gchar *text)
 {
 	gchar *path;
 	GFileIOStream *file_stream;
-	GDataInputStream *in_stream;
+	GInputStream *in_stream;
 	GOutputStream *out_stream;
-	GError *err = NULL;
-	gchar *line;
+	gchar buffer[block_size];
 	const gchar *ptr;
+	GError *err = NULL;
 	gboolean found = FALSE;
 	gint32 counter = 0;
+	gssize size;
 
 	g_assert(file != NULL);
 	g_assert(text != NULL);
@@ -194,52 +184,63 @@ _completion_update_text(GFile *file, const gchar *text)
 
 	if((file_stream = g_file_open_readwrite(file, NULL, &err)))
 	{
-		// search for given text:
+		/* search for given text */
 		g_debug("Searching text...");
-		in_stream = g_data_input_stream_new(g_io_stream_get_input_stream(G_IO_STREAM(file_stream)));
+		in_stream = g_io_stream_get_input_stream(G_IO_STREAM(file_stream));
 		out_stream = g_io_stream_get_output_stream(G_IO_STREAM(file_stream));
 
-		while((line = g_data_input_stream_read_line(in_stream, NULL, NULL, &err)) && !err && !found)
+		do
 		{
-			ptr = line + sizeof(gint32);
-
-			if(!g_strcmp0(ptr, text))
+			if((size = g_input_stream_read(in_stream, buffer, block_size, NULL, &err)) == block_size)
 			{
-				// found text => update counter:
-				g_debug("Found text, seeking");
-				found = TRUE;
+				ptr = buffer + COMPLETION_COUNTER_SIZE;
+				g_debug("Found text: \"%s\"", ptr);
 
-				if(g_seekable_seek(G_SEEKABLE(file_stream), -(strlen(text) + 5), G_SEEK_CUR, NULL, &err))
+				if(!strcmp(ptr, text))
 				{
-					memcpy(&counter, line, sizeof(gint32));
+					found = TRUE;
 
-					if(counter != G_MAXINT)
+					/* update counter */
+					memcpy(&counter, buffer, COMPLETION_COUNTER_SIZE);
+
+					if(counter != G_MAXINT32)
 					{
-						g_debug("new counter: %d", ++counter);
+						counter++;
 					}
 
-					g_output_stream_write(out_stream, &counter, sizeof(gint32), NULL, &err);
-				}
-				else
-				{
-					g_warning("seek failed in file: \"%s\"", path);
+					g_debug("updating counter: %d", counter);
+
+					if(g_seekable_seek(G_SEEKABLE(out_stream), -block_size, G_SEEK_CUR, NULL, &err))
+					{
+						g_output_stream_write(out_stream, &counter, COMPLETION_COUNTER_SIZE, NULL, &err);
+					}
+					else
+					{
+						g_warning("g_seekable_seek() failed");
+					}
 				}
 			}
-
-			g_free(line);
-		}
+			else
+			{
+				if(size)
+				{
+					g_warning("Invalid block size: %d", size);
+				}
+			}
+		} while(!err && !found && size);
 
 		if(!found)
 		{
-			// append text to file:
+			/* append text to file */
 			g_debug("Appending new text: \"%s\"", text);
-			g_output_stream_write(out_stream, &counter, sizeof(gint32), NULL, NULL);
-			g_output_stream_write(out_stream, text, strlen(text), NULL, NULL);
-			g_output_stream_write(out_stream, "\n", 1, NULL, NULL);
+
+			memset(buffer, 0, block_size);
+			memcpy(buffer + COMPLETION_COUNTER_SIZE, text, strlen(text));
+
+			g_output_stream_write(out_stream, buffer, block_size, NULL, &err);
 		}
 
 		g_debug("Closing file");
-		g_object_unref(in_stream);
 		g_io_stream_close(G_IO_STREAM(file_stream), NULL, NULL);
 		g_object_unref(file_stream);
 	}

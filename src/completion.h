@@ -19,7 +19,7 @@
  * \brief Organize strings for autocompletion support.
  * \author Sebastian Fedrau <lord-kefir@arcor.de>
  * \version 0.1.0
- * \date 26. September 2012
+ * \date 27. September 2012
  */
 
 #include <gtk/gtk.h>
@@ -32,13 +32,8 @@
  * @{
  */
 
-/**
- * \param filename file to load
- * \return a list containing loaded strings
- *
- * Load strings from a file.
- */
-GList *completion_load_file(const gchar *filename);
+/*! String maximum length. */
+#define COMPLETION_STRING_SIZE 60
 
 /**
  * \param filename file to load
